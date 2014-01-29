@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<jnlp spec="1.0+" codebase="@GENERATED@" href="@GENERATED@">
+    <information>
+        <title>JmcsAppExample</title>
+        <vendor>Your Great Company</vendor>
+        <homepage href="http://www.yourcompany.com/JmcsAppExample/"/>
+        <description kind="tooltip">JmcsAppExample</description>
+        <description kind="short">jMCS Application Example</description>
+        <icon href="com/yourcompany/example/resource/AppIcon.jpg"/>
+        <offline-allowed/> 
+        <shortcut>
+            <desktop/>
+        </shortcut>
+    </information>
+    <security>
+        <all-permissions/>
+    </security>
+    <resources>
+        <j2se version="1.6+" initial-heap-size="64m" max-heap-size="128m"/>
+
+        <!-- Application module first (main class) -->
+        <jar href="jar/jae.jar" />
+
+        <!-- JMMC modules -->
+        <jar href="jar/jmcs.jar" />
+
+        <!-- JMMC libs -->
+        <extension href="../JmcsLibs/JmcsLibs.jnlp"/>
+        
+    </resources>
+    <application-desc main-class="com.yourcompany.example.Main"/>
+</jnlp>

@@ -1,0 +1,106 @@
+/*******************************************************************************
+ *                 jMCS project ( http://www.jmmc.fr/dev/jmcs )
+ *******************************************************************************
+ * Copyright (c) 2013, CNRS. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     - Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     - Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     - Neither the name of the CNRS nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software without
+ *       specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL CNRS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package fr.jmmc.jmcs.gui.util;
+
+import java.lang.reflect.InvocationTargetException;
+import javax.swing.SwingUtilities;
+
+/**
+ * This class is dedicated to EDT invoke methods and simplify GUI code
+ * @author bourgesl
+ */
+public final class SwingUtils {
+
+    /**
+     * Forbidden constructor
+     */
+    private SwingUtils() {
+        super();
+    }
+
+    /**
+     * Returns true if the current thread is the Event Dispatcher Thread (EDT)
+     *
+     * @return true if the current thread is the Event Dispatcher Thread (EDT)
+     */
+    public static boolean isEDT() {
+        return SwingUtilities.isEventDispatchThread();
+    }
+
+    /**
+     * Execute the given runnable code dedicated to Swing using the Event Dispatcher Thread (EDT)
+     * @param runnable runnable code dedicated to Swing
+     */
+    public static void invokeEDT(final Runnable runnable) {
+        if (isEDT()) {
+            // current Thread is EDT, simply execute runnable:
+            runnable.run();
+        } else {
+            invokeLaterEDT(runnable);
+        }
+    }
+
+    /**
+     * Execute LATER the given runnable code dedicated to Swing using the Event Dispatcher Thread (EDT)
+     * @param runnable runnable code dedicated to Swing
+     */
+    public static void invokeLaterEDT(final Runnable runnable) {
+        // current Thread is NOT EDT, simply invoke later runnable using EDT:
+        SwingUtilities.invokeLater(runnable);
+    }
+
+    /**
+     * Execute the given runnable code dedicated to Swing using the Event Dispatcher Thread (EDT)
+     * And waits for completion
+     * @param runnable runnable code dedicated to Swing
+     * @throws IllegalStateException if any exception occurs while the given runnable code executes using EDT
+     */
+    public static void invokeAndWaitEDT(final Runnable runnable) throws IllegalStateException {
+        if (isEDT()) {
+            // current Thread is EDT, simply execute runnable:
+            runnable.run();
+        } else {
+            // If the current thread is interrupted, then use invoke later EDT (i.e. do not wait):
+            if (Thread.currentThread().isInterrupted()) {
+                invokeLaterEDT(runnable);
+            } else {
+                try {
+                    // Using invokeAndWait to be in sync with the calling thread:
+                    SwingUtilities.invokeAndWait(runnable);
+
+                } catch (InterruptedException ie) {
+                    // propagate the exception because it should never happen:
+                    throw new IllegalStateException("SwingUtils.invokeAndWaitEDT : interrupted while running " + runnable, ie);
+                } catch (InvocationTargetException ite) {
+                    // propagate the internal exception :
+                    throw new IllegalStateException("SwingUtils.invokeAndWaitEDT : an exception occured while running " + runnable, ite.getCause());
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,81 @@
+BEA Systems, Inc.
+Binary License Agreement
+JSR-173
+
+
+1. License to Use. BEA Systems, Inc. ("BEA") grants you a non-exclusive and
+non-transferable license for the internal use only of the accompanying software
+and documentation provided by BEA for the Streaming API for XML ( the
+"Software"), including, but not limited to the right to reproduce and use the
+Software internally for the purpose of testing an implementation of the JSR-173
+specification.
+
+2.  Restrictions. the Software is confidential to BEA and protected by Copyright
+and other bodies of law protecting intellectual property rights. Title to the
+Software and all associated intellectual property rights is retained by BEA
+and/or its licensors. Except as specifically authorized in Section 1, above, you
+may not make copies of the Software. Unless enforcement is prohibited by
+applicable law, you may not modify, decompile, or reverse engineer the Software.
+No right, title or interest in or to any trademark, service mark, logo or trade
+name of BEA or its licensors is granted under this Agreement.  the Software is
+not designed, licensed or intended for use in the design, construction,
+operation or maintenance of any nuclear facility, nor may you use it for such
+purposes.
+
+3.  DISCLAIMER OF WARRANTY. THE SOFTWARE IS PROVIDED “AS IS,” WITHOUT WARRANTY. 
+ALL WARRANTIES, EXPRESS OR IMPLIED, CONDITIONS, AND REPRESENTATIONS, INCLUDING
+ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR
+NON-INFRINGEMENT ARE DISCLAIMED.
+
+4.  Limitation of Liability. In no event will BEA or its Licensors be liable for
+any lost revenue, profits or data, or for special, incidental, consequential or
+other indirect damages, or for punitive damages, however caused, regardless of
+the theory of liability, arising out of or related to the Software or this
+Agreement, even if BEA has been advised of the possibility of such loss. In no
+event will BEA's liability to you, whether in contract, tort (including
+negligence), or otherwise, exceed the amount paid by you for the Software
+hereunder.
+
+5.  Termination; No Obligation to Support. This Agreement is effective until
+terminated. You may terminate this Agreement at any time by destroying all
+copies of the Software. Either party may terminate this Agreement immediately
+should the Software become, or in either party's opinion be likely to become,
+the subject of a claim of infringement of any intellectual property right. This
+Agreement will terminate immediately without notice from BEA if you fail to
+comply with any provision of this Agreement. Upon Termination, you must destroy
+all copies of the Software. BEA may at any time discontinue offering the
+Software or any particular version thereof.  BEA shall have no obligation to
+provide support, updates, patches, bug fixes or other enhancements for the
+Software or any particular version thereof.
+
+6.  Export Regulations. the Software is subject to US export control laws and
+may be subject to export or import regulations in other countries. You agree to
+comply strictly with all such laws and regulations and acknowledge that you have
+the responsibility to obtain such licenses to export, re-export, or import as
+may be required after delivery to you.
+
+7.  U.S. Government Restricted Rights. If the Software is being acquired by or
+on behalf of the U.S. Government or by a U.S. Government contractor, then the
+Government's rights in the Software and accompanying documentation shall be only
+as set forth in this Agreement in accordance with 48 C.F.R. 227.7202-4 (for
+Department of Defense (DOD) acquisitions) and with 48 C.F.R. 2.101 and 12.212
+(for non-DOD acquisitions).
+
+8.  Governing Law. Any action related to this Agreement will be governed by the
+laws of the state of California. Any legal action in any way arising out of or
+related to the Software or this Agreement may be brought exclusively in the
+state of federal courts located in San Jose, California.  By accepting this
+Agreement, you are consenting to the exclusive jurisdiction of these courts.
+
+9.  Severability. If any provision of this Agreement is held to be unlawful or
+unenforceable, or otherwise invalid, this Agreement will remain in effect with
+the invalid provisions omitted, unless omission would frustrate the intent of
+the parties, in which case this Agreement will immediately terminate.
+
+10.  Complete Agreement. This Agreement is the entire agreement between you and
+BEA relating to the subject matter hereof. It supersedes all prior or
+contemporaneous oral or written communications, proposals, representations and
+warranties and prevails over any conflicting or additional terms of any quote,
+order, acknowledgment, or other communication between the parties relating to
+its subject matter. No modification of this Agreement will be binding, unless in
+writing and signed by an authorized representative of each party.

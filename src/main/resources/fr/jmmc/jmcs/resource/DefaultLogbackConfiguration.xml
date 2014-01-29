@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+********************************************************************************
+*                  jMCS project ( http://www.jmmc.fr/dev/jmcs )
+********************************************************************************
+*  Copyright (c) 2013, CNRS. All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions are met:
+*      - Redistributions of source code must retain the above copyright
+*        notice, this list of conditions and the following disclaimer.
+*      - Redistributions in binary form must reproduce the above copyright
+*        notice, this list of conditions and the following disclaimer in the
+*        documentation and/or other materials provided with the distribution.
+*      - Neither the name of the CNRS nor the names of its contributors may be
+*        used to endorse or promote products derived from this software without
+*        specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+*  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+*  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+*  ARE DISCLAIMED. IN NO EVENT SHALL CNRS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+*  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+*  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+*  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+*  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+********************************************************************************
+-->
+
+<!-- Debug controls the Logback configuration logs -->
+<configuration debug="false" scan="false" scanPeriod="30 seconds" > 
+
+    <!-- Reset java.util.logging configuration -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- Appenders -->
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are  by default assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{60} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="APPLOG" class="fr.jmmc.jmcs.logging.ByteArrayOutputStreamAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{60} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STATUSLOG" class="fr.jmmc.jmcs.logging.ByteArrayOutputStreamAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+<!--    
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+      <file>${user.home}/.fr.jmmc.apps.log</file>
+      <append>true</append>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{60} - %msg%n</pattern>
+        </encoder>
+    </appender>
+-->  
+      
+    <!-- Loggers -->
+  
+    <!-- JMMC -->
+    <logger name="fr.jmmc" level="INFO"/>
+
+    <!-- JMMC status -->
+    <logger name="fr.jmmc.jmcs.status" level="INFO" additivity="true">
+        <appender-ref ref="STATUSLOG" />
+    </logger>
+    
+    <!-- Include application specific configuration -->
+    <include resource="LogbackConfiguration.xml"/>
+
+    <!-- JSamp -->
+    <logger name="org.astrogrid.samp" level="WARN"/>
+    <logger name="org.astrogrid.samp.client" level="WARN"/>
+  
+    <!-- Apache HTTP client -->
+    <logger name="org.apache.commons.httpclient" level="INFO"/>
+    <logger name="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager" level="INFO"/>
+    <logger name="httpclient" level="INFO"/>
+    
+    <!-- JIDE -->
+    <logger name="com.jidesoft" level="INFO"/>
+
+    <!-- Disable JDK loggers for AWT / Swing -->
+    <logger name="java.awt" level="INFO"/>
+    <logger name="javax.swing" level="INFO"/>
+    <logger name="sun.awt" level="INFO"/>
+    <logger name="sun.java2d" level="INFO"/>
+
+    <!-- JAXB -->
+    <logger name="javax.xml" level="INFO"/>
+    <logger name="com.sun.xml" level="INFO"/>
+  
+    <!-- Network -->
+    <logger name="sun.net.www" level="INFO"/>
+  
+    <!-- Disable Logback -->
+    <logger name="ch.qos.logback" level="INFO"/>
+
+    <!-- Root Logger -->
+    <!-- Note: level must be INFO in production to avoid performance issues with JUL -->
+    <root level="INFO">
+        <appender-ref ref="APPLOG" />
+        <appender-ref ref="STDOUT" />
+<!--        
+        <appender-ref ref="FILE" />
+-->        
+    </root>
+  
+</configuration>

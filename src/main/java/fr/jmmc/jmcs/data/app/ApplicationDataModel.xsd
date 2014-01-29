@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+********************************************************************************
+*                  jMCS project ( http://www.jmmc.fr/dev/jmcs )
+********************************************************************************
+*  Copyright (c) 2013, CNRS. All rights reserved.
+*  
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions are met:
+*      - Redistributions of source code must retain the above copyright
+*        notice, this list of conditions and the following disclaimer.
+*      - Redistributions in binary form must reproduce the above copyright
+*        notice, this list of conditions and the following disclaimer in the
+*        documentation and/or other materials provided with the distribution.
+*      - Neither the name of the CNRS nor the names of its contributors may be
+*        used to endorse or promote products derived from this software without
+*        specific prior written permission.
+*  
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+*  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+*  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+*  ARE DISCLAIMED. IN NO EVENT SHALL CNRS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+*  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+*  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+*  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+*  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+********************************************************************************
+-->
+
+<!--
+Document   : ApplicationDataModel.xsd
+Author     : Laurent BOURGES, Sylvain LAFRASSE, Guillaume MELLA
+Description: Store jMCS Application meta data.
+-->
+
+<!--
+            xmlns="http://www.jmmc.fr/jmcs/app/1.0"
+            targetNamespace="http://www.jmmc.fr/jmcs/app/1.0"
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+            xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+            jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
+
+    <xsd:annotation>           
+        <xsd:documentation>
+            jMCS Application Data Model
+        </xsd:documentation>
+        <xsd:appinfo>
+
+            <!-- Comment the jaxb:globalBindings element in embedded XML schema used with XJC -->
+            <jaxb:globalBindings generateIsSetMethod="true">
+                <xjc:simple />
+            </jaxb:globalBindings>
+
+            <jaxb:schemaBindings>
+                <jaxb:package name="fr.jmmc.jmcs.data.app.model"/>
+            </jaxb:schemaBindings>
+
+        </xsd:appinfo>
+    </xsd:annotation>
+
+
+    <!-- Elements -->
+
+    <xsd:element name="ApplicationData" type="ApplicationData">
+        <xsd:annotation>
+            <xsd:documentation>
+                jMCS application meta data
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+
+    <!-- Class Types -->
+
+    <xsd:complexType name="ApplicationData">
+        <xsd:annotation>
+            <xsd:documentation>
+                jMCS application meta data
+            </xsd:documentation>
+        </xsd:annotation>
+            
+        <xsd:sequence>
+
+            <!-- Company element -->
+            <xsd:element name="company" type="Company">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Company data
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Element program -->
+            <xsd:element name="program" type="Program">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Application Name and Version
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Element compilation -->
+            <xsd:element name="compilation" type="Compilation">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Build Date and Compiler
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Element text -->
+            <xsd:element name="text" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        About Box text (credits, description)
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Element jnlp -->
+            <!-- TODO : Use URL type -->
+            <xsd:element name="jnlp" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Application JNLP URL
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Element sampdescription -->
+            <xsd:element name="sampdescription" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        SAMP Application Description
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Element authors -->
+            <xsd:element name="authors" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Application Authors String
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Element dependences -->
+            <xsd:element name="dependences" type="Dependences" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Application External Dependencies
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+            <!-- Element menubar -->
+            <xsd:element name="menubar" type ="Menubar" minOccurs="0" maxOccurs="1">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Application Menu Bar
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+
+            <!-- Element releasenotes -->
+            <xsd:element name="releasenotes" type="ReleaseNotes">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Application Release Notes
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            
+            <!-- Element acknowledgment -->
+            <xsd:element name="acknowledgment" minOccurs="0" maxOccurs="1" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Application Acknowledgments
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+        </xsd:sequence>
+        
+            
+        <!-- TODO : Use URL type -->
+        <xsd:attribute name="link" type="xsd:string" use="required">
+            <xsd:annotation>               
+                <xsd:documentation>
+                    Application Homepage URL
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+
+        <!-- TODO : Use URL type -->
+        <xsd:attribute name="iconlink" type="xsd:string" use="required">
+            <xsd:annotation>           
+                <xsd:documentation>
+                    Application Icon URL
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+
+        <!-- TODO : Use URL type -->
+        <xsd:attribute name="faqlink" type="xsd:string" use="optional">
+            <xsd:annotation>           
+                <xsd:documentation>
+                    Application FAQ URL
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+
+        <!-- TODO : Use URL type -->
+        <xsd:attribute name="rsslink" type="xsd:string" use="optional">
+            <xsd:annotation>           
+                <xsd:documentation>
+                    Application RSS URL
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+
+        <!-- TODO : Use URL type -->
+        <xsd:attribute name="documentationlink" type="xsd:string" use="optional">
+            <xsd:annotation>           
+                <xsd:documentation>
+                    Application Documentation URL
+                </xsd:documentation>
+            </xsd:annotation>
+        </xsd:attribute>
+
+    </xsd:complexType>
+    
+    
+    <!-- Store application company details -->
+    <xsd:complexType name="Company">
+        <xsd:sequence>
+            <xsd:element name="short_name" type="xsd:string"/>
+            <xsd:element name="logo_resource" type="xsd:string"/>
+            <xsd:element name="homepage_url" type="xsd:string"/>
+            <xsd:element name="legal_name" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="user_support_url" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="feedback_form_url" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <!-- Store program name and version number -->
+    <xsd:complexType name="Program">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="version" type="xsd:string" use="required"/>
+    </xsd:complexType>
+    
+    
+    <!-- Store build date and used compiler -->
+    <xsd:complexType name="Compilation">
+        <xsd:attribute name="date" type="xsd:string" use="required"/>
+        <xsd:attribute name="compiler" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+
+
+    <!-- Store application external dependences -->
+    <xsd:complexType name="Dependences">
+        <xsd:sequence>
+            <xsd:element name="package" type="Package" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+
+    <!-- Store dependency package name, description and so on -->
+    <xsd:complexType name="Package">
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="description" type="xsd:string" use="required"/>
+        <xsd:attribute name="link" type="xsd:string" use="required"/>
+        <xsd:attribute name="jars" type="xsd:string" use="required"/>
+        <xsd:attribute name="license" type="License" use="required"/>
+        <xsd:attribute name="file" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+    
+    
+    <!-- Store application menu bar tree -->
+    <xsd:complexType name="Menubar">
+        <xsd:sequence>
+            <xsd:element name="menu" type="Menu" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    
+    <!-- Store menu bar entry (menu) -->
+    <xsd:complexType name="Menu">
+        <xsd:sequence>
+            <xsd:element name="menu" type="Menu" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:attribute name="label" type="xsd:string" use="optional"/>
+        <xsd:attribute name="classpath" type="xsd:string" use="required"/>
+        <xsd:attribute name="action" type="xsd:string" use="required"/>
+        <xsd:attribute name="checkbox" type="xsd:string" use="optional"/>
+        <xsd:attribute name="radiogroup" type="xsd:string" use="optional"/>
+        <xsd:attribute name="accelerator" type="xsd:string" use="optional"/>
+        <xsd:attribute name="description" type="xsd:string" use="optional"/>
+        <xsd:attribute name="icon" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+
+
+    <!-- Store application release notes -->
+    <xsd:complexType name="ReleaseNotes">
+        <xsd:sequence>
+            <xsd:element name="release" type="Release" minOccurs="1" maxOccurs="unbounded">
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <!-- Store application release data, such a version number and repository tag, with its prereleases list -->
+    <xsd:complexType name="Release">
+        <xsd:sequence>
+            <xsd:element name="pubDate" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="prerelease" type="Prerelease" minOccurs="1" maxOccurs="unbounded">
+            </xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="version" type="xsd:string" use="required"/>
+        <xsd:attribute name="tag" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+
+    <!-- Store application prerelease data, such change list, a version number and repository tag -->
+    <xsd:complexType name="Prerelease">
+        <xsd:sequence>
+            <xsd:element name="change" type="Change" minOccurs="1" maxOccurs="unbounded">
+            </xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="version" type="xsd:string" use="required"/>
+        <xsd:attribute name="tag" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+
+    <!-- Store application changes description, among CHANGE (the default), FEATURE or BUGFIX -->
+    <xsd:complexType name="Change">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="type" type="xsd:string" use="optional"/>
+                <xsd:attribute name="id" type="xsd:string" use="optional"/>
+                <xsd:attribute name="url" type="xsd:string" use="optional"/>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <!-- Define dependencies licenses -->
+    <xsd:simpleType name="License">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="AFL v2.1"/>
+            <xsd:enumeration value="Apache v2"/>
+            <xsd:enumeration value="BSD"/>
+            <xsd:enumeration value="Eclipse v1"/>
+            <xsd:enumeration value="GPL v2"/>
+            <xsd:enumeration value="GPL v3"/>
+            <xsd:enumeration value="LGPL"/>
+            <xsd:enumeration value="LGPL v2"/>
+            <xsd:enumeration value="LGPL v2.1"/>
+            <xsd:enumeration value="MIT"/>
+            <xsd:enumeration value="Proprietary"/>
+            <xsd:enumeration value="UNKNOWN"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

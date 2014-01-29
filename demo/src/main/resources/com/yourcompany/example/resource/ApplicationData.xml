@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+********************************************************************************
+*                  jMCS project ( http://www.jmmc.fr/dev/jmcs )
+********************************************************************************
+*  Copyright (c) 2013, CNRS. All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions are met:
+*      - Redistributions of source code must retain the above copyright
+*        notice, this list of conditions and the following disclaimer.
+*      - Redistributions in binary form must reproduce the above copyright
+*        notice, this list of conditions and the following disclaimer in the
+*        documentation and/or other materials provided with the distribution.
+*      - Neither the name of the CNRS nor the names of its contributors may be
+*        used to endorse or promote products derived from this software without
+*        specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+*  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+*  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+*  ARE DISCLAIMED. IN NO EVENT SHALL CNRS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+*  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+*  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+*  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+*  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+********************************************************************************
+-->
+
+<ApplicationData link="http://www.jmmcs.fr/dev/jmcs/jae/" faqlink="http://trac.jmmc.fr/jmmc-jmcs/wiki/DevDoc" rsslink="http://trac.jmmc.fr/jmmc-jmcs/timeline?format=rss">
+
+    <company>
+        <short_name>YourCompany</short_name>
+        <legal_name>Your Great Company, inc.</legal_name>
+        <logo_resource>com/yourcompany/example/resource/AppIcon.jpg</logo_resource>
+        <homepage_url>http://www.yourcompany.com</homepage_url>
+        <feedback_form_url>http://jmmc.fr/feedback/jmcs.php</feedback_form_url>
+    </company>
+
+    <authors>Sylvain LAFRASSE</authors>
+
+    <program name="jMCS Demo" version="1.0.0"/>
+
+    <compilation date="29/1/2014" compiler="1.6"/>
+
+    <text>Description of your program should go here...</text>
+
+    <dependences>
+        <package name="Castor" description="A librairie which permits to generate Java classes from XSD schema." link="http://www.castor.org/"/>
+        <package name="JTidy" description="JTidy is a Java port of HTML Tidy, a HTML syntax checker and pretty printer. Like its non-Java cousin, JTidy can be used as a tool for cleaning up malformed and faulty HTML."/>
+        <package name="SAX" description="SAX is the Simple API for XML, originally a Java-only API. SAX was the first widely adopted API for XML in Java, and is a 'de facto' standard." link="http://www.saxproject.org/"/>
+    </dependences>
+
+    <menubar>
+        <menu label="File">
+            <menu label="Open..." classpath="com.yourcompany.example.Main" action="_openAction" accelerator="O"/>
+            <menu label="Import" classpath="com.yourcompany.example.Actions" action="scaction1" icon="com/yourcompany/example/resource/import.png"/>
+            <menu label="Export" classpath="com.yourcompany.example.Actions" action="scaction1"/>
+        </menu>
+        <menu label="Edit">
+            <menu label="Import"/>
+            <menu label="Export">
+                <menu label="As file"/>
+                <menu label="As text"/>
+            </menu>
+        </menu>
+        <menu label="Preferences">
+            <menu label="Save to file" classpath="com.yourcompany.example.Preferences" action="savePreferences"/>
+            <menu label="Set default values" classpath="com.yourcompany.example.Preferences" action="restorePreferences"/>
+        </menu>
+        <menu label="Model fitting">
+            <menu label="Model fitting 3" classpath="com.yourcompany.example.Actions" action="mfaction3" accelerator="shift T" description="Raccourcis n-1 de Model fitting"/>
+            <menu/>
+            <menu label="Model fitting 4" classpath="com.yourcompany.example.Actions" action="mfaction4" description="Raccourcis n-2 de Model fitting"/>
+            <menu label="Model fitting 5" classpath="com.yourcompany.example.Actions" action="mfaction5" accelerator="shift I" description="Raccourcis n-3 de Model fitting"/>
+            <menu/>
+            <menu label="Radio Test" radiogroup="true">
+                <menu label="Radio Menu 1" classpath="com.yourcompany.example.Actions" action="radio1" description="Raccourcis n-2 de Model fitting"/>
+                <menu label="Radio Menu 2" classpath="com.yourcompany.example.Actions" action="radio2" accelerator="shift W" description="Raccourcis n-3 de Model fitting"/>
+                <menu label="Radio Menu 3" classpath="com.yourcompany.example.Actions" action="radio3" accelerator="W"/>
+            </menu>
+            <menu/>
+            <menu label="Model fitting 5" checkbox="true" classpath="com.yourcompany.example.Actions" action="mfaction5" description="Raccourcis n-5 de Model fitting"/>
+        </menu>
+        <menu label="SearchCal">
+            <menu label="SearchCal 1" classpath="com.yourcompany.example.Actions" action="scaction1" accelerator="F">
+                <menu label="SearchCal 11" classpath="com.yourcompany.example.Actions" action="scaction1" accelerator="I">
+                    <menu label="SearchCal 111" classpath="com.yourcompany.example.Actions" action="scaction1" accelerator="I"/>
+                    <menu/>
+                    <menu label="SearchCal 112" classpath="com.yourcompany.example.Actions" action="scaction1" accelerator="I" checkbox="true"/>
+                </menu>
+                <menu label="SearchCal 12" classpath="com.yourcompany.example.Actions" action="scaction1" accelerator="I"/>
+            </menu>
+            <menu label="SearchCal 2" classpath="com.yourcompany.example.Actions" action="scaction2" accelerator="G"/>
+            <menu label="SearchCal 3" classpath="com.yourcompany.example.Actions" action="scaction3" checkbox="true"/>            
+            <menu/>
+            <menu label="SearchCal 5" classpath="com.yourcompany.example.Actions" action="scaction5"/>
+        </menu>
+        <menu label="Help">
+            <menu label="How to bla" classpath="com.yourcompany.example.Actions" action="scaction1"/>
+            <menu label="Don't know" classpath="com.yourcompany.example.Actions" action="scaction1" checkbox="true"/>
+        </menu>
+    </menubar>
+
+    <releasenotes>
+        <release version="1.0.0">
+            <prerelease version="1.0b3" tag="V1_0b3">
+                <change type="FEATURE">Added jMCS web site button.</change>
+                <change type="FEATURE">Added fake feedback script URL for demonstration purpose.</change>
+                <change type="FEATURE">Added window centering.</change>
+                <change type="FEATURE">Added status bar.</change>
+            </prerelease>
+            <prerelease version="1.0b2" tag="V1_0b2">
+                <change type="BUGFIX" url="http://www.yourcompany.com/yourbugtracker/ticket/11">Fixed nasty bug.</change>
+            </prerelease>
+            <prerelease version="1.0b1" tag="V1_0b1">
+                <change type="CHANGE">Enhanced core algorithm.</change>
+                <change type="FEATURE">Added a great new feature.</change>
+            </prerelease>
+        </release>
+    </releasenotes>
+
+    <acknowledgment><![CDATA[Your acknowledgement should go here, in the form of "This research has made use of the \texttt{YourSoftawre} service of the
+Jean-Mariotti Centre\footnote{Available at http://www.jmmc.fr}"
+]]></acknowledgment>
+
+</ApplicationData>
+
