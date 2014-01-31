@@ -20,6 +20,7 @@ License
 =======
 
 BSD 3-Clause : see [LICENSE.txt](../master/LICENSE.txt)
+
 Goodies are also greatly appreciated if you feel like rewarding us for the job :)
 
 Build
