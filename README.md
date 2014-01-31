@@ -20,7 +20,9 @@ Build
 jMCS uses `maven` to build from sources. Please type following commands:
 
 `git clone https://github.com/JMMC-OpenDev/jMCS.git`
+
 `cd jMCS`
+
 `mvn clean package`
 
-Jar files are then available in `target`directory !
+Jar files are then available in `target` directory !
