@@ -9,10 +9,18 @@ The ultimate goal is to leverage your end users knowledge of their favorite plat
 
 Your app then feels better to the end user (by truly respecting its platform of choice), and we free you of all those nasty details !
 
+Documentation
+=============
+
+Lets get started by browsing the [developer documentation](https://github.com/JMMC-OpenDev/jMCS/wiki/jMCS-Developer-Documentation) to further discover what jMCS provides...
+
+The `javadoc` is also included in our [releases](https://github.com/JMMC-OpenDev/jMCS/releases).
+
 License
 =======
 
 BSD 3-Clause : see [LICENSE.txt](../master/LICENSE.txt)
+Goodies are also greatly appreciated if you feel like rewarding us for the job :)
 
 Build
 =====
