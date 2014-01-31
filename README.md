@@ -26,7 +26,7 @@ Goodies are also greatly appreciated if you feel like rewarding us for the job :
 Build
 =====
 
-jMCS uses `maven` to build from sources. Please type following commands:
+jMCS uses `maven` to build from sources. Please type the following commands:
 
 ```
 git clone https://github.com/JMMC-OpenDev/jMCS.git
