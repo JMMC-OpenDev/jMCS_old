@@ -29,7 +29,7 @@
 ********************************************************************************
 -->
 
-<ApplicationData link="http://www.jmmc.fr/dev/jmcs/">
+<ApplicationData link="https://github.com/JMMC-OpenDev/jMCS">
   
     <company>
         <short_name>JMMC</short_name>
@@ -39,8 +39,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/jmcs.php</feedback_form_url>
     </company>
 
-    <program name="jMCS Framework" version="1.0.0"/>
-    <compilation date="29/1/2014" compiler="1.6"/>
+    <program name="jMCS Framework" version="1.0.1"/>
+    <compilation date="15/5/2014" compiler="1.6"/>
     
     <text>JMMC framework, enabling better user interface and platform integration across Mac, Linux and Windows through numerous third-party libraries and in-house code</text>
     
@@ -188,6 +188,65 @@
     </dependences>
     
     <releasenotes>
+        <release version="1.0.1">
+            <pubDate>Thu, 25 May 2014 12:11:15 GMT</pubDate>
+            <prerelease version="1.0.1" tag="AL_V1_1_5">
+                <change type="CHANGE">In fr.jmmc.jmcs.App.java : Added state APP_CLEANUP_FAIL corresponding to an exception thrown during App.cleanup().</change>
+                <change type="CHANGE">In fr.jmmc.jmcs.App.java : Improved getFrame() to create an empty frame displayed in OS toolbar to better show message dialogs during startup.</change>
+                <change type="CHANGE">In fr.jmmc.jmcs.App.java : Use setFrame(new JFrame()) to create a new frame with standard behaviour (quit on close).</change>
+                <change type="CHANGE">In fr.jmmc.jmcs.Bootstrapper.java : Catch any exception thrown by App.cleanup() and open a feedback report (once). Avoid reentrance in stopApp() that can be called in many places (quitAction, window closing listeners, feedback report).</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.Bootstrapper.java, src.main.resources.fr.jmmc.jmcs.resource.ApplicationData.xml : Added framework version number logging at bootstrap.</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.JVMUtils.java : Added JVM Utils (java heap information, nb cpus).</change>
+                <change type="BUGFIX">In fr.jmmc.jmcs.data.app.ApplicationDescription.java : Fixed getInstance() to try loading the application data model first then return the the default data model. Fixed loadApplicationData() to set _appDataModel only if the file was loaded sucessfully (not the default data model).</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.data.preference.Preferences.java : Added dumpDefaultProperties() and dumpProperties(props, sb).</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.data.preference.SessionSettingsPreferences.java : Added getApplicationFileStorage().</change>
+                <change type="BUGFIX">In fr.jmmc.jmcs.gui.FeedbackReport.java : Ensure window is visible (may create a default application frame) like other message dialogs. avoid reentrance in dispose().</change>
+                <change type="BUGFIX">In fr.jmmc.jmcs.gui.HelpView.java : Fixed Classloader issue for JNLP and removed old workaround for JDK 1.5 . 1.6.</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.gui.component.DismissableMessagePane.java : Added setPreferenceState() and getPreferenceState() method.</change>
+                <change type="CHANGE">In fr.jmmc.jmcs.gui.component.FileChooser.java : Renamed ExtendedFileChooser as JmcsFileChooser. Remember window size for file dialogs (any flavor).</change>
+                <change type="CHANGE">In fr.jmmc.jmcs.gui.component.StatusBar.java : Improved design to use weak singleton pattern and ensure StatusBar is created by EDT do not show messages if not enabled.</change>
+                <change type="CHANGE">In fr.jmmc.jmcs.gui.task.TaskSwingWorker.java : Use MCSExceptionHandler to uniformly intercept and filter exceptions.</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.gui.util.WindowUtils.java : Generalized to any Window instance (Dialog, JDialog, Frame, JFrame).</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.network.interop.SampMetaData.java : Added broadcast message flag.</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.util.FileUtils.java : First implementation of an abstraction layer that retrieve remote files in a common dir (a commmon preference has been created).</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.util.FileUtils.java : Added getPlatform...Path() methods for Preferences, Caches and Documents.</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.util.FileUtils.java : Added getName() method to get filenameWithoutExtension and its extension simultaneously.</change>
+                <change type="BUGFIX">In fr.jmmc.jmcs.util.FileUtils.java : Fixed empty file name and extension in retrieveRemoteFile().</change>
+                <change type="BUGFIX">In fr.jmmc.jmcs.util.FileUtils.java : Fixed isRemote bug.</change>
+                <change type="BUGFIX">In fr.jmmc.jmcs.util.FileUtils.java : Prevents getName from NPE.</change>
+                <change type="CHANGE">In fr.jmmc.jmcs.util.MCSExceptionHandler.java : Filter reentrant exception and repeated OutOfMemoryError (>3) but log them. If more than 3 OutOfMemoryError, do not show FeedbackReport anymore. If the Swing exception handler is enabled, show OutOfMemoryError in status bar.</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.util.concurrent.FixedThreadPoolExecutor.java : Added waitForTaskFinished() to wait for cancelled tasks finish.</change>
+                <change type="FEATURE">In fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor.java : Wait for threads to finish their task (cancellation).</change>
+                <change type="CHANGE">In demo, demo/LICENSE.txt : Merged JAE in jMCS as its demo.</change>
+                <change type="BUGFIX">In demo/pom.xml : Fixed artifactId to be in lower case (convention).</change>
+                <change type="FEATURE">In demo/pom.xml, demo/src/main/resources/META-INF, demo/src/main/resources/META-INF/MANIFEST.MF : Use given MANIFEST.MF as required by parent-pom.</change>
+                <change type="CHANGE">In demo/pom.xml, parent-pom/README.md, parent-pom/pom.xml, pom.xml : Do not make assembly and copy dependencies by default.</change>
+                <change type="CHANGE">In demo/pom.xml, pom.xml : Skip jarsigner and do bundle source code.</change>
+                <change type="BUGFIX">In lib/BrowserLauncher2-1_3.jar, lib/README.txt, pom.xml : Resurected BrowserLauncher2 library as maven repository contains a bad/fake jar file.</change>
+                <change type="CHANGE">In lib/jsamp-1.3-3.jar, lib/jsamp-1.3-4.jar, pom.xml : Updated jSAMP from version 1.3-3 to 1.3-4.</change>
+                <change type="CHANGE">In lib/jsamp-1.3-4.jar : Removed former jsamp 1.3.4.</change>
+                <change type="FEATURE">In lib/jsamp-1.3.4+.jar, pom.xml : Added 'x-samp.broadcast' parameter to messages in BasicHubService notifyAll/callAll.</change>
+                <change type="BUGFIX">In lib/jsamp-1.3.4+.jar, pom.xml : Fixed jsamp library (bad dependencies).</change>
+                <change type="CHANGE">In parent-pom, parent-pom/README.md, parent-pom/pom.xml, pom.xml : Added parent pom setup.</change>
+                <change type="CHANGE">In parent-pom/README.md : Skip signing.</change>
+                <change type="CHANGE">In parent-pom/README.md, parent-pom/pom.xml : Reverted to pom packaging to be installed using mvn -Dassembly.skipAssembly install.</change>
+                <change type="CHANGE">In parent-pom/pom.xml : Copy dependencies after jarsigner to keep original libraries.</change>
+                <change type="CHANGE">In parent-pom/pom.xml : Added missing props.</change>
+                <change type="CHANGE">In parent-pom/pom.xml : By default DO NOT bundle source code.</change>
+                <change type="CHANGE">In parent-pom/pom.xml : Removed skipAssembly from assembly plugin.</change>
+                <change type="CHANGE">In parent-pom/pom.xml : Separated jmmc-libs and runtime-libs (2 different copy-dependencies executions).</change>
+                <change type="CHANGE">In parent-pom/pom.xml : Use surefire junit4 to make fest-swing work.</change>
+                <change type="CHANGE">In pom.xml : SLF4J upgraded to release 1.7.6.</change>
+                <change type="CHANGE">In pom.xml : Do not create big jar anymore.</change>
+                <change type="CHANGE">In pom.xml : Exclude commons-logging totally from httpClient dependencies to avoid its inheritance by child projects.</change>
+                <change type="BUGFIX">In pom.xml : Fixed samp jar name in installation comment.</change>
+                <change type="BUGFIX">In pom.xml : Fixed jsamp 1.3-4+ release.</change>
+                <change type="BUGFIX">In pom.xml : Fixed surefire plugin version and junit dependency.</change>
+                <change type="CHANGE">In pom.xml : Increased version in trunk (1.0.1-SNAPSHOT).</change>
+                <change type="CHANGE">In pom.xml : Upgraded logback to release 1.1.2.</change>
+                <change type="BUGFIX">In pom.xml, src/main/config/JmcsLibs.jnlp : Fixed JAXB 2.2.7 dependencies (exclude FastInfoSet and iStack commons). Fixed JSamp dependency (exclude xmlrpc).</change>
+            </prerelease>
+        </release>
         <release version="1.0.0">
             <pubDate>Wed, 29 Jan 2014 13:43:26 GMT</pubDate>
             <prerelease version="1.0.0b1" tag="V1_0_0b1">

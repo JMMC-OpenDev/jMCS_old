@@ -50,12 +50,14 @@ public class TestParallelExecutor {
         /** jMCS Parallel Job executor */
         final ParallelJobExecutor jobExecutor = ParallelJobExecutor.getInstance();
 
-        for (int nIter = 1; nIter <= 100 * 1000; nIter *= 10) {
+        for (int nIter = 1; nIter <= 10 * 1000; nIter *= 2) {
 
             System.gc();
             ThreadExecutors.sleep(100l);
 
             final int nJobs = jobExecutor.getMaxParallelJob() * nIter;
+
+            final int[] values = new int[nJobs];
 
             logger.info("Test: {} jobs");
 
@@ -66,10 +68,20 @@ public class TestParallelExecutor {
 
             // create tasks:
             for (int i = 0; i < nJobs; i++) {
+                final int idx = i;
 
                 jobs[i] = new Runnable() {
                     @Override
                     public void run() {
+
+                        int sum = 0;
+                        for (int j = 0; j < 4; j++) {
+                            for (int i = 0; i < nJobs; i++) {
+                                sum += i;
+                            }
+                        }
+                        values[idx] = sum;
+
                         // nothing to do
                         Thread.currentThread().isInterrupted();
                     }

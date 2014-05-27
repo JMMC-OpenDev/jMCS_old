@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.util.concurrent;
 
 import fr.jmmc.jmcs.util.CollectionUtils;
+import fr.jmmc.jmcs.util.JVMUtils;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -70,7 +71,7 @@ public final class ThreadExecutors {
     /** Process thread pool : minimum threads : 2 */
     public static final int PROCESS_THREAD_MIN = 2;
     /** Process thread pool : maximum threads = number of CPU */
-    public static final int PROCESS_THREAD_MAX = Runtime.getRuntime().availableProcessors();
+    public static final int PROCESS_THREAD_MAX = JVMUtils.availableProcessors();
     /** Generic thread pool : minimum threads : 2 */
     public static final int GENERIC_THREAD_MIN = 2;
     /** delay to wait for shutdown */

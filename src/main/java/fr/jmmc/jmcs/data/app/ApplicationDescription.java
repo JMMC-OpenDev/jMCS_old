@@ -103,6 +103,10 @@ public final class ApplicationDescription {
     public static ApplicationDescription getInstance() {
         if (_appDataModel == null) {
             loadApplicationData();
+            // if application is undefined: _appDataModel is still null and uses the default ApplicationData.xml.
+            if (_appDataModel == null) {
+                return getJmcsInstance();
+            }
         }
         return _appDataModel;
     }
@@ -134,21 +138,16 @@ public final class ApplicationDescription {
 
     /**
      * Load application data if ApplicationData.xml exists into the module.
-     * Otherwise, uses the default ApplicationData.xml.
      */
     private static void loadApplicationData() {
-
         final URL fileURL = ResourceUtils.getUrlFromResourceFilename(APPLICATION_DATA_FILE);
-        if (fileURL == null) {
-            _appDataModel = getJmcsInstance();
-            return;
-        }
-
-        try {
-            _appDataModel = new ApplicationDescription(fileURL);
-        } catch (IllegalStateException iae) {
-            _logger.error("Could not load application data from '{}' file.", fileURL, iae);
-            _appDataModel = getJmcsInstance();
+        if (fileURL != null) {
+            try {
+                _logger.info("Loading application data from '{}' file.", fileURL);
+                _appDataModel = new ApplicationDescription(fileURL);
+            } catch (IllegalStateException iae) {
+                _logger.error("Could not load application data from '{}' file.", fileURL, iae);
+            }
         }
     }
 
@@ -235,7 +234,6 @@ public final class ApplicationDescription {
                 + "</ul>"
                 + "<em>(*) Summary and description must be filled to enable the 'Submit' button.</em>"
                 + "</body></html>";
-
 
         // Load company meta data
         _company = _applicationData.getCompany();
@@ -374,12 +372,10 @@ public final class ApplicationDescription {
      * @return the application main web page URL from the "link" field in the XML file
      */
     public String getLinkValue() {
-        String mainWebPageURL = _mainWebPageURL;
+        String linkValue = _applicationData.getLink();
+        _logger.debug("Link value is: {}", linkValue);
 
-        mainWebPageURL = _applicationData.getLink();
-        _logger.debug("MainWebPageURL: {}", mainWebPageURL);
-
-        return mainWebPageURL;
+        return linkValue;
     }
 
     /**

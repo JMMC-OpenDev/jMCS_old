@@ -27,6 +27,7 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.gui.component;
 
+import fr.jmmc.jmcs.util.StringUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -274,7 +275,7 @@ public class SearchField extends JTextField {
      */
     private void handleCancelEdit() {
         if (isEnabled()) {
-            if (!_showingPlaceholderText && getText().length() != 0) {
+            if (!_showingPlaceholderText && !StringUtils.isEmpty(getText())) {
                 // Field is NOT empty
                 setText("");
             }
@@ -453,7 +454,7 @@ public class SearchField extends JTextField {
                 }
             }
 
-            if (!_showingPlaceholderText && getText().length() != 0) {
+            if (!_showingPlaceholderText && !StringUtils.isEmpty(getText())) {
                 // if NOT empty, draw the cancel cross
 
                 // Draw shaded disk
@@ -629,7 +630,7 @@ public class SearchField extends JTextField {
             _previousColor = getForeground();
 
             // if the field is empty :
-            if (_previousText.length() == 0) {
+            if (StringUtils.isEmpty(_previousText)) {
                 _showingPlaceholderText = true;
                 setForeground(Color.GRAY);
                 setText(_placeholderText);
@@ -646,8 +647,7 @@ public class SearchField extends JTextField {
         final boolean testOptions = true;
 
         // GUI initialization
-        final JFrame frame = new JFrame();
-        frame.setTitle("SearchField Demo");
+        final JFrame frame = new JFrame("SearchField Demo");
 
         // Force to exit when the frame closes :
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

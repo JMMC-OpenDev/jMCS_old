@@ -33,7 +33,9 @@ import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import fr.jmmc.jmcs.util.CollectionUtils;
+import fr.jmmc.jmcs.util.FileUtils;
 import java.awt.Dimension;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +63,8 @@ public final class SessionSettingsPreferences extends Preferences {
     private static final String RECENT_FILE_KEY = "recent_files";
     /** Dimension preference key prefix */
     private static final String DIMENSION_PREFIX = "dimension.";
+    /** Application file storage preference */
+    private static final String APPLICATION_STORAGE_LOCATION = "app.storage.location";
 
     /**
      * Private constructor that must be empty.
@@ -91,7 +95,7 @@ public final class SessionSettingsPreferences extends Preferences {
      * @return default directory (user home)
      */
     private static String getDefaultDirectory() {
-        return System.getProperty("user.home");
+        return SystemUtils.USER_HOME;
     }
 
     /**
@@ -111,6 +115,12 @@ public final class SessionSettingsPreferences extends Preferences {
 
         final List<String> emptyList = Collections.emptyList();
         setDefaultPreference(RECENT_FILE_KEY, emptyList);
+
+        // Default File storage location:
+        final String fileStorageLocation = FileUtils.getPlatformDocumentsPath();
+        setDefaultPreference(APPLICATION_STORAGE_LOCATION, fileStorageLocation
+                + FileUtils.cleanupFileName(ApplicationDescription.getInstance().getProgramName())
+                + File.separatorChar);
     }
 
     /**
@@ -165,7 +175,6 @@ public final class SessionSettingsPreferences extends Preferences {
      * @param path file path to an existing directory
      */
     public static void setCurrentDirectoryForMimeType(final MimeType mimeType, final String path) {
-
         if (mimeType == null || path == null) {
             return;
         }
@@ -190,7 +199,6 @@ public final class SessionSettingsPreferences extends Preferences {
      * @return the recent file list, or null if none found.
      */
     public static List<String> getRecentFilePaths() {
-
         // Try to read paths list from preference
         List<String> paths = null;
         try {
@@ -230,12 +238,18 @@ public final class SessionSettingsPreferences extends Preferences {
     }
 
     /**
+     * @return the application file storage
+     */
+    public static String getApplicationFileStorage() {
+        return getInstance().getPreference(APPLICATION_STORAGE_LOCATION);
+    }
+
+    /**
      * Try to load the dimension associated with the given key.
      * @param key Unique string identifying a given dimension.
      * @return the sought dimension if found, null otherwise.
      */
     public static Dimension loadDimension(final String key) {
-
         if (key == null) {
             _logger.warn("Null dimension key received");
             return null;
@@ -258,7 +272,6 @@ public final class SessionSettingsPreferences extends Preferences {
      * @param dimension the dimension to save.
      */
     public static void storeDimension(final String key, final Dimension dimension) {
-
         if (key == null) {
             _logger.warn("Null dimension key received");
             return;
@@ -285,15 +298,12 @@ public final class SessionSettingsPreferences extends Preferences {
      * Try to save the session settings to file if needed.
      */
     public static void saveToFileIfNeeded() {
-
-        if (_singleton == null) {
-            return;
-        }
-
-        try {
-            _singleton.saveToFile();
-        } catch (PreferencesException ex) {
-            _logger.warn("Could not save session settings", ex);
+        if (_singleton != null) {
+            try {
+                _singleton.saveToFile();
+            } catch (PreferencesException ex) {
+                _logger.warn("Could not save session settings", ex);
+            }
         }
     }
 

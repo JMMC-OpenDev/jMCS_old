@@ -29,6 +29,7 @@ package fr.jmmc.jmcs.gui;
 
 import com.jidesoft.plaf.LookAndFeelFactory;
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.util.JVMUtils;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.data.app.model.Menu;
 import fr.jmmc.jmcs.data.app.model.Menubar;
@@ -40,13 +41,10 @@ import fr.jmmc.jmcs.network.interop.SampManager;
 import fr.jmmc.jmcs.util.ImageUtils;
 import fr.jmmc.jmcs.util.IntrospectionUtils;
 import fr.jmmc.jmcs.service.RecentFilesManager;
-import fr.jmmc.jmcs.util.ResourceUtils;
-import fr.jmmc.jmcs.util.UrlUtils;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,11 +86,6 @@ public class MainMenuBar extends JMenuBar {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
-    /**
-     * This System property controls the Look & Feel menu (useful for debugging purposes).
-     * To show this menu, add "-Djmcs.laf.menu=true" to your JVM options.
-     */
-    public final static String SYSTEM_PROPERTY_LAF_MENU = "jmcs.laf.menu";
     /** Logger */
     private static final Logger _logger = LoggerFactory.getLogger(MainMenuBar.class.getName());
     /** Store whether we are running under Mac OS X or not */
@@ -177,7 +170,7 @@ public class MainMenuBar extends JMenuBar {
         // Create Interop menu :
         createInteropMenu();
 
-        final String lafMenu = System.getProperty(SYSTEM_PROPERTY_LAF_MENU);
+        final String lafMenu = System.getProperty(JVMUtils.SYSTEM_PROPERTY_LAF_MENU);
         if (lafMenu != null && "true".equals(lafMenu)) {
             createLAFMenu();
         }

@@ -56,6 +56,8 @@ public enum SampMetaData {
     AFFILIATION_URL("x-samp.affiliation.url", "Affiliation URL", MimeType.URL),
     /** Get the application affiliation contact */
     AFFILIATION_CONTACT("x-samp.affiliation.contact", "Affiliation Contact", MimeType.URL),
+    /** Get whether the message comes from a broadcast or not */
+    BROADCAST_MESSAGE_FLAG("x-samp.broadcast", "Broadcast Message Flag", MimeType.PLAIN_TEXT),
     /** Get the application JNLP URL */
     JNLP_URL("x-samp.jnlp.url", "JNLP", MimeType.URL),
     /** Get the application beta JNLP URL */

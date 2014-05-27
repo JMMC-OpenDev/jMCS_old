@@ -100,15 +100,6 @@ public final class TaskSwingWorkerExecutor {
     }
 
     /**
-     * Return true if there is at least one worker running
-     *
-     * @return true if there is at least one worker running
-     */
-    public static boolean isTaskRunning() {
-        return _runningWorkerCounter.get() > 0;
-    }
-
-    /**
      * Schedules the given {@code TaskSwingWorker} for execution on a
      * <i>worker</i> thread.
      *
@@ -130,6 +121,15 @@ public final class TaskSwingWorkerExecutor {
         return getInstance().cancel(task);
     }
 
+    /**
+     * Return true if there is at least one worker running
+     *
+     * @return true if there is at least one worker running
+     */
+    public static boolean isTaskRunning() {
+        return _runningWorkerCounter.get() > 0;
+    }
+    
     /**
      * Increment the counter of running worker
      */

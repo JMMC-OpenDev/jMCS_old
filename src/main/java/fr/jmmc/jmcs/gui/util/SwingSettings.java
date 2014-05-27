@@ -38,20 +38,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class gather swing related properties settings for our applications.
+ * This class gather SWING related properties settings for our applications.
  *
- * This code is called during Bootstrapper initialization (always performed before any application code)
+ * This code is called during Bootstrapper initialization (always performed before any application code).
  *
  * @author Laurent BOURGES, Guillaume MELLA.
  */
 public final class SwingSettings {
 
     /** logger */
-    private final static Logger logger = LoggerFactory.getLogger(SwingSettings.class.getName());
+    private final static Logger _logger = LoggerFactory.getLogger(SwingSettings.class.getName());
     /** enable/disable EDT violation detection */
     private final static boolean DEBUG_EDT_VIOLATIONS = false;
     /** flag to prevent multiple code execution */
-    private static boolean alreadyDone = false;
+    private static boolean _alreadyDone = false;
 
     /** Hidden constructor */
     private SwingSettings() {
@@ -59,14 +59,14 @@ public final class SwingSettings {
 
     /**
      * Initialize maximum of things to get uniform application running inn the scientific context.
-     * Initialization are done only on the first call of this method ( which should be from a main method )
+     * Initialization are done only on the first call of this method (which should be from a main method)
      */
     public static void setup() {
         // avoid reentrance:
-        if (alreadyDone) {
+        if (_alreadyDone) {
             return;
         }
-        alreadyDone = true;
+        _alreadyDone = true;
 
         installJideLAFExtensions();
         setSwingDefaults();
@@ -74,7 +74,7 @@ public final class SwingSettings {
         // Install exception handlers :
         MCSExceptionHandler.installSwingHandler();
 
-        logger.info("Swing settings set.");
+        _logger.info("Swing settings set.");
     }
 
     /**
@@ -84,13 +84,13 @@ public final class SwingSettings {
         // Force Locale for Swing Components :
         JComponent.setDefaultLocale(Locale.getDefault());
 
-        logger.debug("Set Locale.US for JComponents");
+        _logger.debug("Set Locale.US for JComponents");
 
         // Let the tooltip stay longer (60s) :
         ToolTipManager.sharedInstance().setInitialDelay(100);
         ToolTipManager.sharedInstance().setDismissDelay(60000);
 
-        logger.debug("Make tooltips appear more quickly and stay longer");
+        _logger.debug("Make tooltips appear more quickly and stay longer");
 
         if (DEBUG_EDT_VIOLATIONS) {
             RepaintManager.setCurrentManager(new ThreadCheckingRepaintManager());
@@ -98,7 +98,7 @@ public final class SwingSettings {
     }
 
     /**
-     * Install JIDE Look And Feel extenstions
+     * Install JIDE Look And Feel extensions.
      * TODO: it has side-effects on date spinner ... maybe enable it only for applications requiring it (System property) ?
      */
     public static void installJideLAFExtensions() {

@@ -27,11 +27,14 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.util;
 
+import fr.jmmc.jmcs.data.MimeType;
+import fr.jmmc.jmcs.network.http.Http;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import static java.io.File.separatorChar;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -42,8 +45,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.util.zip.GZIPOutputStream;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +63,7 @@ public final class FileUtils {
     /** Class logger */
     private static final Logger _logger = LoggerFactory.getLogger(FileUtils.class.getName());
     /** Platform dependent line separator */
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    public static final String LINE_SEPARATOR = SystemUtils.LINE_SEPARATOR;
     /** File encoding use UTF-8 */
     public static final String FILE_ENCODING = "UTF-8";
     /** Default read buffer capacity: 8K */
@@ -70,7 +76,7 @@ public final class FileUtils {
      * @return File or null
      */
     private static File getExistingFile(final String path) {
-        if (path != null && path.length() > 0) {
+        if (!StringUtils.isEmpty(path)) {
             final File file = new File(path);
 
             if (file.exists()) {
@@ -111,6 +117,30 @@ public final class FileUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Returns the name of the file or directory denoted by this abstract
+     * pathname.  This is just the last name in the pathname's name
+     * sequence.  If the pathname's name sequence is empty, then the empty
+     * string is returned.
+     * 
+     * @param fileName long file name (local or remote)
+     *
+     * @return  The name of the file or directory denoted by this abstract
+     *          pathname, or the empty string if this pathname's name sequence
+     *          is empty
+     */
+    public static String getName(final String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+
+        int index = fileName.lastIndexOf(separatorChar);
+        if (index < 0) {
+            return fileName;
+        }
+        return fileName.substring(index + 1);
     }
 
     /**
@@ -643,7 +673,7 @@ public final class FileUtils {
      * @return the temporary directory name
      */
     public static String getTempDirPath() {
-        return System.getProperty("java.io.tmpdir");
+        return SystemUtils.JAVA_IO_TMPDIR;
     }
 
     /**
@@ -665,6 +695,161 @@ public final class FileUtils {
         return cleaned;
     }
 
+    /**
+     * Test if given file is remote.
+     *
+     * @param fileLocation file location path to test (must not be null).
+     * @return true if file is remote else false
+     */
+    public static boolean isRemote(final String fileLocation) {
+
+        // If the given file is an URL :
+        if (fileLocation.contains(":/")) {
+
+            try {
+                final URI uri = new URI(fileLocation);
+                //TODO check for other local resources ?? jar is local or remote ?
+                return !"file".equalsIgnoreCase(uri.getScheme());
+            } catch (URISyntaxException ue) {
+                _logger.error("bad URI", ue);
+            }
+
+        }
+
+        return false;
+    }
+
+    /**
+     * Retrieve a remote file onto local disk.
+     * For now: limited to HTTP and HTTPS.
+     * 
+     * Warning: calling this method may block the current thread for long time (slow transfer or big file or timeout)
+     * Please take care of using it properly using a cancellable SwingWorker (Cancellable background task)
+     *
+     * @param remoteLocation, String defaultParentDir remote location
+     * @param parentDir destination directory
+     * @param mimeType mime type to fix missing file extension
+     * @return a copy of the remote file
+     * @throws IOException if any I/O operation fails (HTTP or file) 
+     * @throws URISyntaxException if given fileLocation  is invalid
+     */
+    public static File retrieveRemoteFile(final String remoteLocation,
+            final String parentDir,
+            final MimeType mimeType) throws IOException, URISyntaxException {
+
+        // TODO improve handling of existing files (do we have to warn the user ?)
+        // TODO add other remote file scheme (ftp, ssh?)
+
+        // assert that parentDir exist
+        new File(parentDir).mkdirs();
+
+        String fileName = FileUtils.getName(remoteLocation);
+
+        if (fileName.isEmpty()) {
+            fileName = StringUtils.replaceNonAlphaNumericCharsByUnderscore(remoteLocation);
+        }
+
+        // fix file extension if missing:
+        final File name = mimeType.checkFileExtension(new File(fileName));
+
+        final File localFile = new File(parentDir, name.getName());
+
+        if (!localFile.exists()) {
+            Http.download(new URI(remoteLocation), localFile, true);
+        } else {
+            // TODO: use HEAD HTTP method to check remote file date / checksum ...
+            _logger.info("'{}' already present, do not download '{}' again ( please delete it first if it has changed or is not the same one and restart).", localFile, remoteLocation);
+        }
+
+        return localFile;
+    }
+
+    /**
+     * Returns the path of folder containing preferences files, as this varies
+     * across different execution platforms.
+     *
+     * @return a string containing the full folder path to the preference file,
+     * according to execution platform.
+     */
+    static public String getPlatformPreferencesPath() {
+        // [USER_HOME]/
+        String fullPreferencesPath = SystemUtils.USER_HOME + File.separatorChar;
+
+        // Under Mac OS X
+        if (SystemUtils.IS_OS_MAC_OSX) {
+            // [USER_HOME]/Library/Preferences/
+            fullPreferencesPath += ("Library" + File.separatorChar + "Preferences" + File.separatorChar);
+        } // Under Windows
+        else if (SystemUtils.IS_OS_WINDOWS) {
+            // [USER_HOME]/Local Settings/Application Data/
+            fullPreferencesPath += ("Local Settings" + File.separatorChar + "Application Data" + File.separatorChar);
+        } // Under Linux, and anything else
+        else {
+            // [USER_HOME]/.
+            fullPreferencesPath += ".";
+        }
+
+        // Mac OS X : [USER_HOME]/Library/Preferences/
+        // Windows : [USER_HOME]/Local Settings/Application Data/
+        // Linux (and anything else) : [USER_HOME]/.
+        _logger.debug("Computed preferences folder path = '{}'.", fullPreferencesPath);
+        return fullPreferencesPath;
+    }
+
+    /**
+     * Returns the preferred path for cache files across different execution platforms.
+     *
+     * @return a string containing the full file path for caches,
+     * according to the execution platform.
+     */
+    static public String getPlatformCachesPath() {
+        // [USER_HOME]/
+        String fullCachesPath = SystemUtils.USER_HOME + File.separatorChar;
+
+        // Under Mac OS X
+        if (SystemUtils.IS_OS_MAC_OSX) {
+            // [USER_HOME]/Library/Caches/
+            fullCachesPath += ("Library" + File.separatorChar + "Caches" + File.separatorChar);
+        } // Under Windows
+        else if (SystemUtils.IS_OS_WINDOWS) {
+            // [USER_HOME]/AppData/Local/
+            fullCachesPath += ("AppData" + File.separatorChar + "Local" + File.separatorChar);
+        } // Under Linux, and anything else
+        else {
+            // [USER_HOME]/.cache/
+            fullCachesPath += ".cache" + File.separatorChar;
+        }
+
+        // Mac OS X : [USER_HOME]/Library/Caches/
+        // Windows : [USER_HOME]/AppData/Local/
+        // Linux (and anything else) : [USER_HOME]/.cache/
+        _logger.debug("Computed caches folder path = '{}'.", fullCachesPath);
+        return fullCachesPath;
+    }
+
+    /**
+     * Returns the preferred path for documents files across different execution platforms.
+     *
+     * @return a string containing the full file path for documents,
+     * according to the execution platform.
+     */
+    static public String getPlatformDocumentsPath() {
+        // [USER_HOME]/
+        String fullDocumentsPath = SystemUtils.USER_HOME + File.separatorChar;
+
+        // Under Mac OS X or Windows
+        if (SystemUtils.IS_OS_MAC_OSX || SystemUtils.IS_OS_WINDOWS) {
+            // [USER_HOME]/Documents/
+            fullDocumentsPath += ("Documents" + File.separatorChar);
+        }
+        // Under Linux, and anything else just use [USER_DIR]
+
+        // Mac OS X or Windows : [USER_HOME]/Documents/
+        // Linux (and anything else) : [USER_HOME]/
+        _logger.debug("Computed documents folder path = '{}'.", fullDocumentsPath);
+        return fullDocumentsPath;
+    }
+
     /** Forbidden constructor */
     private FileUtils() {
         // no-op
@@ -676,6 +861,9 @@ public final class FileUtils {
             final String cleanupFileName = cleanupFileName(string);
             System.out.println("cleanupFileName(" + string + ") = " + cleanupFileName);
         }
+        System.out.println("getPlatformPreferencesPath() = " + getPlatformPreferencesPath());
+        System.out.println("getPlatformCachesPath() = " + getPlatformCachesPath());
+        System.out.println("getPlatformDocumentsPath() = " + getPlatformDocumentsPath());
         /*
          cleanupFileName(aZeRtY/uiop) = aZeRtY_uiop
          cleanupFileName(This>is some(string,with $invalid*-chars).jpg) = This_is_some_string_with__invalid_-chars_.jpg

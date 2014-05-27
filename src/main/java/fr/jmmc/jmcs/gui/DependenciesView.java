@@ -71,6 +71,7 @@ public class DependenciesView {
         // Get jMCS data
         final ApplicationDescription data = ApplicationDescription.getJmcsInstance();
         final String jMcsName = data.getProgramName();
+        final String jMcsVersion = data.getProgramVersion();
         final String jmmcLogoResourcePath = data.getCompanyLogoResourcePath();
         final String jmmcLogoURL = ResourceUtils.getResource(jmmcLogoResourcePath).toString();
         final String jmmcUrl = data.getMainWebPageURL();
@@ -84,7 +85,9 @@ public class DependenciesView {
         generatedHtml.append("<center><b>").append(jMcsName).append(" Acknowledgments</b></center><br>");
         generatedHtml.append("<center><a href='").append(jmmcUrl).append("'><img src='").append(jmmcLogoURL).append("'></a></center><br><br>");
         generatedHtml.append("<i>").append(ApplicationDescription.getInstance().getProgramName()).append("</i>");
-        generatedHtml.append(" make extensive use of the <a href = '").append(jMcsUrl).append("'>").append(jMcsName).append("</a> provided by the ").append(jmmcLongName).append(" (").append(jmmcName).append(").<br><br>");
+        generatedHtml.append(" make extensive use of the <a href = '").append(jMcsUrl).append("'>").append(jMcsName)
+                .append("</a> (version ").append(jMcsVersion).append(") provided by the ").append(jmmcLongName)
+                .append(" (").append(jmmcName).append(").<br><br>");
         generatedHtml.append(jMcsName).append(" dependencies include:<br>");
 
         // Compose each package informations
@@ -143,5 +146,9 @@ public class DependenciesView {
         generatedHtml.append("</body></html>");
 
         return generatedHtml.toString();
+    }
+
+    public static void main(String args[]) {
+        DependenciesView.display();
     }
 }

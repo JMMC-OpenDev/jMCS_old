@@ -59,7 +59,7 @@ public class HelpView {
 
     /** Show the help window */
     private HelpView() {
-        _instance = this;
+        super();
     }
 
     /**
@@ -76,34 +76,14 @@ public class HelpView {
             return true;
         }
 
+        final ClassLoader appClassLoader = _instance.getClass().getClassLoader();
+
         URL url = null;
         try {
             // Get the helpset file and create the centered help broker 
-            url = HelpSet.findHelpSet(null, "documentation.hs");
+            url = HelpSet.findHelpSet(appClassLoader, "documentation.hs");
 
-            _logger.trace("HelpSet.findHelpSet(null, 'documentation.hs') = '{}'.", url);
-
-            if (url == null) {
-                url = HelpSet.findHelpSet(null, "/documentation.hs");
-
-                _logger.trace("HelpSet.findHelpSet(null, '/documentation.hs') = '{}'.", url);
-            }
-
-            if (url == null) {
-                // Works on Mac OS X 10.5 PPC G5 with JVM 1.5.0_16
-                // Works on Mac OS X 10.5 Intel with JVM 1.5.0_16
-                // Works on Windows XP with JVM 1.6.0_07
-                // Works on Linux with JVM 1.5.0_16
-                url = _instance.getClass().getClassLoader().getResource("documentation.hs");
-
-                _logger.trace("_instance.getClass().getClassLoader().getResource('documentation.hs') = '{}'.", url);
-            }
-
-            if (url == null) {
-                url = _instance.getClass().getClassLoader().getResource("/documentation.hs");
-
-                _logger.trace("_instance.getClass().getClassLoader().getResource('/documentation.hs') = '{}'.", url);
-            }
+            _logger.debug("HelpSet.findHelpSet(appClassLoader, 'documentation.hs') = '{}'.", url);
 
             // http://forums.sun.com/thread.jspa?messageID=10522645
             url = UrlUtils.fixJarURL(url);
@@ -117,14 +97,16 @@ public class HelpView {
                 return false;
             }
 
-            HelpSet helpSet = new HelpSet(_instance.getClass().getClassLoader(), url);
+            final HelpSet helpSet = new HelpSet(appClassLoader, url);
+
             _helpBroker = helpSet.createHelpBroker();
+
             _helpBroker.setLocation(WindowUtils.getCenteringPoint(_helpBroker.getSize()));
 
-        } catch (Exception ex) {
+        } catch (Exception e) {
             // skip complex case
             _logger.error("Problem during helpset creation (url='{}', classloader={})",
-                    url, _instance.getClass().getClassLoader(), ex);
+                    url, appClassLoader, e);
 
             return false;
         }

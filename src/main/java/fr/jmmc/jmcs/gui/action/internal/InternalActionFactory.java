@@ -317,7 +317,7 @@ public class InternalActionFactory {
         public void actionPerformed(ActionEvent evt) {
             if (_applicationData != null) {
                 // Show the feedback report :
-                FeedbackReport.openDialog(null);
+                FeedbackReport.openDialog();
             }
         }
     }

@@ -83,9 +83,9 @@ public class SplashScreen extends JFrame {
      * Creates a new SplashScreen object.
      */
     private SplashScreen() {
+        super();
         _applicationDataModel = ApplicationDescription.getInstance();
         if (_applicationDataModel != null) {
-
             // Draw window
             setAllProperties();
             pack();

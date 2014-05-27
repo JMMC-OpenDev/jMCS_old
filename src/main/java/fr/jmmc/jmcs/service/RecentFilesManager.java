@@ -29,6 +29,7 @@ package fr.jmmc.jmcs.service;
 
 import fr.jmmc.jmcs.data.preference.SessionSettingsPreferences;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.collection.FixedSizeLinkedHashMap;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -164,14 +165,14 @@ public final class RecentFilesManager {
             return false;
         }
 
-        if ((path == null) || (path.length() == 0)) {
+        if (StringUtils.isEmpty(path)) {
             _logger.warn("Could not resolve empty file path of file '{}'", file);
             return false;
         }
 
         // Check file name
         String name = file.getName();
-        if ((name == null) || (name.length() == 0)) { // If no name found
+        if (StringUtils.isEmpty(name)) { // If no name found
             name = path; // Use path instead
         }
 

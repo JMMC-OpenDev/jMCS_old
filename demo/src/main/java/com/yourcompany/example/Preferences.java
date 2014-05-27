@@ -28,8 +28,8 @@
 package com.yourcompany.example;
 
 import fr.jmmc.jmcs.data.preference.PreferencesException;
-
-import java.util.logging.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test application default preferences class.
@@ -37,21 +37,21 @@ import java.util.logging.*;
 public class Preferences extends fr.jmmc.jmcs.data.preference.Preferences {
 
     /** Logger */
-    private static final Logger _logger = Logger.getLogger(Preferences.class.getName());
+    private static final Logger _logger = LoggerFactory.getLogger(Preferences.class.getName());
     /** Singleton instance */
     private static Preferences _instance = null;
 
     /** Return the preference filename. */
     @Override
     protected String getPreferenceFilename() {
-        _logger.entering("Preferences", "getPreferenceFilename");
+        _logger.trace("Preferences.getPreferenceFilename");
         return "com.yourcompany.example.test.properties";
     }
 
     /** Return the preference revision number. */
     @Override
     protected int getPreferencesVersionNumber() {
-        _logger.entering("Preferences", "getPreferencesVersionNumber");
+        _logger.trace("Preferences.getPreferencesVersionNumber");
 
         return 1;
     }
@@ -59,7 +59,7 @@ public class Preferences extends fr.jmmc.jmcs.data.preference.Preferences {
     /** Set preferences default values */
     @Override
     protected void setDefaultPreferences() throws PreferencesException {
-        _logger.entering("Preferences", "setDefaultPreferences");
+        _logger.trace("Preferences.setDefaultPreferences");
 
         setDefaultPreference("DEFAULT", "default");
     }

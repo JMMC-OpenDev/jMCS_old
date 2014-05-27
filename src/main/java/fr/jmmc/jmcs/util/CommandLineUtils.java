@@ -84,7 +84,7 @@ public final class CommandLineUtils {
      */
     public static Long exec(final String cliPath, final JobListener jobListener) throws IllegalStateException {
 
-        if (cliPath == null || cliPath.length() == 0) {
+        if (StringUtils.isEmpty(cliPath)) {
             throw new IllegalArgumentException("empty command-line path !");
         }
         if (jobListener == null) {

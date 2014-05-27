@@ -27,8 +27,8 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.gui.task;
 
-import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.util.MCSExceptionHandler;
 import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 import org.slf4j.Logger;
@@ -204,7 +204,7 @@ public abstract class TaskSwingWorker<T> extends SwingWorker<T, Void> {
      * @param ee execution exception
      */
     public void handleException(final ExecutionException ee) {
-        // Show feedback report (modal and do not exit on close) :
-        FeedbackReport.openDialog(true, ee.getCause());
+        // Show feedback report (modal and do not exit on close):
+        MCSExceptionHandler.runExceptionHandler(ee.getCause());
     }
 }

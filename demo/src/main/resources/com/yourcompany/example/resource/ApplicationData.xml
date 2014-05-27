@@ -44,7 +44,7 @@
 
     <program name="jMCS Demo" version="1.0.0"/>
 
-    <compilation date="29/1/2014" compiler="1.6"/>
+    <compilation date="19/2/2014" compiler="1.6"/>
 
     <text>Description of your program should go here...</text>
 
@@ -95,10 +95,16 @@
                 <menu label="SearchCal 12" classpath="com.yourcompany.example.Actions" action="scaction1" accelerator="I"/>
             </menu>
             <menu label="SearchCal 2" classpath="com.yourcompany.example.Actions" action="scaction2" accelerator="G"/>
-            <menu label="SearchCal 3" classpath="com.yourcompany.example.Actions" action="scaction3" checkbox="true"/>            
+            <menu label="SearchCal 3" classpath="com.yourcompany.example.Actions" action="scaction3" checkbox="true"/>
             <menu/>
             <menu label="SearchCal 5" classpath="com.yourcompany.example.Actions" action="scaction5"/>
         </menu>
+
+        <menu label="Interop">
+            <menu label="Send Votable sample" classpath="com.yourcompany.example.FakeSampCapabilityAction" action="FakeSampCapabilityAction"
+                  description="send a Votable sample (SAMP)"/>
+        </menu>
+
         <menu label="Help">
             <menu label="How to bla" classpath="com.yourcompany.example.Actions" action="scaction1"/>
             <menu label="Don't know" classpath="com.yourcompany.example.Actions" action="scaction1" checkbox="true"/>

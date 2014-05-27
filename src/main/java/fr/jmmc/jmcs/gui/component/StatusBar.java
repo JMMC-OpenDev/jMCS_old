@@ -39,6 +39,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.ref.WeakReference;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -55,21 +56,97 @@ import org.slf4j.Logger;
  * 
  * @author Sylvain LAFRASSE, Samuel PRETTE, Guillaume MELLA, Laurent BOURGES.
  */
-public class StatusBar extends JPanel {
+public final class StatusBar extends JPanel {
 
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
     /** Logger */
     private static final Logger _statusLogger = LoggingService.getInstance().getLogger(LoggingService.JMMC_STATUS_LOG);
+    /** weak reference on the StatusBar singleton instance */
+    private static volatile WeakReference<StatusBar> _weakSingleton = null;
+    /* members */
     /** Status label */
-    private static final JLabel _statusLabel = new JLabel();
+    private final JLabel _statusLabel = new JLabel();
 
     /**
-     * Constructor.
+     * Return the StatusBar singleton instance or create a new one
+     * @return StatusBar singleton instance
+     */
+    public static StatusBar getInstance() {
+        return getInstance(true);
+    }
+
+    /**
+     * Return the existing StatusBar singleton instance
+     * @return StatusBar singleton instance or null if none defined
+     */
+    public static StatusBar getExistingInstance() {
+        return getInstance(false);
+    }
+
+    /**
+     * Set the status bar text if created.
+     *
+     * @param message the message to be displayed by the status bar.
+     */
+    public static void show(final String message) {
+        final StatusBar instance = getExistingInstance();
+        if (instance != null) {
+            SwingUtils.invokeEDT(new Runnable() {
+                /**
+                 * Update the status bar using EDT
+                 */
+                @Override
+                public void run() {
+                    instance.setStatusLabel(message);
+                }
+            });
+        }
+    }
+
+    /**
+     * Set the status bar text if the current message equals the given previous message (ignore case)
+     *
+     * @param previous the previous message to override
+     * @param message the message to be displayed by the status bar.
+     */
+    public static void showIfPrevious(final String previous, final String message) {
+        final StatusBar instance = getExistingInstance();
+        if (instance != null) {
+            SwingUtils.invokeEDT(new Runnable() {
+                /**
+                 * Update the status bar using EDT
+                 */
+                @Override
+                public void run() {
+                    final String lastStatus = instance.getStatusLabel();
+                    if (lastStatus != null && lastStatus.equalsIgnoreCase(previous)) {
+                        instance.setStatusLabel(message);
+                    }
+                }
+            });
+        }
+    }
+
+    private static synchronized StatusBar getInstance(final boolean doCreate) {
+        StatusBar instance = (_weakSingleton != null) ? _weakSingleton.get() : null;
+        if ((instance == null) && doCreate) {
+            // Check EDT
+            if (!SwingUtils.isEDT()) {
+                throw new IllegalStateException("StatusBar must be created using EDT !");
+            }
+            instance = new StatusBar();
+            _weakSingleton = new WeakReference<StatusBar>(instance);
+        }
+        return instance;
+    }
+
+    /**
+     * Private Constructor.
      *
      * Should be called at least once in order to allow usage.
      */
-    public StatusBar() {
+    private StatusBar() {
         super();
 
         // Layed out horizontally
@@ -138,48 +215,10 @@ public class StatusBar extends JPanel {
     }
 
     /**
-     * Set the status bar text.
-     *
-     * @param message the message to be displayed by the status bar.
-     */
-    public static void show(final String message) {
-        SwingUtils.invokeEDT(new Runnable() {
-            /**
-             * Update the status bar using EDT
-             */
-            @Override
-            public void run() {
-                setStatusLabel(message);
-            }
-        });
-    }
-
-    /**
-     * Set the status bar text if the current message equals the given previous message (ignore case)
-     *
-     * @param previous the previous message to override
-     * @param message the message to be displayed by the status bar.
-     */
-    public static void showIfPrevious(final String previous, final String message) {
-        SwingUtils.invokeEDT(new Runnable() {
-            /**
-             * Update the status bar using EDT
-             */
-            @Override
-            public void run() {
-                final String lastStatus = getStatusLabel();
-                if (lastStatus != null && lastStatus.equalsIgnoreCase(previous)) {
-                    setStatusLabel(message);
-                }
-            }
-        });
-    }
-
-    /**
      * Change the content of the status bar
      * @param message message to display
      */
-    private static void setStatusLabel(final String message) {
+    private void setStatusLabel(final String message) {
         _statusLabel.setText(message);
 
         // use status log:
@@ -191,7 +230,7 @@ public class StatusBar extends JPanel {
      * Note: Must be called by EDT
      * @return content of the status bar 
      */
-    private static String getStatusLabel() {
+    private String getStatusLabel() {
         return _statusLabel.getText();
     }
 }

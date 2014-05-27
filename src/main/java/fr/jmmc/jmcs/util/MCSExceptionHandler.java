@@ -29,7 +29,9 @@ package fr.jmmc.jmcs.util;
 
 import fr.jmmc.jmcs.gui.FeedbackReport;
 import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +60,12 @@ public final class MCSExceptionHandler {
     private static final boolean USE_DEFAULT_UNCAUGHT_EXCEPTION_HANDLER = true;
     /** flag indicating to set the UncaughtExceptionHandler to the current thread (main) (false because of JNLP) */
     private static final boolean SET_HANDLER_TO_CURRENT_THREAD = false;
+    /** counter for OutOfMemoryError to avoid reporting too many */
+    private static final AtomicInteger COUNT_OOME = new AtomicInteger();
+    /** flag indicating that Swing is enabled (StatusBar can be used) */
+    private static boolean SWING_ENABLED = false;
     /** uncaughtException handler singleton */
-    private static volatile Thread.UncaughtExceptionHandler _exceptionHandler = null;
+    private static volatile Thread.UncaughtExceptionHandler EXCEPTION_HANDLER = null;
 
     /**
      * Public method to initialize the exception handler singleton with the LoggingExceptionHandler
@@ -111,7 +117,7 @@ public final class MCSExceptionHandler {
      * @return exception handler singleton or null if undefined
      */
     private static Thread.UncaughtExceptionHandler getExceptionHandler() {
-        return _exceptionHandler;
+        return EXCEPTION_HANDLER;
     }
 
     /**
@@ -124,7 +130,8 @@ public final class MCSExceptionHandler {
      */
     private static synchronized void setExceptionHandler(final Thread.UncaughtExceptionHandler handler) {
         if (handler != null) {
-            _exceptionHandler = handler;
+            EXCEPTION_HANDLER = handler;
+            SWING_ENABLED = (handler instanceof SwingExceptionHandler);
 
             applyUncaughtExceptionHandler(handler);
         }
@@ -159,22 +166,21 @@ public final class MCSExceptionHandler {
             applyUncaughtExceptionHandler(Thread.currentThread(), handler);
         }
 
-        if (handler instanceof SwingExceptionHandler) {
-            try {
-                // Using invokeAndWait to be in sync with this thread :
-                // note: invokeAndWaitEDT throws an IllegalStateException if any exception occurs
-                SwingUtils.invokeAndWaitEDT(new Runnable() {
-                    /**
-                     * Add my handler to the Event-Driven Thread.
-                     */
-                    @Override
-                    public void run() {
-                        applyUncaughtExceptionHandler(Thread.currentThread(), handler);
-                    }
-                });
-            } catch (IllegalStateException ise) {
-                _logger.error("exception occured: ", ise);
-            }
+        // Set or reset the UncaughtExceptionHandler for EDT:
+        try {
+            // Using invokeAndWait to be in sync with this thread :
+            // note: invokeAndWaitEDT throws an IllegalStateException if any exception occurs
+            SwingUtils.invokeAndWaitEDT(new Runnable() {
+                /**
+                 * Add my handler to the Event-Driven Thread.
+                 */
+                @Override
+                public void run() {
+                    applyUncaughtExceptionHandler(Thread.currentThread(), handler);
+                }
+            });
+        } catch (IllegalStateException ise) {
+            _logger.error("exception occured: ", ise);
         }
     }
 
@@ -210,6 +216,19 @@ public final class MCSExceptionHandler {
         if (e instanceof ThreadDeath) {
             return true;
         }
+        if (e instanceof OutOfMemoryError) {
+            if (SWING_ENABLED) {
+                StatusBar.show("OutOfMemoryError detected: the application may behave hazardously ...");
+            }
+
+            // count them:
+            final int countOOME = COUNT_OOME.incrementAndGet();
+            if (countOOME > 3) {
+                // log it anyway:
+                _logger.info("Ignored repeated OutOfMemoryError ({}): ", countOOME, e);
+                return true;
+            }
+        }
         // ignore java.lang.ArrayIndexOutOfBoundsException: 1
         // from apple.awt.CWindow.displayChanged(CWindow.java:924):
         if (e instanceof ArrayIndexOutOfBoundsException) {
@@ -217,14 +236,19 @@ public final class MCSExceptionHandler {
             if (lastStack != null) {
                 if ("apple.awt.CWindow".equalsIgnoreCase(lastStack.getClassName())
                         && "displayChanged".equalsIgnoreCase(lastStack.getMethodName())) {
-
                     // log it anyway:
                     _logger.info("Ignored apple exception: ", e);
-
                     return true;
                 }
             }
         }
+        // Avoid reentrance:
+        if (checkReentrance(e)) {
+            // log it anyway:
+            _logger.info("Ignored cycling exception: ", e);
+            return true;
+        }
+
         return false;
     }
 
@@ -242,10 +266,29 @@ public final class MCSExceptionHandler {
     }
 
     /**
-     * Log the exception
+     * Return true if this class is already present in the exception's stack traces
+     * @param e exception to get its stack traces
+     * @return true if this class is already present in the exception's stack traces
+     */
+    private static boolean checkReentrance(final Throwable e) {
+        final String className = MCSExceptionHandler.class.getName();
+
+        final StackTraceElement[] stackElements = e.getStackTrace();
+
+        for (int i = 0, len = stackElements.length; i < len; i++) {
+            if (stackElements[i].getClassName().startsWith(className)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Log the exception to both System.err and logback streams
      * @param t the thread
      * @param e the exception
      */
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
     private static void logException(final Thread t, final Throwable e) {
         System.err.println("An unexpected exception occured in thread " + t.getName());
         e.printStackTrace(System.err);
@@ -267,7 +310,7 @@ public final class MCSExceptionHandler {
     }
 
     /**
-     * Public constructor used by reflection
+     * Public constructor used by reflection (AWT exception handler)
      */
     public MCSExceptionHandler() {
         super();
@@ -275,11 +318,13 @@ public final class MCSExceptionHandler {
 
     /**
      * AWT exception handler useful for exceptions occurring in modal dialogs
+     * 
+     * WARNING: Don't change the signature of this method!
      *
-     * @param e the exception
+     * @param throwable the exception
      */
-    public void handle(final Throwable e) {
-        showException(Thread.currentThread(), e);
+    public void handle(final Throwable throwable) {
+        runExceptionHandler(throwable);
     }
 
     /**

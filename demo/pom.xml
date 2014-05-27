@@ -3,94 +3,50 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>fr.jmmc</groupId>
+        <artifactId>jmmc</artifactId>
+        <version>TRUNK</version>
+        <!--  please install first parent pom from jMCS/parent-pom directory -->
+    </parent>
+
+
     <groupId>fr.jmmc.jmcs</groupId>
-    <artifactId>jMCS-Demo</artifactId>
-    <version>1.0.0</version>
+    <artifactId>jmcs-demo</artifactId>
     <packaging>jar</packaging>
 
     <name>jMCS-Demo</name>
     <url>http://www.jmmc.fr/dev/jmcs</url>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<!-- do make assembly and copy dependencies -->
+	<assembly.skipAssembly>false</assembly.skipAssembly>
+	<mdep.skip>false</mdep.skip>
+
+        <!-- do not sign libraries only applications -->
+        <jarsigner.skip>true</jarsigner.skip>
+
+        <!-- jMCS is an open source project -->
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+        <source.skip>false</source.skip>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>fr.jmmc.jmcs</groupId>
             <artifactId>jmcs</artifactId>
-            <version>1.0.0</version>
+            <version>TRUNK</version>
         </dependency>
+
+        <dependency>
+            <!-- Requires you to install manually the artifact:
+           mvn install:install-file -Dfile=lib/jmcs-demo-doc.jar -DgroupId=fr.jmmc.jmcs -DartifactId=jmcs-demo-doc -Dversion=1.0 -Dpackaging=jar
+            -->
+            <groupId>fr.jmmc.jmcs</groupId>
+            <artifactId>jmcs-demo-doc</artifactId>
+            <version>1.0</version>
+        </dependency>
+
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-            
-            <plugin>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
-            </plugin>
-            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.yourcompany.example.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

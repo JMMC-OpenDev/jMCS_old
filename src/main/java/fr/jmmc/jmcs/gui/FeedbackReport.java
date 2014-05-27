@@ -30,6 +30,7 @@ package fr.jmmc.jmcs.gui;
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.App.ApplicationState;
 import fr.jmmc.jmcs.Bootstrapper;
+import fr.jmmc.jmcs.util.JVMUtils;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.data.preference.CommonPreferences;
 import fr.jmmc.jmcs.data.preference.PreferencedDocument;
@@ -41,6 +42,7 @@ import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.network.http.Http;
 import fr.jmmc.jmcs.logging.LoggingService;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -111,7 +113,11 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
             SwingUtils.invokeAndWaitEDT(new Runnable() {
                 @Override
                 public void run() {
-                    new FeedbackReport(modal, exception);
+                    // ensure window is visible (not iconified):
+                    App.showFrameToFront();
+
+                    // Display a new feedback report dialog:
+                    new FeedbackReport(modal, exception).setVisible(true);
                 }
             });
         } else {
@@ -121,6 +127,8 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
     }
 
     /* members */
+    /** flag indicating if the dialog is disposed (avoid reentrance) */
+    private boolean disposed = false;
     /** Any Throwable (Exception, RuntimeException and Error) */
     private final Throwable _exception;
 
@@ -136,12 +144,10 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
      * @param exception exception
      */
     private FeedbackReport(final boolean modal, final Throwable exception) {
-
         super(App.getFrame(), modal);
 
         _feedbackTypeDataModel = new DefaultComboBoxModel(_feedbackTypes);
-
-        _exception = exception;
+        _exception = prepareException(exception);
 
         initComponents();
         postInit();
@@ -156,11 +162,8 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
      * This method is useful to set the models and specific features of initialized swing components :
      */
     private void postInit() {
-        //setResizable(false);
         this.setMinimumSize(new Dimension(600, 600));
         this.setPreferredSize(new Dimension(600, 600));
-
-        WindowUtils.centerOnMainScreen(this);
 
         cancelButton.addActionListener(new ActionListener() {
             @Override
@@ -172,26 +175,30 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
         });
 
         if (_exception != null) {
-            _feedbackTypeDataModel.setSelectedItem(BUG_REPORT);
-            final String msg = ((_exception.getMessage() != null) ? _exception.getMessage() : "no message");
+            _logger.error("An exception was given to the feedback report: ", _exception);
+
+            final StringBuilder desc = new StringBuilder(1024);
+            
+            desc.append("Following exception occured:\n");
+            desc.append((_exception.getMessage() != null) ? _exception.getMessage() : "no message");
 
             // try to get cause if possible
-            String cause = "";
-
             Throwable thCause = _exception.getCause();
-
-            // process all nested exceptions:
-            while (thCause != null) {
-                if (thCause.getMessage() != null) {
-                    cause += "\n\nCause: " + thCause.getMessage();
+            
+            if (thCause != null) {
+                // process all nested exceptions:
+                while (thCause != null) {
+                    if (thCause.getMessage() != null) {
+                        desc.append("\n\nCause: ").append(thCause.getMessage());
+                    }
+                    thCause = thCause.getCause();
                 }
-
-                thCause = thCause.getCause();
             }
-
-            descriptionTextArea.append("Following exception occured:\n" + msg + cause + "\n\n--\n");
-
-            _logger.error("An exception was given to the feedback report: ", _exception);
+            desc.append("\n--\n");
+            descriptionTextArea.setText(desc.toString());
+            descriptionTextArea.setCaretPosition(0);
+            
+            _feedbackTypeDataModel.setSelectedItem(BUG_REPORT);
         } else {
             _feedbackTypeDataModel.setSelectedItem(EVOLUTION_REQUEST);
         }
@@ -217,13 +224,13 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
 
         pack();
 
-        setVisible(true);
+        WindowUtils.centerOnMainScreen(this);
     }
 
     /**
      * Close the dialog box if everything was correct or let the user retry.
      * This method is called by the worker using EDT.
-    
+     *
      * @param sent boolean flag indicating if the feedback report was sent
      */
     public void shouldDispose(final boolean sent) {
@@ -268,17 +275,20 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
      */
     @Override
     public final void dispose() {
-        _logger.debug("dispose : {}", this);
+        if (!disposed) {
+            disposed = true;
 
-        // do not kill the associated worker task to let the started job end properly
-        // else we would have called:
-        // TaskSwingWorkerExecutor.cancel(JmcsTaskRegistry.TASK_FEEDBACK_REPORT);
+            _logger.debug("dispose : {}", this);
 
-        // Exit or not the application
-        exit();
+            // do not kill the associated worker task to let the started job end properly
+            // else we would have called:
+            // TaskSwingWorkerExecutor.cancel(JmcsTaskRegistry.TASK_FEEDBACK_REPORT);
+            // Exit or not the application
+            exit();
 
-        // dispose Frame :
-        super.dispose();
+            // dispose Frame :
+            super.dispose();
+        }
     }
 
     /**
@@ -362,13 +372,13 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
     }
 
     /**
-     * Enable submit button according desc and summary fields.
+     * Enable submit button according description and summary fields.
      * @param e event thrown by description or summary updates.
      */
     @Override
     public final void keyReleased(final KeyEvent e) {
-        final boolean hasDesc = descriptionTextArea.getText().length() > 0;
-        final boolean hasSummary = summaryTextField.getText().length() > 0;
+        final boolean hasDesc = !StringUtils.isEmpty(descriptionTextArea.getText());
+        final boolean hasSummary = !StringUtils.isEmpty(summaryTextField.getText());
         submitButton.setEnabled(hasDesc && hasSummary);
     }
 
@@ -574,21 +584,46 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
      *
      * @return sorted list of system properties
      */
-    public final String getSystemConfig() {
+    private static final String getSystemConfig() {
+        final StringBuilder sb = new StringBuilder(16384);
+        sb.append(JVMUtils.getMemoryInfo()).append("\n\n");
+
         // Get all informations about the system running the application
-        return Preferences.dumpProperties(System.getProperties());
+        return Preferences.dumpProperties(System.getProperties(), sb).toString();
     }
 
     /**
      * Return application log
      * @return application log
      */
-    private String getApplicationLog() {
+    private static String getApplicationLog() {
         final String logOutput = LoggingService.getInstance().getLogOutput().getContent();
 
         _logger.debug("logOutput length = {}", logOutput.length());
 
-        return (logOutput.length() > 0) ? logOutput : "None";
+        return (!StringUtils.isEmpty(logOutput)) ? logOutput : "None";
+    }
+
+    /**
+     * Analyze the given exception and possibly return a wrapped exception with a customized message
+     * @param th exception or null
+     * @return (maybe another) exception or null
+     */
+    private static Throwable prepareException(final Throwable th) {
+        if (th instanceof OutOfMemoryError) {
+            final String warningMessage = "The application has not enough free memory to work properly. \n\n"
+                    + "Please try first to download its latest release as a JAR file from the website:\n"
+                    + ApplicationDescription.getInstance().getLinkValue()
+                    + "\n\nStart it again using the command line:\n"
+                    + "    java -Xms256m -Xmx1024m -jar [AppName-Version].jar\n\n"
+                    + "To define the memory usage of the java program, your can use following options:\n"
+                    + "    -Xms<size> to set initial Java heap size\n"
+                    + "    -Xmx<size> to set maximum Java heap size\n"
+                    + "\nIf this operation does not fix the problem, please send us a feedback report!";
+
+            return new Throwable(warningMessage, th);
+        }
+        return th;
     }
 
     /**
@@ -661,8 +696,8 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
          * @param comments user comments
          */
         private FeedbackReportWorker(final FeedbackReport feedbackReport,
-                final String config, final String log, final String stackTrace,
-                final String type, final String mail, final String summary, final String comments) {
+                                     final String config, final String log, final String stackTrace,
+                                     final String type, final String mail, final String summary, final String comments) {
             super(JmcsTaskRegistry.TASK_FEEDBACK_REPORT);
             this.feedbackReport = feedbackReport;
             this.config = config;

@@ -32,6 +32,7 @@ import fr.jmmc.jmcs.data.app.model.Package;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.ImageUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -272,14 +273,14 @@ public class AboutBox extends JDialog implements HyperlinkListener {
         generatedHtml.append("<html><body>");
 
         final String authors = _applicationDataModel.getAuthors();
-        if ((authors != null) && (authors.length() > 0)) {
+        if (!StringUtils.isEmpty(authors)) {
             generatedHtml.append("Brought to you by ").append(authors).append(".<br><br>");
         }
         generatedHtml.append("<i>If this software was helpful for your study or research work, please include the mandatory acknowledgment (available from the Help menu) in your publications.</i><br><br>");
 
         // Get the Text value
         final String textValue = _applicationDataModel.getTextValue();
-        if ((textValue != null) && (textValue.length() > 0)) {
+        if (!StringUtils.isEmpty(textValue)) {
             generatedHtml.append(textValue).append("<br><br>");
         }
 

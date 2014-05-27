@@ -3,16 +3,31 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>fr.jmmc</groupId>
+        <artifactId>jmmc</artifactId>
+        <version>TRUNK</version>
+        <!--  please install first parent pom from jMCS/parent-pom directory -->
+    </parent>
+
     <groupId>fr.jmmc.jmcs</groupId>
     <artifactId>jmcs</artifactId>
-    <version>1.0.0</version>
 
     <packaging>jar</packaging>
     <name>jMCS</name>
     <url>http://www.jmmc.fr/dev/jmcs</url>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- do make assembly and copy dependencies -->
+        <assembly.skipAssembly>false</assembly.skipAssembly>
+        <mdep.skip>false</mdep.skip>
+
+        <!-- do not sign libraries only applications -->
+        <jarsigner.skip>true</jarsigner.skip>
+
+        <!-- jMCS is an open source project -->
+        <maven.javadoc.skip>false</maven.javadoc.skip>
+        <source.skip>false</source.skip>
     </properties>
 
     <dependencies>
@@ -25,8 +40,11 @@
             <version>1.6</version>
         </dependency>
         <dependency>
+            <!-- Requires you to install manually the artifact:
+           mvn install:install-file -Dfile=lib/BrowserLauncher2-1_3.jar -DgroupId=edu.stanford.ejalbert -DartifactId=BrowserLauncher2.orig -Dversion=1.3 -Dpackaging=jar
+            -->
             <groupId>edu.stanford.ejalbert</groupId>
-            <artifactId>BrowserLauncher2</artifactId>
+            <artifactId>BrowserLauncher2.orig</artifactId>
             <version>1.3</version>
         </dependency>
         <dependency>
@@ -38,13 +56,13 @@
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
             <version>3.1</version>
-        </dependency>
-        <dependency>
-            <!-- Commons Logging is used by HttpClient but implemented by jcl-over-slf4j module -->
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.3</version>
-            <scope>provided</scope>
+            <exclusions>
+                <!-- Commons Logging is implemented by jcl-over-slf4j module -->
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -58,32 +76,46 @@
         </dependency>
         <!-- JAXB -->
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.2.11</version>
-        </dependency>
-        <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
             <version>2.2.7</version>
-            <scope>runtime</scope>
+            <exclusions>
+                <!-- unused FastInfoSet support (binary XML format) -->
+                <exclusion>
+                    <groupId>com.sun.xml.fastinfoset</groupId>
+                    <artifactId>FastInfoset</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.2.7</version>
+            <exclusions>
+                <!-- useless as istack is embedded into jaxb-core -->
+                <exclusion>
+                    <groupId>com.sun.istack</groupId>
+                    <artifactId>istack-commons-runtime</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- SLF4J -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.5</version>
+            <version>1.7.6</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
-            <version>1.7.5</version>
+            <version>1.7.6</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>com.sun.woodstock.dependlibs</groupId>
@@ -97,117 +129,23 @@
         </dependency>
         <dependency>
             <!-- Requires you to install manually the artifact:
-            mvn install:install-file -Dfile=lib/jsamp-1.3-4.jar -DgroupId=org.astrogrid -DartifactId=jsamp -Dversion=1.3.4 -Dpackaging=jar
+            mvn install:install-file -Dfile=lib/jsamp-1.3-4+.jar -DgroupId=org.astrogrid -DartifactId=jsamp -Dversion=1.3-4+ -Dpackaging=jar
             -->
             <groupId>org.astrogrid</groupId>
             <artifactId>jsamp</artifactId>
-            <version>1.3.4+</version>
+            <version>1.3-4+</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.8.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                <configuration>
-                    <tags>
-                        <tag>
-                            <name>warning</name>
-                            <!-- warning tag for all places -->
-                            <placement>a</placement>
-                            <head>Warning:</head>
-                        </tag>
-                    </tags>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- To create the 'big JMCS jar' -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- To copy dependencies into target/runtime-libs folder -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeScope>runtime</includeScope>
-                            <outputDirectory>${project.build.directory}/runtime-libs</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>

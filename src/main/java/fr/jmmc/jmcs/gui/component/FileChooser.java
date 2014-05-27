@@ -31,10 +31,15 @@ import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.data.preference.SessionSettingsPreferences;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.data.MimeType;
+import fr.jmmc.jmcs.gui.util.WindowUtils;
+import java.awt.Component;
 import java.awt.FileDialog;
+import java.awt.HeadlessException;
+import java.awt.Window;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
@@ -53,6 +58,8 @@ public final class FileChooser {
     public final static String MAC_FILE_DIALOG_DIRECTORY = "apple.awt.fileDialogForDirectories";
     /** Use native file chooser i.e. AWT FileDialog (Mac OS X) */
     private final static boolean USE_DIALOG_FOR_FILE_CHOOSER = SystemUtils.IS_OS_MAC_OSX;
+    /** File Dialog key to remember file dialog dimensions */
+    private final static String FILE_DIALOG_DIMENSION_KEY = "___JMCS_INTERNAL_FILE_DIALOG_DIMENSION";
 
     /**
      * Show the directory chooser using following properties:
@@ -75,6 +82,8 @@ public final class FileChooser {
                 fileDialog.setFile(preselectedDirectory.getName());
             }
 
+            hookFileDialog(fileDialog);
+
             // force the file dialog to use directories only:
             System.setProperty(MAC_FILE_DIALOG_DIRECTORY, "true");
 
@@ -91,7 +100,7 @@ public final class FileChooser {
                 selectedDirectory = new File(fileDialog.getDirectory(), fileDialog.getFile());
             }
         } else {
-            final JFileChooser fileChooser = new JFileChooser();
+            final JFileChooser fileChooser = new JmcsFileChooser();
             if (preselectedDirectory != null) {
                 fileChooser.setCurrentDirectory(preselectedDirectory);
             }
@@ -163,7 +172,7 @@ public final class FileChooser {
      * @return File array or null if dialog was discarded
      */
     private static File[] showOpenFileChooser(final String title, final File givenDirectory, final MimeType mimeType, final String defaultFileName,
-            final boolean multiSelectionFlag) {
+                                              final boolean multiSelectionFlag) {
 
         final File preselectedDirectory = retrieveLastDirectoryForMimeType(givenDirectory, mimeType);
 
@@ -182,6 +191,8 @@ public final class FileChooser {
                 fileDialog.setFile(defaultFileName);
             }
 
+            hookFileDialog(fileDialog);
+
             // waits for dialog inputs:
             fileDialog.setVisible(true);
 
@@ -190,7 +201,7 @@ public final class FileChooser {
             }
 
         } else {
-            final JFileChooser fileChooser = new JFileChooser();
+            final JFileChooser fileChooser = new JmcsFileChooser();
             fileChooser.setMultiSelectionEnabled(multiSelectionFlag);
             if (preselectedDirectory != null) {
                 fileChooser.setCurrentDirectory(preselectedDirectory);
@@ -223,9 +234,10 @@ public final class FileChooser {
         }
 
         if (selectedFiles != null) {
-            final List<File> validatedFiles = new ArrayList<File>(selectedFiles.length);
+            final int length = selectedFiles.length;
+            final List<File> validatedFiles = new ArrayList<File>(length);
 
-            for (int i = 0; i < selectedFiles.length; i++) {
+            for (int i = 0; i < length; i++) {
                 File selectedFile = selectedFiles[i];
 
                 // Mac OS X can return application packages:
@@ -295,6 +307,8 @@ public final class FileChooser {
                 fileDialog.setFile(defaultFileName);
             }
 
+            hookFileDialog(fileDialog);
+
             // waits for dialog inputs:
             fileDialog.setVisible(true);
 
@@ -303,7 +317,7 @@ public final class FileChooser {
             }
 
         } else {
-            final JFileChooser fileChooser = new JFileChooser();
+            final JFileChooser fileChooser = new JmcsFileChooser();
             if (preselectedDirectory != null) {
                 fileChooser.setCurrentDirectory(preselectedDirectory);
             }
@@ -375,5 +389,30 @@ public final class FileChooser {
      */
     private FileChooser() {
         super();
+    }
+
+    private static void hookFileDialog(final Window fileDialog) {
+        // Restore, then automatically save window size changes:
+        WindowUtils.rememberWindowSize(fileDialog, FILE_DIALOG_DIMENSION_KEY);
+        // Center dialog on window:
+        WindowUtils.centerOnMainScreen(fileDialog);
+    }
+
+    private static final class JmcsFileChooser extends JFileChooser {
+
+        private static final long serialVersionUID = 1L;
+
+        JmcsFileChooser() {
+            super();
+        }
+
+        @Override
+        protected JDialog createDialog(final Component parent) throws HeadlessException {
+            final JDialog fileDialog = super.createDialog(parent);
+
+            hookFileDialog(fileDialog);
+
+            return fileDialog;
+        }
     }
 }

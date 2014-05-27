@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.service;
 
 import fr.jmmc.jmcs.util.ResourceUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -418,7 +419,7 @@ public final class XslTransform {
     private static Transformer loadXsl(final String xslFilePath)
             throws IllegalStateException, IllegalArgumentException {
 
-        if ((xslFilePath == null) || (xslFilePath.length() == 0)) {
+        if (StringUtils.isEmpty(xslFilePath)) {
             throw new IllegalArgumentException("XmlFactory.resolvePath : unable to load XSLT : empty file path !");
         }
 
@@ -458,7 +459,7 @@ public final class XslTransform {
     private static StreamSource resolveXSLTPath(final String xslFilePath)
             throws IllegalStateException, IllegalArgumentException {
 
-        if ((xslFilePath == null) || (xslFilePath.length() == 0)) {
+        if (StringUtils.isEmpty(xslFilePath)) {
             throw new IllegalArgumentException("XmlFactory.resolveXSLTPath : unable to load XSLT : empty file path !");
         }
 

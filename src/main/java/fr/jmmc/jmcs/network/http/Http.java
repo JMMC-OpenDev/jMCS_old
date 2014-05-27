@@ -30,6 +30,7 @@ package fr.jmmc.jmcs.network.http;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.network.NetworkSettings;
 import fr.jmmc.jmcs.util.FileUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +41,11 @@ import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import org.apache.commons.httpclient.*;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HostConfiguration;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -234,7 +239,7 @@ public final class Http {
                 }
                 final int port = epoint.getPort();
 
-                if (host.trim().length() > 0 && port > 0) {
+                if (!StringUtils.isTrimmedEmpty(host) && port > 0) {
                     hostConfiguration.setProxy(host, port);
                 }
             }

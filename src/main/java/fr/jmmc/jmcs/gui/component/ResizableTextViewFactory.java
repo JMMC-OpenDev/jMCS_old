@@ -44,7 +44,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
@@ -177,7 +176,7 @@ public class ResizableTextViewFactory {
      * @param timeoutMillis timeout in milliseconds to wait before the window is hidden (auto-hide)
      */
     private static void finishLayout(final JEditorPane editorPane, final JDialog dialog, final String text,
-            final boolean modal, final int timeoutMillis) {
+                                     final boolean modal, final int timeoutMillis) {
 
         final JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(editorPane);
@@ -241,10 +240,10 @@ public class ResizableTextViewFactory {
         final float requiredRuntime = 1.6f;
         final float javaRuntime = SystemUtils.JAVA_VERSION_FLOAT;
 
-        final String javaVersion = System.getProperty("java.version");
-        final String jvmVendor = System.getProperty("java.vm.vendor");
-        final String jvmName = System.getProperty("java.vm.name");
-        final String jvmVersion = System.getProperty("java.vm.version");
+        final String javaVersion = SystemUtils.JAVA_VERSION;
+        final String jvmVendor = SystemUtils.JAVA_VM_VENDOR;
+        final String jvmName = SystemUtils.JAVA_VM_NAME;
+        final String jvmVersion = SystemUtils.JAVA_VM_VERSION;
 
         int timeoutMillis = 0; // disabled by default
         boolean shouldWarn = false;

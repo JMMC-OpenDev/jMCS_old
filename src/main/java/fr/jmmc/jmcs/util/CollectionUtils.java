@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.SystemUtils;
 
 /**
  * Collection toString() methods
@@ -48,7 +49,7 @@ public final class CollectionUtils {
     /** one line separator string */
     public static final String ONE_LINE_VALUE_SEPARATOR = ", ";
     /** Line separator string */
-    public final static String LINE_SEPARATOR = System.getProperty("line.separator");
+    public final static String LINE_SEPARATOR = SystemUtils.LINE_SEPARATOR;
     /** begin separator = \n{\n */
     public final static String BEGIN_SEPARATOR = LINE_SEPARATOR + ONE_LINE_BEGIN_SEPARATOR + LINE_SEPARATOR;
     /** end separator = \n} */

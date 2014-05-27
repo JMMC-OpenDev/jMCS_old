@@ -92,14 +92,14 @@ public final class WindowUtils {
     }
 
     /**
-     * Center the given JFrame on the main screen real estate.
+     * Center the given window on the main screen real estate.
      *
-     * If the JFrame is bigger than the main screen, it will be moved to the upper-left main screen corner.
+     * If the window is bigger than the main screen, it will be moved to the upper-left main screen corner.
      *
-     * @param frameToCenter the JFrame we want to center
+     * @param windowToCenter the window we want to center
      */
-    public static void centerOnMainScreen(final Window frameToCenter) {
-        if (frameToCenter != null) {
+    public static void centerOnMainScreen(final Window windowToCenter) {
+        if (windowToCenter != null) {
             // Using invokeAndWait to be in sync with this thread
             // note: invokeAndWaitEDT throws an IllegalStateException if any exception occurs
             SwingUtils.invokeAndWaitEDT(new Runnable() {
@@ -113,13 +113,13 @@ public final class WindowUtils {
                     try {
                         getScreenProperties();
 
-                        // Dimension of the JFrame
-                        Dimension frameSize = frameToCenter.getSize();
+                        // Dimension of the window
+                        Dimension windowSize = windowToCenter.getSize();
 
                         // Get centering point
-                        Point point = getCenteringPoint(frameSize);
+                        Point point = getCenteringPoint(windowSize);
 
-                        frameToCenter.setLocation(point);
+                        windowToCenter.setLocation(point);
 
                         _logger.debug("The window has been centered");
 
@@ -172,9 +172,9 @@ public final class WindowUtils {
      * Installs standard window-closing keyboard shortcuts (i.e ESC and ctrl-W).
      *
      * @param rootPane the pane to listen keystroke.
-     * @param window the JFrame or JDialog to close on keystroke.
+     * @param window the window to close on keystroke.
      */
-    private static void setClosingKeyboardShortcuts(JRootPane rootPane, final Window window) {
+    private static void setClosingKeyboardShortcuts(final JRootPane rootPane, final Window window) {
 
         if ((rootPane == null) || (window == null)) {
             throw new IllegalArgumentException();
@@ -203,13 +203,14 @@ public final class WindowUtils {
 
     /**
      * Restore, then automatically save window size changes.
-     * @param frame the frame to monitor.
-     * @param key the frame identifier.
+     * @param window the window to monitor.
+     * @param key the window identifier.
      */
-    public static void rememberWindowSize(final JFrame frame, final String key) {
+    public static void rememberWindowSize(final Window window, final String key) {
 
         // Restore dimension from preferences
         final Dimension loadedDimension = SessionSettingsPreferences.loadDimension(key);
+
         // Using invokeAndWait to be in sync with this thread :
         // note: invokeAndWaitEDT throws an IllegalStateException if any exception occurs
         SwingUtils.invokeAndWaitEDT(new Runnable() {
@@ -219,15 +220,15 @@ public final class WindowUtils {
             @Override
             public void run() {
                 if (loadedDimension == null) {
-                    frame.pack();
+                    window.pack();
                 } else {
                     getScreenProperties();
-                    frame.setSize(getMaximumArea(loadedDimension));
+                    window.setSize(getMaximumArea(loadedDimension));
                 }
             }
         });
 
-        frame.addComponentListener(new FrameSizeAdapter(frame, key));
+        window.addComponentListener(new WindowSizeAdapter(window, key));
     }
 
     /**
@@ -237,36 +238,36 @@ public final class WindowUtils {
         super();
     }
 
-    private static final class FrameSizeAdapter extends ComponentAdapter {
+    private static final class WindowSizeAdapter extends ComponentAdapter {
 
         /** component resize timer to avoid repeated calls */
         private final Timer _timer;
 
         /**
          * Constructor
-         * @param frame the frame to monitor.
-         * @param key the frame identifier.
+         * @param window the window to monitor.
+         * @param key the window identifier.
          */
-        FrameSizeAdapter(final JFrame frame, final String key) {
+        WindowSizeAdapter(final Window window, final String key) {
 
             // Triggered once timer definitly expires
             final ActionListener frameSizeChangedAction = new ActionListener() {
-                // Weak to let frame deallocation occur gracefully
-                private final WeakReference<JFrame> _weakFrame = new WeakReference<JFrame>(frame);
+                // Weak to let window deallocation occur gracefully
+                private final WeakReference<Window> _weakWindow = new WeakReference<Window>(window);
                 private final String _key = key;
 
                 @Override
                 public void actionPerformed(ActionEvent evt) {
-                    final JFrame frame = _weakFrame.get();
-                    if (frame == null) {
+                    final Window window = _weakWindow.get();
+                    if (window == null) {
                         return;
                     }
 
                     if (_logger.isDebugEnabled()) {
-                        _logger.debug("Store frame[{}] size = {}.", _key, frame.getSize());
+                        _logger.debug("Store window[{}] size = {}.", _key, window.getSize());
                     }
 
-                    SessionSettingsPreferences.storeDimension(_key, frame.getSize());
+                    SessionSettingsPreferences.storeDimension(_key, window.getSize());
                 }
             };
 

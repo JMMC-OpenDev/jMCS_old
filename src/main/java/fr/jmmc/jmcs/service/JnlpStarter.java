@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.service;
 
 import fr.jmmc.jmcs.util.FileUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import fr.jmmc.jmcs.util.runner.EmptyJobListener;
 import fr.jmmc.jmcs.util.runner.JobListener;
 import fr.jmmc.jmcs.util.runner.LocalLauncher;
@@ -81,7 +82,7 @@ public final class JnlpStarter {
      */
     public static Long launch(final String jnlpUrl, final JobListener jobListener) throws IllegalStateException {
 
-        if (jnlpUrl == null || jnlpUrl.length() == 0) {
+        if (StringUtils.isEmpty(jnlpUrl)) {
             throw new IllegalArgumentException("empty JNLP url !");
         }
         if (jobListener == null) {

@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.util.concurrent;
 
 import ch.qos.logback.classic.Level;
+import fr.jmmc.jmcs.util.JVMUtils;
 import fr.jmmc.jmcs.logging.LoggingService;
 import fr.jmmc.jmcs.util.MCSExceptionHandler;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public final class ParallelJobExecutor {
     /** maximum number of running parallel job */
     private int _maxParallelJob;
     /** thread pool dedicated to this computation */
-    private final ThreadPoolExecutor _parallelExecutor;
+    private final FixedThreadPoolExecutor _parallelExecutor;
 
     /**
      * Return the singleton instance
@@ -93,7 +94,7 @@ public final class ParallelJobExecutor {
      */
     private ParallelJobExecutor() {
         super();
-        _cpuCount = Runtime.getRuntime().availableProcessors();
+        _cpuCount = JVMUtils.availableProcessors();
         _maxParallelJob = _cpuCount;
 
         // create any the thread pool even if there is only 1 CPU:
@@ -475,6 +476,9 @@ public final class ParallelJobExecutor {
                     // do interrupt thread if running:
                     future.cancel(true);
                 }
+
+                // Wait for threads to finish their task (cancellation):
+                _parallelExecutor.waitForTaskFinished();
 
                 // Anyway: interrupt this thread again anyway:
                 Thread.currentThread().interrupt();

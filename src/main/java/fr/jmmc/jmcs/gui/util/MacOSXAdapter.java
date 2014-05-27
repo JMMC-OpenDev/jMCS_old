@@ -58,7 +58,7 @@ public final class MacOSXAdapter implements AboutHandler, PreferencesHandler, Qu
     /** enable / disable EDT fix (JDK 1.6.0_51 and 1.7.0_25) */
     private static final boolean _useEdtFix = true;
     /** enable / disable EDT fix debugging statements */
-    private static final boolean _debugEdtFix = true;
+    private static final boolean _debugEdtFix = false;
     /** pseudo-singleton model; no point in making multiple instances */
     private static MacOSXAdapter _instance = null;
     /** application */

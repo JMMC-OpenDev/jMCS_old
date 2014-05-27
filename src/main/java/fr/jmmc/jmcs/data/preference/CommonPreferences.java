@@ -44,7 +44,7 @@ public final class CommonPreferences extends Preferences {
     /* Preferences */
     /** Store the filename of the common preference file */
     public static final String PREFERENCES_FILENAME = "fr.jmmc.jmcs.properties";
-    /**  Name of the preference which stores the user email in the feedback report */
+    /** Name of the preference which stores the user email in the feedback report */
     public static final String FEEDBACK_REPORT_USER_EMAIL = "feedback_report.user_email";
     /** Name of the preference which stores the flag to display or not the splash screen */
     public static final String SHOW_STARTUP_SPLASHSCREEN = "startup.splashscreen.show";
@@ -55,16 +55,13 @@ public final class CommonPreferences extends Preferences {
     /** HTTP proxy port */
     public static final String HTTP_PROXY_PORT = "http.proxyPort";
 
-    /**
-     * Private constructor that must be empty.
-     */
+    /** Private constructor that must be empty. */
     private CommonPreferences() {
         super();
     }
 
     /**
      * Return the singleton instance of CommonPreferences.
-     *
      * @return the singleton preference instance
      */
     public static CommonPreferences getInstance() {
@@ -81,7 +78,6 @@ public final class CommonPreferences extends Preferences {
 
     /**
      * Define the default properties used to reset default preferences.
-     *
      * @throws PreferencesException if any preference value has a unsupported class type
      */
     @Override
@@ -95,7 +91,6 @@ public final class CommonPreferences extends Preferences {
 
     /**
      * Return the preference filename.
-     *
      * @return preference filename.
      */
     @Override
@@ -104,8 +99,7 @@ public final class CommonPreferences extends Preferences {
     }
 
     /**
-     *  Return preference version number.
-     *
+     * Return preference version number.
      * @return preference version number.
      */
     @Override
@@ -115,7 +109,7 @@ public final class CommonPreferences extends Preferences {
 
     /**
      * Run this program to generate the common preference file.
-     * @param args NC
+     * @param args CLI parameters.
      */
     public static void main(String[] args) {
         try {

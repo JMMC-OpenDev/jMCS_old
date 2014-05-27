@@ -29,6 +29,7 @@ package fr.jmmc.jmcs.gui.component;
 
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.regex.Pattern;
@@ -212,7 +213,7 @@ public final class SearchPanel extends javax.swing.JFrame {
     private void doSearch(final SEARCH_DIRECTION direction) {
 
         final String text = _searchField.getText().trim();
-        if (text.length() != 0) {
+        if (!StringUtils.isEmpty(text)) {
 
             // Convert search token to standard regexp if not yet in this syntax
             final String regexp;

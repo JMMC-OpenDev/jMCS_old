@@ -275,7 +275,7 @@ public final class Bootstrapper {
      * @throws IllegalStateException
      */
     public static boolean launchApp(final App application, final boolean waitBeforeExecution, final boolean exitWhenClosed,
-            final boolean shouldShowSplashScreen) throws IllegalStateException {
+                                    final boolean shouldShowSplashScreen) throws IllegalStateException {
 
         return ___internalLaunch(application, exitWhenClosed, shouldShowSplashScreen);
     }
@@ -333,14 +333,18 @@ public final class Bootstrapper {
             MessagePane.showErrorMessage("An error occured while initializing the application");
 
             // Add last chance tip if this exception appears in an inited state but before being ready. (cf. trac #458)
+            final Throwable throwable;
             if (stateOnError.after(ApplicationState.ENV_INIT) && stateOnError.before(ApplicationState.APP_READY)) {
                 final String warningMessage = "The application did not start properly. Please try first to start it again from the website:\n"
                         + ApplicationDescription.getInstance().getLinkValue()
                         + "\nIf this operation does not fix the problem, please send us a feedback report!\n\n";
-                FeedbackReport.openDialog(true, new Throwable(warningMessage, th));
+
+                throwable = new Throwable(warningMessage, th);
             } else {
-                FeedbackReport.openDialog(true, th);
+                throwable = th;
             }
+            /* use invokeAndWaitEDT ie blocking the current thread */
+            FeedbackReport.openDialog(true, throwable);
         }
 
         return launchDone;
@@ -383,9 +387,7 @@ public final class Bootstrapper {
 
                 // Define the JFrame associated to the application which will get the JMenuBar
                 final JFrame frame = App.getFrame();
-                if (frame == null) {
-                    return;
-                }
+
                 // Define OSXAdapter (menu bar integration)
                 macOSXRegistration();
                 // Create menus including the Interop menu (SAMP required)
@@ -415,10 +417,6 @@ public final class Bootstrapper {
     private static void macOSXRegistration() {
         // If running under Mac OS X
         if (SystemUtils.IS_OS_MAC_OSX) {
-
-            // Set the menu bar under Mac OS X
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-
             final Class<?> osxAdapter = IntrospectionUtils.getClass("fr.jmmc.jmcs.gui.util.MacOSXAdapter");
             if (osxAdapter == null) {
                 // This will be thrown first if the OSXAdapter is loaded on a system without the EAWT
@@ -456,7 +454,7 @@ public final class Bootstrapper {
      * @param evt the triggering event if any, null otherwise.
      */
     public static void quitApp(final ActionEvent evt) {
-        _jmmcLogger.info("Application quitting.");
+        _jmmcLogger.info("Quitting the application ...");
 
         // Mac OS X Quit action handler
         final QuitResponse response;
@@ -518,51 +516,81 @@ public final class Bootstrapper {
      * @param statusCode status code to return
      */
     public static void stopApp(final int statusCode) {
-        _jmmcLogger.info("Stopping the application.");
-        try {
-            if (_application != null) {
+        if (isInState(ApplicationState.JAVA_LIMB)) {
+            return;
+        }
+        boolean appCleanupFailed = false;
 
+        // Avoid reentrance if an exception occured (Feedback Report):
+        if (_application != null && getState().before(ApplicationState.APP_CLEANUP)) {
+            _jmmcLogger.info("Stopping the application ...");
+            try {
                 setState(ApplicationState.APP_CLEANUP);
                 _application.cleanup();
 
-                setState(ApplicationState.ENV_CLEANUP);
-                ___internalStop();
-            }
-        } finally {
-            setState(ApplicationState.APP_DEAD);
-            App.___internalSingletonCleanup();
-            if (!_avoidSystemExit) {
-                _jmmcLogger.info("Exiting with status code '{}'.", statusCode);
-                System.exit(statusCode);
+            } catch (Throwable th) {
+                appCleanupFailed = true;
+                setState(ApplicationState.APP_CLEANUP_FAIL);
+
+                /* use invokeAndWaitEDT ie blocking the current thread */
+                FeedbackReport.openDialog(true, th);
             }
         }
-        setState(ApplicationState.JAVA_LIMB);
+
+        // Avoid reentrance if an exception occured (Feedback Report):
+        if (appCleanupFailed
+                || (!isInState(ApplicationState.APP_CLEANUP_FAIL) && getState().before(ApplicationState.ENV_CLEANUP))) {
+
+            setState(ApplicationState.ENV_CLEANUP);
+            // should not throw runtime exception:
+            ___internalStop();
+
+            setState(ApplicationState.APP_DEAD);
+            App.___internalSingletonCleanup();
+
+            if (!_avoidSystemExit) {
+                /* fix status code if an exception occured during application cleanup */
+                final int exitCode = (appCleanupFailed) ? -1 : statusCode;
+
+                _jmmcLogger.info("Exiting with status code '{}'.", exitCode);
+
+                System.exit(exitCode);
+            }
+            setState(ApplicationState.JAVA_LIMB);
+        }
     }
 
     /**
      * Internal: Stop services
      */
     private static void ___internalStop() {
-        // Save session settings if needed
-        SessionSettingsPreferences.saveToFileIfNeeded();
+        _jmmcLogger.info("Stopping internal services ...");
+        try {
+            // Save session settings if needed:
+            SessionSettingsPreferences.saveToFileIfNeeded();
 
-        // Stop the job runner (if any)
-        LocalLauncher.shutdown();
+            // Stop the job runner (if any)
+            LocalLauncher.shutdown();
 
-        // Stop the task executor (if any)
-        TaskSwingWorkerExecutor.shutdown();
+            // Stop the task executor (if any)
+            TaskSwingWorkerExecutor.shutdown();
 
-        // Stop the parallel job executor (if any)
-        ParallelJobExecutor.shutdown();
+            // Stop the parallel job executor (if any)
+            ParallelJobExecutor.shutdown();
 
-        // Disconnect from SAMP Hub (if any)
-        SampManager.shutdown();
+            // Disconnect from SAMP Hub (if any)
+            SampManager.shutdown();
 
-        // Close all HTTP connections (http client) (if any)
-        MultiThreadedHttpConnectionManager.shutdownAll();
+            // Close all HTTP connections (http client) (if any)
+            MultiThreadedHttpConnectionManager.shutdownAll();
 
-        // Switch to logging exception handler:
-        MCSExceptionHandler.installLoggingHandler();
+            // Switch to logging exception handler:
+            MCSExceptionHandler.installLoggingHandler();
+
+        } catch (RuntimeException re) {
+            // should not happen but anyway log any potential exception:
+            _jmmcLogger.warn("A runtime exception occured while stopping services: ", re);
+        }
     }
 
     /**

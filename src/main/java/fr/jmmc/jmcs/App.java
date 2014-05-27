@@ -27,12 +27,17 @@
  ******************************************************************************/
 package fr.jmmc.jmcs;
 
+import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
 import fr.jmmc.jmcs.gui.action.internal.InternalActionFactory;
+import fr.jmmc.jmcs.gui.util.ResourceImage;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.util.CommandLineUtils;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -202,7 +207,7 @@ public abstract class App {
     public static void setFrame(final JFrame frame) {
         // avoid reentrance:
         if (_applicationFrame != frame) {
-            
+
             if (_applicationFrame != null) {
                 ___internalDisposeFrame();
             }
@@ -229,7 +234,31 @@ public abstract class App {
      */
     public static JFrame getFrame() {
         if (_applicationFrame == null) {
-            _applicationFrame = new JFrame();
+            /* try getting application name */
+            String appName = "Application";
+            try {
+                appName = ApplicationDescription.getInstance().getProgramName();
+            } catch (IllegalStateException ise) {
+                _logger.debug("Unable to get application description: ", ise);
+            }
+            /* always create a frame with a title and default icon (displayed in the OS toolbar) */
+            final JFrame frame = new JFrame(appName);
+
+            final Image jmmcFavImage = ResourceImage.JMMC_FAVICON.icon().getImage();
+            frame.setIconImage(jmmcFavImage);
+
+            /* define the minimal size to see the frame empty and not an ugly cropped box */
+            final Dimension dim = new Dimension(300, 100);
+            frame.setMinimumSize(dim);
+            frame.setPreferredSize(dim);
+
+            // Set application frame ideal size
+            frame.pack();
+
+            setFrame(frame);
+
+            /* center the empty frame on screen */
+            WindowUtils.centerOnMainScreen(frame);
         }
         return _applicationFrame;
     }
@@ -245,12 +274,10 @@ public abstract class App {
      * Show the application frame and bring it to front.
      */
     public static void showFrameToFront() {
-        // use the existing application frame only
-        // to not create a new frame when displaying messages 
-        // during application startup
-        final JFrame frame = _applicationFrame;
-        if (frame != null) {
+        // may create a new JFrame when displaying messages during application startup
+        final JFrame frame = getFrame();
 
+        if (frame != null) {
             // Ensure window is visible (not iconified)
             if (frame.getState() == Frame.ICONIFIED) {
                 frame.setState(Frame.NORMAL);
@@ -306,10 +333,9 @@ public abstract class App {
 
     static void ___internalSingletonCleanup() {
         ___internalDisposeFrame();
-        
         _instance = null;
     }
-    
+
     private static void ___internalDisposeFrame() {
         if (_applicationFrame != null) {
             // Hide and dispose the former application frame:
@@ -335,8 +361,9 @@ public abstract class App {
         APP_READY(5),
         APP_STOP(6),
         APP_CLEANUP(7),
-        ENV_CLEANUP(8),
-        APP_DEAD(9);
+        APP_CLEANUP_FAIL(8),
+        ENV_CLEANUP(9),
+        APP_DEAD(10);
         // Members
         /** the numerical order of the internal progress */
         private final int _step;

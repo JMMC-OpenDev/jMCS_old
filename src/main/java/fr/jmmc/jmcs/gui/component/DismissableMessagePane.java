@@ -41,6 +41,11 @@ import javax.swing.JOptionPane;
  */
 public final class DismissableMessagePane {
 
+    private static String composePreferenceName(final String preferenceName) {
+        final String dontShowPreferenceName = "MCSGUI.DismissableMessagePane." + preferenceName + ".dontShow";
+        return dontShowPreferenceName;
+    }
+
     /**
      * Forbidden constructor
      */
@@ -58,7 +63,7 @@ public final class DismissableMessagePane {
      */
     public static void show(final String message, final Preferences preferences, final String preferenceName) {
 
-        final String dontShowPreferenceName = "MCSGUI.DismissableMessagePane." + preferenceName + ".dontShow";
+        final String dontShowPreferenceName = composePreferenceName(preferenceName);
         try {
             // return false if the preference value is missing:
             boolean dontShow = preferences.getPreferenceAsBoolean(dontShowPreferenceName, true);
@@ -75,6 +80,38 @@ public final class DismissableMessagePane {
                     preferences.setPreference(dontShowPreferenceName, dontShow);
                 }
             }
+        } catch (PreferencesException pe) {
+            // Show the feedback report :
+            FeedbackReport.openDialog(pe);
+        }
+    }
+
+    /**
+     * @return the state of the preference for the given preference name.
+     * @param preferences Reference to the dedicated Preferences singleton
+     * @param preferenceName Name of the preference related to this message
+     */
+    public static boolean getPreferenceState(final Preferences preferences, final String preferenceName) {
+
+        // Return false if the preference value is missing:
+        final String dontShowPreferenceName = composePreferenceName(preferenceName);
+        final boolean dontShow = preferences.getPreferenceAsBoolean(dontShowPreferenceName, true);
+        return dontShow;
+    }
+
+    /**
+     * Set the state of the preference for the given preference name.
+     *
+     * @param preferences Reference to the dedicated Preferences singleton.
+     * @param preferenceName Name of the preference related to this message.
+     * @param state true to dismiss the message, false otherwise.
+     */
+    public static void setPreferenceState(final Preferences preferences, final String preferenceName, final boolean state) {
+
+        // Return false if the preference value is missing:
+        final String dontShowPreferenceName = composePreferenceName(preferenceName);
+        try {
+            preferences.setPreference(dontShowPreferenceName, state);
         } catch (PreferencesException pe) {
             // Show the feedback report :
             FeedbackReport.openDialog(pe);

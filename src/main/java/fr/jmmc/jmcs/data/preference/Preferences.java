@@ -32,12 +32,12 @@ import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.util.ColorEncoder;
 import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.NumberUtils;
+import fr.jmmc.jmcs.util.StringUtils;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -53,7 +53,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Properties;
 import javax.swing.Action;
-import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -936,6 +935,10 @@ public abstract class Preferences extends Observable {
 
         final String value = getPreference(preferenceName);
 
+        /* ignore empty string */
+        if (StringUtils.isEmpty(value)) {
+            return Collections.emptyList();
+        }
         return Arrays.asList(value.split(LIST_SPLITTER));
     }
 
@@ -1162,30 +1165,10 @@ public abstract class Preferences extends Observable {
      * according to execution platform.
      */
     final public String computePreferenceFilepath() {
-        // [USER_HOME]/
-        _fullFilepath = SystemUtils.USER_HOME + File.separator;
 
-        // Under Mac OS X
-        if (SystemUtils.IS_OS_MAC_OSX) {
-            // [USER_HOME]/Library/Preferences/
-            _fullFilepath += ("Library" + File.separator + "Preferences" + File.separator);
-        } // Under Windows
-        else if (SystemUtils.IS_OS_WINDOWS) {
-            // [USER_HOME]/Local Settings/Application Data/
-            _fullFilepath += ("Local Settings" + File.separator + "Application Data" + File.separator);
-        } // Under Linux, and anything else
-        else {
-            // [USER_HOME]/.
-            _fullFilepath += ".";
-        }
-
-        // Mac OS X : [USER_HOME]/Library/Preferences/fr.jmmc...properties
-        // Windows : [USER_HOME]/Local Settings/Application Data/fr.jmmc...properties
-        // Linux (and anything else) : [USER_HOME]/.fr.jmmc...properties
+        _fullFilepath = FileUtils.getPlatformPreferencesPath();
         _fullFilepath += getPreferenceFilename();
-
         _logger.debug("Computed preference file path = '{}'.", _fullFilepath);
-
         return _fullFilepath;
     }
 
@@ -1311,8 +1294,18 @@ public abstract class Preferences extends Observable {
      * @return string representation of properties using the format "{name} : {value}"
      */
     public static String dumpProperties(final Properties properties) {
+        return dumpProperties(properties, new StringBuilder(2048)).toString();
+    }
+
+    /**
+     * Dump all properties (sorted by keys) into the given buffer
+     * @param properties properties to dump
+     * @param sb buffer to append into
+     * @return string representation of properties using the format "{name} : {value}"
+     */
+    public static StringBuilder dumpProperties(final Properties properties, final StringBuilder sb) {
         if (properties == null) {
-            return "";
+            return sb;
         }
 
         // Sort properties
@@ -1321,11 +1314,10 @@ public abstract class Preferences extends Observable {
         Arrays.sort(keys);
 
         // For each property, we make a string like "{name} : {value}"
-        final StringBuilder sb = new StringBuilder(2048);
         for (String key : keys) {
             sb.append(key).append(" : ").append(properties.getProperty(key)).append("\n");
         }
-        return sb.toString();
+        return sb;
     }
 
     /**
@@ -1334,5 +1326,13 @@ public abstract class Preferences extends Observable {
      */
     public String dumpCurrentProperties() {
         return dumpProperties(_currentProperties);
+    }
+
+    /**
+     * Dump default properties (for debugging purposes)
+     * @return string representation of properties using the format "{name} : {value}"
+     */
+    public String dumpDefaultProperties() {
+        return dumpProperties(_defaultProperties);
     }
 }

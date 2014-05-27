@@ -29,12 +29,15 @@ package com.yourcompany.example;
 
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
+import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.DismissableMessagePane;
 import fr.jmmc.jmcs.gui.component.MessagePane;
 import fr.jmmc.jmcs.gui.component.StatusBar;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.network.interop.SampCapability;
+import fr.jmmc.jmcs.network.interop.SampCapabilityAction;
 import fr.jmmc.jmcs.network.interop.SampMessageHandler;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.service.RecentFilesManager;
@@ -46,7 +49,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JPanel;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.SampUtils;
 import org.slf4j.Logger;
@@ -91,13 +96,37 @@ public class Main extends App {
     protected void setupGui() {
         _logger.warn("Initialize application objects");
 
+        // Create actions:
         _actions = new Actions();
         _openAction = openAction();
 
-        // Buttons
+        // Fake Samp action:
+        new SampCapabilityAction(
+                "com.yourcompany.example.FakeSampCapabilityAction",
+                "FakeSampCapabilityAction",
+                SampCapability.LOAD_VO_TABLE) {
+
+                    private static final long serialVersionUID = 1L;
+
+                    @Override
+                    public Map<?, ?> composeMessage() {
+
+                        final Map<String, String> parameters = new HashMap<String, String>(2);
+                        parameters.put("url", "http://www.myexperiment.org/files/910/versions/1/download/2MASS.vot");
+
+                        return parameters;
+                    }
+
+                };
+
+        // Create application's frame and set its title:
+        getFrame().setTitle(ApplicationDescription.getInstance().getProgramNameWithVersion());
+
+        // Create Buttons:
         _openBrowserButton = new JButton(openJMcsWebSiteAction());
         _testDismissableMessagePane = new JButton(dismissableMessagePaneAction());
 
+        // Define application's frame widgets:
         final Container framePanel = getFramePanel();
 
         // Set borderlayout
@@ -112,20 +141,30 @@ public class Main extends App {
     /** Execute application body */
     @Override
     protected void execute() {
+        _logger.info("Execute application body");
 
-        // Center main window on the screen
-        WindowUtils.centerOnMainScreen(getFrame());
+        SwingUtils.invokeLaterEDT(new Runnable() {
+            /**
+             * Show the application frame using EDT
+             */
+            @Override
+            public void run() {
+                _logger.debug("Main.execute() handler called.");
 
-        // Show the application frame
-        showFrameToFront();
+                // Center main window on the screen
+                WindowUtils.centerOnMainScreen(getFrame());
+
+                // Show the application frame
+                showFrameToFront();
+            }
+        });
 
         StatusBar.show("Application ready.");
-        _logger.info("Execute application body");
 
         RecentFilesManager.addFile(new File("/Users/lafrasse/test.scvot"));
 
         try {
-            SampMessageHandler handler = new SampMessageHandler("stuff.do") {
+            new SampMessageHandler("stuff.do") {
                 @Override
                 public void processMessage(String senderId, Message msg) {
                     // do stuff
@@ -138,7 +177,7 @@ public class Main extends App {
                     result.put("x", SampUtils.encodeFloat(3.141159));
                 }
             };
-            handler = new SampMessageHandler(SampCapability.LOAD_VO_TABLE) {
+            new SampMessageHandler(SampCapability.LOAD_VO_TABLE) {
                 @Override
                 public void processMessage(String senderId, Message msg) {
                     // do stuff
