@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+********************************************************************************
+*                  jMCS project ( http://www.jmmc.fr/dev/jmcs )
+********************************************************************************
+*  Copyright (c) 2013, CNRS. All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions are met:
+*      - Redistributions of source code must retain the above copyright
+*        notice, this list of conditions and the following disclaimer.
+*      - Redistributions in binary form must reproduce the above copyright
+*        notice, this list of conditions and the following disclaimer in the
+*        documentation and/or other materials provided with the distribution.
+*      - Neither the name of the CNRS nor the names of its contributors may be
+*        used to endorse or promote products derived from this software without
+*        specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+*  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+*  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+*  ARE DISCLAIMED. IN NO EVENT SHALL CNRS BE LIABLE FOR ANY DIRECT, INDIRECT,
+*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+*  OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+*  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+*  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+*  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+********************************************************************************
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.jmmc</groupId>
+        <artifactId>jmmc</artifactId>
+        <version>TRUNK</version>
+        <!--  please install first parent pom from jMCS/parent-pom directory -->
+    </parent>
+
+    <groupId>fr.jmmc.jmcs</groupId>
+    <artifactId>helpset</artifactId>
+
+    <packaging>jar</packaging>
+    <name>jMCS Helpset</name>
+    <url>http://www.jmmc.fr/dev/jmcs</url>
+
+    <properties>
+        <!-- do make assembly and copy dependencies -->
+        <assembly.skipAssembly>false</assembly.skipAssembly>
+        <mdep.skip>false</mdep.skip>
+
+        <!-- do not sign libraries only applications -->
+        <jarsigner.skip>true</jarsigner.skip>
+    </properties>
+
+    <dependencies>
+        <!-- SLF4J -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.6</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>1.7.6</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+
+        <!-- mvn install:install-file -Dfile=lib/jhelpdev.jar -DgroupId=net.sourceforge.jhelpdev -DartifactId=jhelpdev -Dversion=0.63 -Dpackaging=jar -->
+        <dependency>
+            <groupId>net.sourceforge.jhelpdev</groupId>
+            <artifactId>jhelpdev</artifactId>
+            <version>0.63</version>
+        </dependency>
+
+        <!-- mvn install:install-file -Dfile=lib/xmlenc.jar -DgroupId=org.znerd.xmlenc -DartifactId=xmlenc -Dversion=0.48 -Dpackaging=jar -->
+        <dependency>
+            <groupId>org.znerd.xmlenc</groupId>
+            <artifactId>xmlenc</artifactId>
+            <version>0.48</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.woodstock.dependlibs</groupId>
+            <artifactId>jhall</artifactId>
+            <version>2.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+        </plugins>
+    </build>
+</project>
