@@ -310,23 +310,27 @@ public class MainMenuBar extends JMenuBar {
                 Action action;
                 // Add each component
                 for (Component currentComponent : components) {
-                    // Get menuitem initialised from ApplicationData
-                    JMenuItem menuItem = (JMenuItem) currentComponent;
+                    if (currentComponent instanceof JMenuItem) {
+                        // Get the menu item initialised from ApplicationData
+                        JMenuItem menuItem = (JMenuItem) currentComponent;
 
-                    action = menuItem.getAction();
+                        action = menuItem.getAction();
 
-                    if (action instanceof SampCapabilityAction) {
-                        // @TODO : cast SAMP-flagged menus only !
-                        SampCapabilityAction sampAction = (SampCapabilityAction) action;
-                        // get previously created menu by samp action
-                        JMenu menu = SampManager.getMenu(sampAction);
+                        if (action instanceof SampCapabilityAction) {
+                            // @TODO : cast SAMP-flagged menus only !
+                            SampCapabilityAction sampAction = (SampCapabilityAction) action;
+                            // get previously created menu by samp action
+                            JMenu menu = SampManager.getMenu(sampAction);
 
-                        if (menu != null) {
-                            // set text coming from applicationData.xml
-                            menu.setText(menuItem.getText());
+                            if (menu != null) {
+                                // set text coming from applicationData.xml
+                                menu.setText(menuItem.getText());
 
-                            interopMenu.add(menu);
+                                interopMenu.add(menu);
+                            }
                         }
+                    } else {
+                        interopMenu.add(currentComponent);
                     }
                 }
             }
@@ -478,7 +482,7 @@ public class MainMenuBar extends JMenuBar {
      * @return the instantiated JComponent according to the XML menu hierarchy.
      */
     private JComponent recursiveParser(Menu menu,
-            JComponent parent, boolean createMenu, ButtonGroup buttonGroup) {
+                                       JComponent parent, boolean createMenu, ButtonGroup buttonGroup) {
         // Create the current component
         JComponent component = createComponent(menu, createMenu, buttonGroup);
 
@@ -524,9 +528,6 @@ public class MainMenuBar extends JMenuBar {
      * @return the instantiated JComponent according to the XML description.
      */
     private JComponent createComponent(Menu menu, boolean isMenu, ButtonGroup buttonGroup) {
-        // Component to create
-        JMenuItem item = null;
-
         // Attributes
         boolean hasClasspath = (menu.getClasspath() != null);
         boolean hasAction = (menu.getAction() != null);
@@ -561,6 +562,9 @@ public class MainMenuBar extends JMenuBar {
 
         // Set attributes
         setAttributes(menu, action);
+
+        // Component to create
+        JMenuItem item;
 
         // Is it a checkbox ?
         if (isCheckbox) {

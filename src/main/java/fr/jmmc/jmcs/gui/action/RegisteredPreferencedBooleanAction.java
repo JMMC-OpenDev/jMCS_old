@@ -52,11 +52,11 @@ public class RegisteredPreferencedBooleanAction extends RegisteredAction
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1L;
     /** Monitored Preference object */
-    private Preferences _preferences;
+    private final Preferences _preferences;
     /** Name of the bound preference */
-    private String _preferenceName;
+    private final String _preferenceName;
     /** List of buttons bound to this action */
-    private List<AbstractButton> _boundButtons;
+    private final List<AbstractButton> _boundButtons;
 
     /**
      * Constructor.
@@ -94,8 +94,9 @@ public class RegisteredPreferencedBooleanAction extends RegisteredAction
 
     /**
      * Automatically called whenever the observed Preferences object changed.
-     * @param o
-     * @param arg  
+     *
+     * @param o the Observable object
+     * @param arg parameter
      */
     @Override
     public void update(Observable o, Object arg) {

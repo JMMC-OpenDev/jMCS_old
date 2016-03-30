@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.gui;
 
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.util.ImageUtils;
 import java.awt.BorderLayout;
@@ -102,48 +103,58 @@ public class SplashScreen extends JFrame {
             return;
         }
 
-        if (_instance == null) {
-            _instance = new SplashScreen();
-        }
-
-        WindowUtils.centerOnMainScreen(_instance);
-
-        // Show window
-        _instance.setVisible(true);
-
-        // Use Timer to wait 2,5s before closing this dialog :
-        final Timer timer = new Timer(2500, new ActionListener() {
-            /**
-             * Handle the timer call
-             * @param ae action event
-             */
+        SwingUtils.invokeAndWaitEDT(new Runnable() {
             @Override
-            public void actionPerformed(final ActionEvent ae) {
-                // Just call close to hide and dispose this frame :
-                SplashScreen.close();
+            public void run() {
+                if (_instance == null) {
+                    _instance = new SplashScreen();
+                }
+
+                WindowUtils.centerOnMainScreen(_instance);
+
+                // Show window
+                _instance.setVisible(true);
+
+                // Use Timer to wait 2,5s before closing this dialog :
+                final Timer timer = new Timer(2500, new ActionListener() {
+                    /**
+                     * Handle the timer call
+                     * @param ae action event
+                     */
+                    @Override
+                    public void actionPerformed(final ActionEvent ae) {
+                        // Just call close to hide and dispose this frame :
+                        SplashScreen.close();
+                    }
+                });
+
+                // timer runs only once :
+                timer.setRepeats(false);
+                timer.start();
             }
         });
-
-        // timer runs only once :
-        timer.setRepeats(false);
-        timer.start();
     }
 
     /**
      * Close the splash screen
      */
     public static void close() {
-        if (_instance == null) {
-            return;
-        }
+        if (_instance != null) {
+            SwingUtils.invokeAndWaitEDT(new Runnable() {
+                @Override
+                public void run() {
+                    if (_instance != null) {
+                        if (_instance.isVisible()) {
+                            _instance.setVisible(false);
+                            _instance.dispose();
+                        }
 
-        if (_instance.isVisible()) {
-            _instance.setVisible(false);
-            _instance.dispose();
+                        // cleanup (helps GC):
+                        _instance = null;
+                    }
+                }
+            });
         }
-
-        // cleanup (helps GC):
-        _instance = null;
     }
 
     /**

@@ -136,7 +136,7 @@ public abstract class SampCapabilityAction extends RegisteredAction {
 
     /**
      * Set action text.
-     * @param text
+     * @param text action text
      */
     public void setText(String text) {
         _logger.trace("setText('{}')", text);

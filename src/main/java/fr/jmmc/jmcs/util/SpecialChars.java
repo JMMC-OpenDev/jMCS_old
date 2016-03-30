@@ -32,7 +32,7 @@ import org.apache.commons.lang.SystemUtils;
 
 /**
  *
- * @author bourgesl
+ * @author Laurent BOURGES.
  */
 public final class SpecialChars {
 

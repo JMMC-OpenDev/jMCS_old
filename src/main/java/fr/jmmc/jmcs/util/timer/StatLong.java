@@ -57,7 +57,7 @@ public final class StatLong implements ToStringable {
 
     /**
      * Define the occurrence thresholds to compute average, standard deviation ...
-     * @param thresholdAverage
+     * @param thresholdAverage average threshold
      */
     public static void defineThreshold(final int thresholdAverage) {
         if (thresholdAverage > 0) {

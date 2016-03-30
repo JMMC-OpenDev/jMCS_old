@@ -62,10 +62,7 @@ public final class Task {
             return false;
         }
         final Task other = (Task) obj;
-        if ((_name == null) ? (other._name != null) : !_name.equals(other._name)) {
-            return false;
-        }
-        return true;
+        return !((_name == null) ? (other.getName() != null) : !_name.equals(other.getName()));
     }
 
     /**

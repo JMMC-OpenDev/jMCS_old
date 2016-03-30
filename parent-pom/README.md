@@ -19,7 +19,7 @@ mvn -Dassembly.skipAssembly -Djarsigner.skip=true clean install
 <parent>
     <groupId>fr.jmmc</groupId>
     <artifactId>jmmc</artifactId>
-    <version>TRUNK</version>    
+    <version>TRUNK</version>
 </parent>
 ```
 
@@ -29,6 +29,23 @@ Else you will have :
 
 ```xml
 <settings>
+    <!-- offline
+    | Determines whether maven should attempt to connect to the network when executing a build.
+    | This will have an effect on artifact downloads, artifact deployment, and others.
+    |
+    | Default: false
+    -->
+    <offline>false</offline>
+
+    <proxies>
+        <proxy>
+            <active>false</active>
+            <protocol>http</protocol>
+            <host>www-cache.ujf-grenoble.fr</host>
+            <port>3128</port>
+            <nonProxyHosts>*.jmmc.fr</nonProxyHosts>
+        </proxy>
+    </proxies>
 ...
 
     <profiles>

@@ -39,7 +39,8 @@ import static org.junit.Assert.*;
 
 /**
  * This class provides several tests on Preferences abstract class (
- * @author bourgesl
+ *
+ * @author Laurent BOURGES.
  */
 public class PreferencesTest {
 

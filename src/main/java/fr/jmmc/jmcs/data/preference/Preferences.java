@@ -149,9 +149,10 @@ public abstract class Preferences extends Observable {
 
         loadFromFile();
 
-        // Parent class name must be given to register one action per inherited Preference class
-        _savePreferences = new SavePrefAction(this.getClass().getName());
-        _restoreDefaultPreferences = new RestoreDefaultPrefAction(this.getClass().getName());
+        // Concrete class name must be given to register one action per inherited Preference class
+        final String className = this.getClass().getName();
+        _savePreferences = new SavePrefAction(className);
+        _restoreDefaultPreferences = new RestoreDefaultPrefAction(className);
     }
 
     /**
@@ -800,7 +801,7 @@ public abstract class Preferences extends Observable {
         if (value == null) {
             return false;
         }
-        return Boolean.valueOf(value).booleanValue();
+        return Boolean.parseBoolean(value);
     }
 
     /**
@@ -829,7 +830,7 @@ public abstract class Preferences extends Observable {
         if (value == null) {
             return Double.NaN;
         }
-        return Double.valueOf(value).doubleValue();
+        return Double.parseDouble(value);
     }
 
     /**
@@ -891,6 +892,7 @@ public abstract class Preferences extends Observable {
      * @return one Dimension representing the preference value.
      * 
      * @throws MissingPreferenceException if the preference value is missing.
+     * @throws fr.jmmc.jmcs.data.preference.PreferencesException TBD
      */
     final public Dimension getPreferenceAsDimension(final Object preferenceName) throws MissingPreferenceException, PreferencesException {
         return getPreferenceAsDimension(preferenceName, false);
@@ -1092,10 +1094,9 @@ public abstract class Preferences extends Observable {
 
     /**
      * Returns an Enumeration (ordered if possible) of preference names which
-     * start with given string. One given empty string make all preference
-     * entries returned.
+     * start with given string. An empty string make all preference entries returned.
      *
-     * @param prefix 
+     * @param prefix sought preference name, or "" for all
      * @return Enumeration a string enumeration of preference names
      */
     final public Enumeration<String> getPreferences(final Object prefix) {
@@ -1315,7 +1316,7 @@ public abstract class Preferences extends Observable {
 
         // For each property, we make a string like "{name} : {value}"
         for (String key : keys) {
-            sb.append(key).append(" : ").append(properties.getProperty(key)).append("\n");
+            sb.append(key).append(" : ").append(properties.getProperty(key)).append('\n');
         }
         return sb;
     }

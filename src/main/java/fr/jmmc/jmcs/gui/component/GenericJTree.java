@@ -191,7 +191,7 @@ public abstract class GenericJTree<E> extends JTree {
 
         final int size = node.getChildCount();
         if (size > 0) {
-            DefaultMutableTreeNode result = null;
+            DefaultMutableTreeNode result;
 
             DefaultMutableTreeNode childNode;
             for (int i = 0; i < size; i++) {

@@ -34,7 +34,8 @@ import java.util.Date;
 
 /**
  * Helper methods related to Formatter (NumberFormat, DateFormat ...)
- * @author bourgesl
+ *
+ * @author Laurent BOURGES.
  */
 public final class FormatterUtils {
 

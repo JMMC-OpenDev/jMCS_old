@@ -27,11 +27,14 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.data.preference;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -55,16 +58,14 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
     /** Class logger */
     private final static Logger _logger = LoggerFactory.getLogger(PreferencedDocument.class.getName());
     /** Store PreferencedDocument instances for a given preference name */
-    private static Map<String, PreferencedDocument> _instanceMap = Collections.synchronizedMap(new HashMap<String, PreferencedDocument>(8));
+    private static final Map<String, PreferencedDocument> _instanceMap = Collections.synchronizedMap(new HashMap<String, PreferencedDocument>(8));
+    /* members */
     /** Shared instance */
     private final Preferences _preferences;
     /** Preference property */
     private final String _preferenceProperty;
-    /**
-     * Tells if preference must be saved automatically or not (default).
-     * @warning : the whole preference list associated in the preference will also be saved !
-     */
-    private final boolean _autoSave;
+    /** auto-save timer */
+    private final Timer _autoSaveTimer;
 
     /**
      * PreferencedButtonModel constructor
@@ -75,7 +76,7 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
      * (default)
      */
     private PreferencedDocument(final Preferences preferences,
-            final String preferenceProperty, final boolean autoSave) {
+                                final String preferenceProperty, final boolean autoSave) {
 
         // Store the Preference shared instance of the main application
         _preferences = preferences;
@@ -83,8 +84,23 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
         // Store the property name for later use
         _preferenceProperty = preferenceProperty;
 
-        // store beavior flag
-        _autoSave = autoSave;
+        if (autoSave) {
+            _autoSaveTimer = new Timer(2000, new ActionListener() {
+                /* Invoked when timer action occurs. */
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        _preferences.saveToFile();
+                    } catch (PreferencesException ex) {
+                        throw new IllegalStateException("Can't set value for preference " + _preferenceProperty);
+                    } finally {
+                        _autoSaveTimer.stop();
+                    }
+                }
+            });
+        } else {
+            _autoSaveTimer = null;
+        }
 
         // Retrieve the property value and set the widget accordinaly
         setMyText(_preferences.getPreference(_preferenceProperty));
@@ -107,7 +123,7 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
      * @return the PreferencedDocument singleton
      */
     public static PreferencedDocument getInstance(final Preferences preferences,
-            final String preferenceProperty, final boolean autosave) {
+                                                  final String preferenceProperty, final boolean autosave) {
 
         PreferencedDocument d = _instanceMap.get(preferenceProperty);
 
@@ -128,7 +144,7 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
      * @return the PreferencedDocument singleton
      */
     public static PreferencedDocument getInstance(final Preferences preferences,
-            final String preferenceProperty) {
+                                                  final String preferenceProperty) {
         return getInstance(preferences, preferenceProperty, false);
     }
 
@@ -170,8 +186,8 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
     private void setPrefValue(final String newValue) {
         try {
             _preferences.setPreference(_preferenceProperty, newValue);
-            if (_autoSave) {
-                _preferences.saveToFile();
+            if (_autoSaveTimer != null) {
+                _autoSaveTimer.restart();
             }
         } catch (PreferencesException ex) {
             throw new IllegalStateException("Can't set value for preference " + _preferenceProperty);
@@ -186,7 +202,9 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
     @Override
     public void changedUpdate(final DocumentEvent evt) {
         // this event is not used
-        _logger.trace("changeUpdate:\n event: {}\n text: {}", evt, getMyText());
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("changeUpdate:\n event: {}\n text: {}", evt, getMyText());
+        }
     }
 
     /**
@@ -196,8 +214,10 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
      */
     @Override
     public void insertUpdate(final DocumentEvent evt) {
-        // Gives notification that there was an insert into the document.        
-        _logger.trace("insertUpdate:\n event: {}\n text: {}", evt, getMyText());
+        // Gives notification that there was an insert into the document.
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("insertUpdate:\n event: {}\n text: {}", evt, getMyText());
+        }
         setPrefValue(getMyText());
     }
 
@@ -208,16 +228,18 @@ public final class PreferencedDocument extends javax.swing.text.PlainDocument
      */
     @Override
     public void removeUpdate(final DocumentEvent evt) {
-        // Gives notification that a portion of the document has been removed.        
-        _logger.trace("removeUpdate:\n event: {}\n text: {}", evt, getMyText());
+        // Gives notification that a portion of the document has been removed.    
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("removeUpdate:\n event: {}\n text: {}", evt, getMyText());
+        }
         setPrefValue(getMyText());
     }
 
     /**
-     * Triggerd if the preference shared instance has been modified.
+     * Triggered if the preference shared instance has been modified.
      *
-     * @param o
-     * @param arg
+     * @param o the Observable object
+     * @param arg parameter
      */
     @Override
     public void update(final Observable o, final Object arg) {

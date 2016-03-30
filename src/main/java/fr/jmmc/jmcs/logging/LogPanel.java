@@ -42,7 +42,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This panel displays both log content and refresh buttons
- * @author bourgesl
+ *
+ * @author Laurent BOURGES.
  */
 public class LogPanel extends javax.swing.JPanel implements ActionListener, ChangeListener {
 

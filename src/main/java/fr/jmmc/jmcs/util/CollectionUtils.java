@@ -195,7 +195,7 @@ public final class CollectionUtils {
      * @return string
      */
     public static String toString(final Map<?, ?> m) {
-        return toString(m, LINE_SEPARATOR, BEGIN_SEPARATOR, END_SEPARATOR);
+        return (m != null) ? toString(m, LINE_SEPARATOR, BEGIN_SEPARATOR, END_SEPARATOR) : "";
     }
 
     /**
@@ -278,7 +278,7 @@ public final class CollectionUtils {
      * @return string
      */
     public static String toString(final Collection<?> c, final String lineSep, final String startSep,
-            final String endSep) {
+                                  final String endSep) {
         final StringBuilder sb = new StringBuilder(255);
         toString(sb, c, lineSep, startSep, endSep);
         return sb.toString();
@@ -295,7 +295,10 @@ public final class CollectionUtils {
      * @return buffer (sb)
      */
     public static StringBuilder toString(final StringBuilder sb, final Collection<?> c, final String lineSep,
-            final String startSep, final String endSep) {
+                                         final String startSep, final String endSep) {
+        if (c == null) {
+            return sb;
+        }
         final Iterator<?> it = c.iterator();
 
         sb.append(startSep);
@@ -321,7 +324,7 @@ public final class CollectionUtils {
      * @return string
      */
     public static String toString(final Map<?, ?> m, final String lineSep, final String startSep,
-            final String endSep) {
+                                  final String endSep) {
         final StringBuilder sb = new StringBuilder(255);
         toString(sb, m, lineSep, startSep, endSep);
         return sb.toString();
@@ -339,7 +342,10 @@ public final class CollectionUtils {
      */
     @SuppressWarnings("unchecked")
     public static StringBuilder toString(final StringBuilder sb, final Map<?, ?> m, final String lineSep,
-            final String startSep, final String endSep) {
+                                         final String startSep, final String endSep) {
+        if (m == null) {
+            return sb;
+        }
         final Iterator it = m.entrySet().iterator();
 
         sb.append(startSep);

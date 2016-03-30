@@ -7,4 +7,5 @@ Implementation-URL: http://example.yourcompany.com
 Application-Name: jMCS Demo
 Permissions: all-permissions
 Codebase: http://example.yourcompany.com
+Application-Library-Allowable-Codebase: http://example.yourcompany.com
 Main-Class: com.yourcompany.example.Main

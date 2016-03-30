@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.gui.component;
 
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.service.BrowserLauncher;
@@ -116,40 +117,44 @@ public class ResizableTextViewFactory {
      * @param timeoutMillis timeout in milliseconds to wait before the window is hidden (auto-hide)
      */
     public static void createHtmlWindow(final String html, final String title, final boolean modal, final int timeoutMillis) {
-        SwingUtils.invokeAndWaitEDT(new Runnable() {
-            @Override
-            public void run() {
-                final JDialog dialog = new JDialog(App.getFrame(), title, modal);
-                final JEditorPane editorPane = startLayout(dialog);
+        if (Bootstrapper.isHeadless()) {
+            _logger.info("[Headless] Html Message: {}", html);
+        } else {
+            SwingUtils.invokeAndWaitEDT(new Runnable() {
+                @Override
+                public void run() {
+                    final JDialog dialog = new JDialog(App.getFrame(), title, modal);
+                    final JEditorPane editorPane = startLayout(dialog);
 
-                editorPane.setContentType("text/html");
-                editorPane.addHyperlinkListener(new HyperlinkListener() {
-                    @Override
-                    public void hyperlinkUpdate(HyperlinkEvent event) {
-                        // When a link is clicked
-                        if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                    editorPane.setContentType("text/html");
+                    editorPane.addHyperlinkListener(new HyperlinkListener() {
+                        @Override
+                        public void hyperlinkUpdate(HyperlinkEvent event) {
+                            // When a link is clicked
+                            if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
 
-                            // Get the clicked URL
-                            final URL url = event.getURL();
+                                // Get the clicked URL
+                                final URL url = event.getURL();
 
-                            // If it is valid
-                            if (url != null) {
-                                // Get it in the good format
-                                final String clickedURL = url.toExternalForm();
-                                // Open the url in web browser
-                                BrowserLauncher.openURL(clickedURL);
-                            } else { // Assume it was an anchor
-                                String anchor = event.getDescription();
-                                editorPane.scrollToReference(anchor);
+                                // If it is valid
+                                if (url != null) {
+                                    // Get it in the good format
+                                    final String clickedURL = url.toExternalForm();
+                                    // Open the url in web browser
+                                    BrowserLauncher.openURL(clickedURL);
+                                } else { // Assume it was an anchor
+                                    String anchor = event.getDescription();
+                                    editorPane.scrollToReference(anchor);
+                                }
                             }
                         }
-                    }
-                });
+                    });
 
-                // if modal, blocks until the dialog is closed:
-                finishLayout(editorPane, dialog, html, modal, timeoutMillis);
-            }
-        });
+                    // if modal, blocks until the dialog is closed:
+                    finishLayout(editorPane, dialog, html, modal, timeoutMillis);
+                }
+            });
+        }
     }
 
     /**
@@ -176,7 +181,7 @@ public class ResizableTextViewFactory {
      * @param timeoutMillis timeout in milliseconds to wait before the window is hidden (auto-hide)
      */
     private static void finishLayout(final JEditorPane editorPane, final JDialog dialog, final String text,
-                                     final boolean modal, final int timeoutMillis) {
+            final boolean modal, final int timeoutMillis) {
 
         final JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(editorPane);
@@ -258,7 +263,7 @@ public class ResizableTextViewFactory {
 
             message += "<FONT COLOR='" + ((isOpenJDK7) ? "ORANGE" : "RED") + "'>WARNING</FONT> : ";
             message += "Your Java Virtual Machine is an OpenJDK JVM, which may have known bugs (SWING look and feel,"
-                    + " fonts, PDF issues...) on several Linux distributions." + "<BR><BR>";
+                    + " fonts, time zones, PDF issues...) on several Linux distributions." + "<BR><BR>";
 
             if (isOpenJDK7) {
                 // If OpenJDK 1.7+, set auto-hide delay to 5s:
@@ -303,7 +308,7 @@ public class ResizableTextViewFactory {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            _logger.info("CloseWindowAction called.");
+            _logger.debug("CloseWindowAction called.");
 
             if (_window.isVisible()) {
                 // trigger standard closing action (@see JFrame.setDefaultCloseOperation)

@@ -27,12 +27,17 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.gui.util;
 
+import fr.jmmc.jmcs.App;
+import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 /**
  * This class is dedicated to EDT invoke methods and simplify GUI code
- * @author bourgesl
+ *
+ * @author Laurent BOURGES.
  */
 public final class SwingUtils {
 
@@ -41,6 +46,25 @@ public final class SwingUtils {
      */
     private SwingUtils() {
         super();
+    }
+
+    /**
+     * Returns the first <code>JFrame</code> ancestor of <code>c</code>, or
+     * App.getFrame() if <code>c</code> is not contained inside a <code>JFrame</code>.
+     *
+     * @param c <code>Component</code> to get <code>JFrame</code> ancestor
+     *        of.
+     * @return the first <code>JFrame</code> ancestor of <code>c</code>, or
+     *         App.getFrame() if <code>c</code> is not contained inside a
+     *         <code>JFrame</code>.
+     */
+    public static JFrame getParentFrame(final JComponent c) {
+        final Window w = SwingUtilities.getWindowAncestor(c);
+        if (w instanceof JFrame) {
+            return (JFrame) w;
+        }
+        // null or not JFrame
+        return App.getFrame();
     }
 
     /**

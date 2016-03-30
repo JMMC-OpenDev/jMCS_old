@@ -404,7 +404,7 @@ public final class ThreadExecutors {
 
         getExecutor().shutdown();
 
-        boolean terminated = false;
+        boolean terminated;
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("ThreadExecutors.stop : waiting for termination [{} s] : {}", SHUTDOWN_DELAY, getPoolName());

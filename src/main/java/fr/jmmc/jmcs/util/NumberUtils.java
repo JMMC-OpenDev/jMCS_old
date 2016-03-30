@@ -60,6 +60,58 @@ public final class NumberUtils {
     }
 
     /**
+     * Copied from JDK8:
+     * Returns {@code true} if the argument is a finite floating-point
+     * value; returns {@code false} otherwise (for NaN and infinity
+     * arguments).
+     *
+     * @param value the {@code double} value to be tested
+     * @return {@code true} if the argument is a finite
+     * floating-point value, {@code false} otherwise.
+     */
+    public static boolean isFinite(final float value) {
+        return Math.abs(value) <= Float.MAX_VALUE;
+    }
+
+    /**
+     * Returns {@code true} if the argument is a finite floating-point
+     * value and greater or equals to 0; returns {@code false} otherwise (for negative and NaN and infinity
+     * arguments).
+     * @param value the {@code double} value to be tested
+     * @return {@code true} if the argument is a finite positive
+     * floating-point value, {@code false} otherwise.
+     */
+    public static boolean isFinitePositive(final float value) {
+        return isFinite(value) && (value >= 0f);
+    }
+
+    /**
+     * Copied from JDK8:
+     * Returns {@code true} if the argument is a finite floating-point
+     * value; returns {@code false} otherwise (for NaN and infinity
+     * arguments).
+     *
+     * @param value the {@code double} value to be tested
+     * @return {@code true} if the argument is a finite
+     * floating-point value, {@code false} otherwise.
+     */
+    public static boolean isFinite(final double value) {
+        return Math.abs(value) <= Double.MAX_VALUE;
+    }
+
+    /**
+     * Returns {@code true} if the argument is a finite floating-point
+     * value and greater or equals to 0; returns {@code false} otherwise (for negative and NaN and infinity
+     * arguments).
+     * @param value the {@code double} value to be tested
+     * @return {@code true} if the argument is a finite positive
+     * floating-point value, {@code false} otherwise.
+     */
+    public static boolean isFinitePositive(final double value) {
+        return isFinite(value) && (value >= 0d);
+    }
+
+    /**
      * Adjust the given double value to keep only 3 decimal digits
      * @param value value to adjust
      * @return double value with only 3 decimal digits

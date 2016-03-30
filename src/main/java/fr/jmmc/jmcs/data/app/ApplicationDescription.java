@@ -35,10 +35,11 @@ import fr.jmmc.jmcs.data.app.model.Menubar;
 import fr.jmmc.jmcs.data.app.model.Package;
 import fr.jmmc.jmcs.data.app.model.Program;
 import fr.jmmc.jmcs.data.app.model.Release;
-import fr.jmmc.jmcs.util.jaxb.JAXBFactory;
-import fr.jmmc.jmcs.util.jaxb.XmlBindException;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
+import fr.jmmc.jmcs.util.StringUtils;
+import fr.jmmc.jmcs.util.jaxb.JAXBFactory;
+import fr.jmmc.jmcs.util.jaxb.XmlBindException;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -174,6 +175,44 @@ public final class ApplicationDescription {
     public static boolean isBetaVersion() {
         return getInstance().getProgramVersion().contains("b");
     }
+
+    /**
+     * Parse the application's version string (0.9.4 beta 11 for example) as a float number to be comparable
+     * @param version version as string
+     * @return version number as float
+     */
+    public static float parseVersion(final String version) {
+        float res = 0f;
+
+        // Extract first numeric part '0.'
+        String tmp = version;
+        final String first;
+        
+        int pos = tmp.indexOf('.');
+        if (pos != -1) {
+            pos++;
+            first = tmp.substring(0, pos);
+            tmp = tmp.substring(pos);
+        } else {
+            first = "0.";
+        }
+        
+        // Remove whitespace and '.' in "9.4 beta 11" => "94beta11":
+        tmp = StringUtils.removeNonAlphaNumericChars(tmp);
+
+        // Replace chars by '' in "94beta11" => "9411":
+        tmp = StringUtils.replaceNonNumericChars(tmp, "");
+
+        try {
+            tmp = first + tmp;
+            // parse tmp => 0.9411:
+            res = Float.parseFloat(tmp);
+        } catch (NumberFormatException nfe) {
+            _logger.info("Unable to parse version: {}", version);
+        }
+        return res;
+    }
+
     // Members
     /** internal JAXB Factory */
     private final JAXBFactory _jf;
@@ -201,6 +240,8 @@ public final class ApplicationDescription {
     private String _hotNewsRSSFeedLink = null;
     /** FAQ URL */
     private String _faqLink = null;
+    /** Documentation URL */
+    private String _documentationLink = null;
 
     /**
      * Public constructor
@@ -262,6 +303,9 @@ public final class ApplicationDescription {
         }
         if (_applicationData.isSetRsslink()) {
             _hotNewsRSSFeedLink = _applicationData.getRsslink();
+        }
+        if (_applicationData.isSetDocumentationlink()) {
+            _documentationLink = _applicationData.getDocumentationlink();
         }
 
         _logger.debug("Application data model loaded.");
@@ -328,11 +372,10 @@ public final class ApplicationDescription {
      * @return the value of the "program" element name from the XML file
      */
     public String getProgramName() {
-        Program program = null;
         String programName = "Unknown";
 
         // Get program
-        program = _applicationData.getProgram();
+        final Program program = _applicationData.getProgram();
 
         if (program != null) {
             programName = program.getName();
@@ -347,11 +390,10 @@ public final class ApplicationDescription {
      * @return the value of the "program version" element from the XML file
      */
     public String getProgramVersion() {
-        Program program = null;
         String programVersion = "?.?";
 
         // Get program
-        program = _applicationData.getProgram();
+        final Program program = _applicationData.getProgram();
 
         if (program != null) {
             programVersion = program.getVersion();
@@ -391,20 +433,28 @@ public final class ApplicationDescription {
      * @return the application Hot News RSS feed URL if any, null otherwise.
      */
     public String getHotNewsRSSFeedLinkValue() {
-        _logger.debug("HotNewsRSSFeedLink: {}", _hotNewsRSSFeedLink);
+        _logger.debug("HotNewsRSSFeedLink value is: {}", _hotNewsRSSFeedLink);
 
         return _hotNewsRSSFeedLink;
+    }
+
+    /**
+     * @return the application Documentation URL if any, null otherwise.
+     */
+    public String getDocumentationLinkValue() {
+        _logger.debug("DocumentationLink value is: {}", _documentationLink);
+
+        return _documentationLink;
     }
 
     /**
      * @return the value of the element compilation date from the XML file
      */
     public String getCompilationDate() {
-        Compilation compilation = null;
         String compilationDate = "Unknown";
 
         // Get compilation
-        compilation = _applicationData.getCompilation();
+        final Compilation compilation = _applicationData.getCompilation();
 
         if (compilation != null) {
             compilationDate = compilation.getDate();
@@ -418,11 +468,10 @@ public final class ApplicationDescription {
      * @return the value of the element compiler version from the XML file
      */
     public String getCompilatorVersion() {
-        Compilation compilation = null;
         String compilationCompilator = "Unknown";
 
         // Get compilation
-        compilation = _applicationData.getCompilation();
+        final Compilation compilation = _applicationData.getCompilation();
 
         if (compilation != null) {
             compilationCompilator = compilation.getCompiler();
@@ -461,9 +510,8 @@ public final class ApplicationDescription {
      * @return Forge the "copyright" text used in the AboutBox
      */
     public String getCopyrightValue() {
-        int year = 0;
-        String compilationDate = getCompilationDate();
-
+        final String compilationDate = getCompilationDate();
+        int year;
         try {
             // Try to get the year from the compilation date
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -515,13 +563,6 @@ public final class ApplicationDescription {
      */
     public String getSampDescription() {
         return _applicationData.getSampdescription();
-    }
-
-    /**
-     * @return Application documentation URL if any, null otherwise.
-     */
-    public String getDocumetationUrl() {
-        return _applicationData.getDocumentationlink();
     }
 
     public String getJnlpUrl() {

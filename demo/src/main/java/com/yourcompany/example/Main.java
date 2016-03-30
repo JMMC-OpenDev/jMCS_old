@@ -49,9 +49,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JPanel;
 import org.astrogrid.samp.Message;
 import org.astrogrid.samp.SampUtils;
 import org.slf4j.Logger;
@@ -67,7 +65,7 @@ public class Main extends App {
     /** Button to open jMCS web site in the default web browser */
     private JButton _openBrowserButton = null;
     /** Actions class */
-    public RegisteredAction _openAction;
+    private RegisteredAction _openAction;
     /** Test button */
     private JButton _testDismissableMessagePane = null;
     private Actions _actions = null;
@@ -135,7 +133,7 @@ public class Main extends App {
         // Add buttons to panel
         framePanel.add(_openBrowserButton, BorderLayout.NORTH);
         framePanel.add(_testDismissableMessagePane, BorderLayout.CENTER);
-        framePanel.add(new StatusBar(), BorderLayout.SOUTH);
+        framePanel.add(StatusBar.getInstance(), BorderLayout.SOUTH);
     }
 
     /** Execute application body */

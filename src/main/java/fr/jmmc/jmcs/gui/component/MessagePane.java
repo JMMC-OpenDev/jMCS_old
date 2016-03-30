@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.gui.component;
 
 import fr.jmmc.jmcs.App;
+import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import java.awt.Component;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class provides utility methods to create message panes (message, error) with/without exceptions
- * 
+ *
  * @author Laurent BOURGES, Sylvain LAFRASSE, Guillaume MELLA.
  */
 public final class MessagePane {
@@ -129,7 +130,6 @@ public final class MessagePane {
      * @param th exception to use
      */
     public static void showErrorMessage(final String message, final String title, final Throwable th) {
-
         if (th != null) {
             _logger.error("An exception occured: {}", message, th);
         } else {
@@ -164,7 +164,7 @@ public final class MessagePane {
     }
 
     /**
-     * Show the given message.    
+     * Show the given message.
      * The frame size is limited so long messages appear in a scroll pane.
      * @param message message to display
      * @param title window title to use
@@ -176,17 +176,20 @@ public final class MessagePane {
      *			or <code>PLAIN_MESSAGE</code>
      */
     private static void showMessageDialog(final String message, final String title, final int messageType) {
+        if (Bootstrapper.isHeadless()) {
+            _logger.info("[Headless] Message: {}", message);
+        } else {
+            // display the message within EDT :
+            SwingUtils.invokeAndWaitEDT(new Runnable() {
+                @Override
+                public void run() {
+                    // ensure window is visible (not iconified):
+                    App.showFrameToFront();
 
-        // display the message within EDT :
-        SwingUtils.invokeAndWaitEDT(new Runnable() {
-            @Override
-            public void run() {
-                // ensure window is visible (not iconified):
-                App.showFrameToFront();
-
-                JOptionPane.showMessageDialog(getApplicationFrame(), getMessageComponent(message), title, messageType);
-            }
-        });
+                    JOptionPane.showMessageDialog(getApplicationFrame(), getMessageComponent(message), title, messageType);
+                }
+            });
+        }
     }
 
     // --- WARNING MESSAGES ---------------------------------------------------------
@@ -285,17 +288,17 @@ public final class MessagePane {
 
     /**
      * Show a confirmation dialog to ask if the user wants to save changes before closing the application
-     * @return true if the user wants the file replaced, false otherwise.
+     * @return Save if the user wants to save changes, Cancel or Ignore otherwise.
      */
     public static ConfirmSaveChanges showConfirmSaveChangesBeforeClosing() {
         return showConfirmSaveChanges("closing");
     }
 
     /**
-     * Show a confirmation dialog to ask if the user wants to save changes before closing the application.
-     * 
+     * Show a confirmation dialog to ask if the user wants to save changes before doing any operation.
+     *
      * @param beforeMessage part of the message inserted after 'before ' ?
-     * @return true if the user wants the file replaced, false otherwise.
+     * @return Save if the user wants to save changes, Cancel or Ignore otherwise.
      */
     public static ConfirmSaveChanges showConfirmSaveChanges(final String beforeMessage) {
         final String message = "Do you want to save changes to this document before "
@@ -335,7 +338,7 @@ public final class MessagePane {
 
     /**
      * Show a confirmation dialog to ask if the user wants to kill SAMP hub while quitting.
-     * 
+     *
      * @return true if the user wants the quit nevertheless, false otherwise.
      */
     public static boolean showConfirmKillHub() {
@@ -397,13 +400,13 @@ public final class MessagePane {
 
         final FutureTask<String> future = new FutureTask<String>(
                 new Callable<String>() {
-            @Override
-            public String call() {
-                // ensure window is visible (not iconified):
-                App.showFrameToFront();
-                return JOptionPane.showInputDialog(getApplicationFrame(), getMessageComponent(message), title, JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
+                    @Override
+                    public String call() {
+                        // ensure window is visible (not iconified):
+                        App.showFrameToFront();
+                        return JOptionPane.showInputDialog(getApplicationFrame(), getMessageComponent(message), title, JOptionPane.INFORMATION_MESSAGE);
+                    }
+                });
 
         SwingUtils.invokeEDT(future);
 
@@ -442,8 +445,8 @@ public final class MessagePane {
         return App.getFrame();
     }
 
-    /** 
-     * Return the smallest component that would display given message in a dialog frame. 
+    /**
+     * Return the smallest component that would display given message in a dialog frame.
      * If the message is too big, one limited size scroll pane is used for display.
      * @param message string that will be wrapped if too long
      * @return the component which can be given to JOptionPane methods.
@@ -461,7 +464,7 @@ public final class MessagePane {
         scrollPane.setMaximumSize(dims);
         scrollPane.setPreferredSize(dims);
 
-        // Show scrollpane only when needed        
+        // Show scrollpane only when needed
         final boolean textAreaBackgroundShouldBeOpaque = (textAreaWidth > finalWidth) || (textAreaHeight > finalHeight);
         textArea.setOpaque(textAreaBackgroundShouldBeOpaque);
         scrollPane.setOpaque(textAreaBackgroundShouldBeOpaque);

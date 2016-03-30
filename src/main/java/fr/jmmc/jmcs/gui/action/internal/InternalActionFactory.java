@@ -38,6 +38,7 @@ import fr.jmmc.jmcs.gui.action.ShowReleaseNotesAction;
 import fr.jmmc.jmcs.gui.component.ResizableTextViewFactory;
 import fr.jmmc.jmcs.logging.LogbackGui;
 import fr.jmmc.jmcs.gui.util.ResourceImage;
+import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
@@ -213,7 +214,6 @@ public class InternalActionFactory {
          * @param fieldName the name of the field pointing to the action.
          */
         ShowAboutBoxAction(String classPath, String fieldName) {
-
             super(classPath, fieldName, "About...");
             _applicationData = ApplicationDescription.getInstance();
         }
@@ -226,12 +226,18 @@ public class InternalActionFactory {
         public void actionPerformed(ActionEvent evt) {
             if (_aboutBox != null) {
                 if (!_aboutBox.isVisible()) {
+                    // Center window on main screen
+                    WindowUtils.centerOnMainScreen(_aboutBox);
+                    
                     _aboutBox.setVisible(true);
                 } else {
                     _aboutBox.toFront();
                 }
             } else {
                 _aboutBox = new AboutBox();
+
+                // Center window on main screen
+                WindowUtils.centerOnMainScreen(_aboutBox);
             }
         }
     }
@@ -405,6 +411,7 @@ public class InternalActionFactory {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
+        private String _documentationURL = null;
 
         /**
          * Public constructor
@@ -414,12 +421,18 @@ public class InternalActionFactory {
          */
         ShowHelpAction(String classPath, String fieldName) {
             super(classPath, fieldName, "User Manual");
-            setEnabled(HelpView.isAvailable());
 
             // Set Icon only if not under Mac OS X
             if (!SystemUtils.IS_OS_MAC_OSX) {
                 final ImageIcon helpIcon = ResourceImage.HELP_ICON.icon();
                 putValue(SMALL_ICON, helpIcon);
+            }
+
+            // If Documentation web page URL not provided
+            _documentationURL = ApplicationDescription.getInstance().getDocumentationLinkValue();
+            if (_documentationURL == null) {
+                // Try embedded HelpSet instead
+                setEnabled(HelpView.isAvailable());
             }
         }
 
@@ -429,7 +442,11 @@ public class InternalActionFactory {
          */
         @Override
         public void actionPerformed(ActionEvent evt) {
-            HelpView.setVisible(true);
+            if (_documentationURL != null) {
+                BrowserLauncher.openURL(_documentationURL);
+            } else {
+                HelpView.setVisible(true);
+            }
         }
     }
 

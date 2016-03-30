@@ -30,9 +30,14 @@ jMCS uses `maven` to build from sources. Please type the following commands:
 
 ```
 git clone https://github.com/JMMC-OpenDev/jMCS.git
-cd jMCS
-mvn install:install-file -Dfile=lib/AppleJavaExtensions-1.6.jar -DgroupId=apple -DartifactId=AppleJavaExtensions -Dversion=1.6 -Dpackaging=jar
-mvn install:install-file -Dfile=lib/jsamp-1.3-4+.jar -DgroupId=org.astrogrid -DartifactId=jsamp -Dversion=1.3.4+ -Dpackaging=jar
+
+
+# first time only: install parent-pom and missing libraries in maven repositories:
+cd jMCS/parent-pom
+mvn -Dassembly.skipAssembly -Djarsigner.skip=true clean install
+cd ..
+mvn process-resources
+# build jMCS jar files
 mvn clean package
 ```
 

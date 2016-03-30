@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.util;
 
 import fr.jmmc.jmcs.data.MimeType;
+import fr.jmmc.jmcs.gui.component.StatusBar;
 import fr.jmmc.jmcs.network.http.Http;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -48,6 +49,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
@@ -532,6 +534,32 @@ public final class FileUtils {
     }
 
     /**
+     * Unzip source file into destination one.
+     *
+     * @param src source file to be unzipped
+     * @param dst destination file corresponding to the unzipped source file
+     * @throws IOException if an I/O exception occurred
+     * @throws FileNotFoundException if input file is not found
+     */
+    public static void unzip(final File src, final File dst) throws IOException, FileNotFoundException {
+        final InputStream in = new GZIPInputStream(new FileInputStream(src));
+        final OutputStream out = new BufferedOutputStream(new FileOutputStream(dst), 64 * 1024);
+
+        // Transfer bytes from in to out
+        try {
+            final byte[] buf = new byte[8 * 1024];
+
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+        } finally {
+            closeStream(in);
+            closeStream(out);
+        }
+    }
+
+    /**
      * Copy the input file to output file
      *
      * @param in input file
@@ -726,7 +754,7 @@ public final class FileUtils {
      * Warning: calling this method may block the current thread for long time (slow transfer or big file or timeout)
      * Please take care of using it properly using a cancellable SwingWorker (Cancellable background task)
      *
-     * @param remoteLocation, String defaultParentDir remote location
+     * @param remoteLocation remote location
      * @param parentDir destination directory
      * @param mimeType mime type to fix missing file extension
      * @return a copy of the remote file
@@ -734,12 +762,11 @@ public final class FileUtils {
      * @throws URISyntaxException if given fileLocation  is invalid
      */
     public static File retrieveRemoteFile(final String remoteLocation,
-            final String parentDir,
-            final MimeType mimeType) throws IOException, URISyntaxException {
+                                          final String parentDir,
+                                          final MimeType mimeType) throws IOException, URISyntaxException {
 
         // TODO improve handling of existing files (do we have to warn the user ?)
         // TODO add other remote file scheme (ftp, ssh?)
-
         // assert that parentDir exist
         new File(parentDir).mkdirs();
 
@@ -755,10 +782,15 @@ public final class FileUtils {
         final File localFile = new File(parentDir, name.getName());
 
         if (!localFile.exists()) {
-            Http.download(new URI(remoteLocation), localFile, true);
+            StatusBar.show("downloading file: " + remoteLocation + " ...");
+
+            if (!Http.download(new URI(remoteLocation), localFile, false)) {
+                // http status != 200
+                return null;
+            }
         } else {
             // TODO: use HEAD HTTP method to check remote file date / checksum ...
-            _logger.info("'{}' already present, do not download '{}' again ( please delete it first if it has changed or is not the same one and restart).", localFile, remoteLocation);
+            _logger.info("Use local copy '{}', skip downloading '{}'", localFile, remoteLocation);
         }
 
         return localFile;

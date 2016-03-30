@@ -52,7 +52,7 @@ public final class JAXBFactory {
     /** JAXB implementation 2.1.12 provided in JMCS libraries */
     public static final String JAXB_CONTEXT_FACTORY_IMPLEMENTATION = "com.sun.xml.bind.v2.ContextFactory";
     /** all factories */
-    private static ConcurrentHashMap<String, JAXBFactory> managedInstances = new ConcurrentHashMap<String, JAXBFactory>(4);
+    private static final ConcurrentHashMap<String, JAXBFactory> managedInstances = new ConcurrentHashMap<String, JAXBFactory>(4);
     // Members
     /** JAXB context path : used to find a factory */
     private final String _jaxbPath;
@@ -86,11 +86,9 @@ public final class JAXBFactory {
 
             factory.initialize();
 
-            if (factory != null) {
-                managedInstances.putIfAbsent(jaxbPath, factory);
-                // to be sure to return the singleton :
-                factory = managedInstances.get(jaxbPath);
-            }
+            managedInstances.putIfAbsent(jaxbPath, factory);
+            // to be sure to return the singleton :
+            factory = managedInstances.get(jaxbPath);
         }
 
         return factory;

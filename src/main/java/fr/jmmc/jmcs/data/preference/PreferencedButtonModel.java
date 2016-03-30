@@ -57,7 +57,7 @@ public final class PreferencedButtonModel extends DefaultButtonModel
     /** Class logger */
     private final static Logger _logger = LoggerFactory.getLogger(PreferencedButtonModel.class.getName());
     /** Store PreferencedButtonModel instances for a given preference name */
-    private static Map<String, PreferencedButtonModel> _instanceMap = Collections.synchronizedMap(new HashMap<String, PreferencedButtonModel>(8));
+    private static final Map<String, PreferencedButtonModel> _instanceMap = Collections.synchronizedMap(new HashMap<String, PreferencedButtonModel>(8));
     /* members */
     /** Shared instance */
     private final Preferences _preferences;
@@ -140,8 +140,8 @@ public final class PreferencedButtonModel extends DefaultButtonModel
 
     /**
      * Triggered if the preference shared instance has been modified.
-     * @param o
-     * @param arg  
+     * @param o the Observable object
+     * @param arg parameter
      */
     @Override
     public void update(final Observable o, final Object arg) {

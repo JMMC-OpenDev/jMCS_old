@@ -51,6 +51,7 @@ import fr.jmmc.jmcs.util.IntrospectionUtils;
 import fr.jmmc.jmcs.util.MCSExceptionHandler;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.jmcs.util.runner.LocalLauncher;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -91,6 +92,8 @@ public final class Bootstrapper {
     private static ApplicationState _applicationState = ApplicationState.JAVA_LIMB;
     /** The application  instance */
     private static App _application = null;
+    /** Flag to indicate headless mode */
+    private static int _isHeadless = -1;
 
     /**
      * Static Logger initialization and Network settings
@@ -116,7 +119,7 @@ public final class Bootstrapper {
         // Set System properties
         // note: it calls: System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
         // Must be set before any call to Collections or Arrays.sort(Object[]) that use that property once
-        // ie before initializing Logs because it calls Collections.sort in LoggerContext.getLoggerList:195	
+        // ie before initializing Logs because it calls Collections.sort in LoggerContext.getLoggerList:195
         setSystemProperties();
 
         // Initialize Locale.US
@@ -217,6 +220,26 @@ public final class Bootstrapper {
     }
 
     /**
+     * @return Flag to indicate headless mode
+     */
+    public static boolean isHeadless() {
+        if (_isHeadless == -1) {
+            // Check headless mode ONCE (may be a costly operation):
+            _isHeadless = (GraphicsEnvironment.isHeadless()) ? 1 : 0;
+        }
+
+        return (_isHeadless == 1);
+    }
+
+    /**
+     * Force the headless mode from API
+     */
+    public static void forceHeadless() {
+        _jmmcLogger.info("force Headless mode.");
+        _isHeadless = 1;
+    }
+
+    /**
      * Launch an application that will:
      * - execute directly after services initialization and GUI setup;
      * - trap and properly exit on main frame close button click;
@@ -272,10 +295,10 @@ public final class Bootstrapper {
      * @param shouldShowSplashScreen show startup splash screen if true, nothing otherwise.
      *
      * @return true on success, false otherwise.
-     * @throws IllegalStateException
+     * @throws IllegalStateException TBD
      */
     public static boolean launchApp(final App application, final boolean waitBeforeExecution, final boolean exitWhenClosed,
-                                    final boolean shouldShowSplashScreen) throws IllegalStateException {
+            final boolean shouldShowSplashScreen) throws IllegalStateException {
 
         return ___internalLaunch(application, exitWhenClosed, shouldShowSplashScreen);
     }
@@ -307,14 +330,14 @@ public final class Bootstrapper {
 
             _application.___internalStart();
 
+            SplashScreen.display(shouldShowSplashScreen && !isHeadless());
+
             // Build Acknowledgment, ShowRelease and ShowHelp Actions
             // (the creation must be done after applicationModel instanciation)
             ActionRegistrar.getInstance().createAllInternalActions();
 
             setState(ApplicationState.APP_INIT);
-            application.initServices();
-
-            SplashScreen.display(shouldShowSplashScreen);
+            _application.initServices();
 
             ___internalRun();
 
@@ -345,8 +368,16 @@ public final class Bootstrapper {
             }
             /* use invokeAndWaitEDT ie blocking the current thread */
             FeedbackReport.openDialog(true, throwable);
-        }
 
+        } finally {
+            if (isHeadless()) {
+                _jmmcLogger.info("Unable to start the GUI application [{}] (headless mode enabled) !",
+                        _application.getClass().getSimpleName());
+
+                // Exit the application anyway:
+                Bootstrapper.stopApp(-1);
+            }
+        }
         return launchDone;
     }
 
@@ -364,7 +395,6 @@ public final class Bootstrapper {
              */
             @Override
             public void run() {
-
                 // If running under Mac OS X
                 if (SystemUtils.IS_OS_MAC_OSX) {
                     // Set application name
@@ -378,24 +408,27 @@ public final class Bootstrapper {
                 setState(ApplicationState.GUI_SETUP);
                 _application.setupGui();
 
-                // Initialize SampManager as needed by MainMenuBar:
-                SampManager.getInstance();
-                // Declare SAMP message handlers first:
-                _application.declareInteroperability();
-                // Perform defered action initialization (SAMP-related actions)
-                ActionRegistrar.getInstance().performDeferedInitialization();
+                if (!isHeadless()) {
+                    // Disabled SAMP in shell mode: (runHub needs GUI):
+                    // Initialize SampManager as needed by MainMenuBar:
+                    SampManager.getInstance();
+                    // Declare SAMP message handlers first:
+                    _application.declareInteroperability();
+                    // Perform defered action initialization (SAMP-related actions)
+                    ActionRegistrar.getInstance().performDeferedInitialization();
 
-                // Define the JFrame associated to the application which will get the JMenuBar
-                final JFrame frame = App.getFrame();
+                    // Define the JFrame associated to the application which will get the JMenuBar
+                    final JFrame frame = App.getFrame();
 
-                // Define OSXAdapter (menu bar integration)
-                macOSXRegistration();
-                // Create menus including the Interop menu (SAMP required)
-                frame.setJMenuBar(new MainMenuBar());
-                // Set application frame ideal size
-                frame.pack();
-                // Restore, then automatically save window size changes
-                WindowUtils.rememberWindowSize(frame, MAIN_FRAME_DIMENSION_KEY);
+                    // Define OSXAdapter (menu bar integration)
+                    macOSXRegistration();
+                    // Create menus including the Interop menu (SAMP required)
+                    frame.setJMenuBar(new MainMenuBar());
+                    // Set application frame ideal size
+                    frame.pack();
+                    // Restore, then automatically save window size changes
+                    WindowUtils.rememberWindowSize(frame, MAIN_FRAME_DIMENSION_KEY);
+                }
             }
         });
 
@@ -406,6 +439,9 @@ public final class Bootstrapper {
 
         // Delegate execution to daughter class through abstract execute() call
         _application.execute();
+
+        // Process command line:
+        _application.___internalProcessCommandLine();
 
         // Optionally Open given File:
         _application.openCommandLineFile();
@@ -475,7 +511,7 @@ public final class Bootstrapper {
         }
 
         // If we are ready to stop application execution
-        if (_application.canBeTerminatedNow()) {
+        if (_application == null || _application.canBeTerminatedNow()) {
             _jmmcLogger.debug("Application should be killed.");
 
             // Verify if we are authorized to kill the application or not
@@ -566,6 +602,9 @@ public final class Bootstrapper {
     private static void ___internalStop() {
         _jmmcLogger.info("Stopping internal services ...");
         try {
+            // Save common settings if needed:
+            CommonPreferences.saveToFileIfNeeded();
+            
             // Save session settings if needed:
             SessionSettingsPreferences.saveToFileIfNeeded();
 

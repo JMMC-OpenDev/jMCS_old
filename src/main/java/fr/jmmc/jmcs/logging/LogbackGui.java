@@ -108,6 +108,9 @@ public final class LogbackGui extends javax.swing.JPanel implements TreeSelectio
                 _guiFrameSingleton.setState(Frame.NORMAL);
             }
 
+            // Center it :
+            WindowUtils.centerOnMainScreen(_guiFrameSingleton);
+
             // force the frame to be visible and bring it to front
             _guiFrameSingleton.setVisible(true);
             _guiFrameSingleton.toFront();

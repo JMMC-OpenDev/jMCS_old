@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is a customization of the standard SwingWorker to have a single
- * thread only processing workers because our computations require serialization
+ * thread (or few threads) only processing workers because our computations require serialization
  * and cancellation
  *
  * @author Guillaume MELLA, Laurent BOURGES.
@@ -50,6 +50,8 @@ public final class TaskSwingWorkerExecutor {
 
     /** Class logger */
     private static final Logger _logger = LoggerFactory.getLogger(TaskSwingWorkerExecutor.class.getName());
+    /** default number of threads = 1 */
+    private final static int DEFAULT_N_THREADS = 1;
     /** flag to log debugging information */
     private final static boolean DEBUG_FLAG = false;
     /** singleton instance */
@@ -57,16 +59,24 @@ public final class TaskSwingWorkerExecutor {
     /** running worker counter */
     private final static AtomicInteger _runningWorkerCounter = new AtomicInteger(0);
     // members
-    /** Single threaded thread pool */
+    /** thread pool */
     private final ExecutorService _executorService;
     /** Current (or old) worker atomic reference for all tasks */
     private final Map<String, AtomicReference<TaskSwingWorker<?>>> _currentTaskWorkers;
 
     /**
-     * Start the TaskSwingWorkerExecutor
+     * Start the TaskSwingWorkerExecutor using a single thread pool
      */
     public static void start() {
         getInstance();
+    }
+
+    /**
+     * Start the TaskSwingWorkerExecutor
+     * @param nThreads number of threads to create in the fixed thread pool
+     */
+    public static void start(final int nThreads) {
+        getInstance(nThreads);
     }
 
     /**
@@ -88,9 +98,19 @@ public final class TaskSwingWorkerExecutor {
      *
      * @return TaskSwingWorkerExecutor
      */
-    private static synchronized TaskSwingWorkerExecutor getInstance() {
+    private static TaskSwingWorkerExecutor getInstance() {
+        return getInstance(DEFAULT_N_THREADS);
+    }
+
+    /**
+     * This code returns the singleton instance.
+     *
+     * @param nThreads number of threads to create in the fixed thread pool
+     * @return TaskSwingWorkerExecutor
+     */
+    private static synchronized TaskSwingWorkerExecutor getInstance(final int nThreads) {
         if (_instance == null) {
-            _instance = new TaskSwingWorkerExecutor();
+            _instance = new TaskSwingWorkerExecutor(nThreads);
 
             if (DEBUG_FLAG) {
                 _logger.info("created SwingWorkerExecutor: {}", _instance);
@@ -129,7 +149,7 @@ public final class TaskSwingWorkerExecutor {
     public static boolean isTaskRunning() {
         return _runningWorkerCounter.get() > 0;
     }
-    
+
     /**
      * Increment the counter of running worker
      */
@@ -154,15 +174,16 @@ public final class TaskSwingWorkerExecutor {
 
     /**
      * Private constructor
+     * @param nThreads number of threads to create in the fixed thread pool
      */
-    private TaskSwingWorkerExecutor() {
+    private TaskSwingWorkerExecutor(final int nThreads) {
         super();
 
         // Use an unsynchronized Map as map modifications are only made by Swing EDT (put) :
         _currentTaskWorkers = new HashMap<String, AtomicReference<TaskSwingWorker<?>>>(16);
 
-        // Prepare the custom executor service with a single thread :
-        _executorService = new SwingWorkerSingleThreadExecutor(this);
+        // Prepare the custom executor service with the given number of threads:
+        _executorService = new SwingWorkerThreadExecutor(nThreads, this);
     }
 
     /**
@@ -174,7 +195,7 @@ public final class TaskSwingWorkerExecutor {
 
     /**
      * Schedules the given {@code TaskSwingWorker} for execution on a
-     * <i>worker</i> thread. There is a Single <i>worker</i> thread available.
+     * <i>worker</i> thread. There is typically a Single <i>worker</i> thread available.
      * In the event the <i>worker</i> thread is busy handling other
      * {@code SwingWorkers} the given {@code SwingWorker} is placed in a waiting
      * queue. NOTE : No synchronization HERE as it must be called from Swing EDT
@@ -239,8 +260,8 @@ public final class TaskSwingWorkerExecutor {
                 _logger.debug("cancel worker = {}", currentWorker);
 
                 // note : if the worker was previously cancelled, it has no effect.
-                // interrupt the thread to have Thread.isInterrupted() == true :
-                currentWorker.cancel(true);
+                // Interrupt the thread to have Thread.isInterrupted() == true :
+                currentWorker.doCancel();
             }
         }
         return cancelled;
@@ -318,22 +339,24 @@ public final class TaskSwingWorkerExecutor {
     }
 
     /**
-     * Single threaded Swing Worker executor
+     * Custom Swing Worker executor
      */
-    private static final class SwingWorkerSingleThreadExecutor extends FixedThreadPoolExecutor {
+    private static final class SwingWorkerThreadExecutor extends FixedThreadPoolExecutor {
 
         // members
         /** TaskSwingWorkerExecutor reference for clearWorker callback */
         private final TaskSwingWorkerExecutor _executor;
 
         /**
-         * Create a single threaded Swing Worker executor
+         * Create a Swing Worker executor
          *
-         * @param executor TaskSwingWorkerExecutor reference for clearWorker
-         * callback
+         * @param nThreads number of threads to create in the fixed thread pool
+         * @param executor TaskSwingWorkerExecutor reference for clearWorker callback
          */
-        protected SwingWorkerSingleThreadExecutor(final TaskSwingWorkerExecutor executor) {
-            super(1, new SwingWorkerThreadFactory());
+        protected SwingWorkerThreadExecutor(final int nThreads, final TaskSwingWorkerExecutor executor) {
+            super(nThreads, new SwingWorkerThreadFactory());
+
+            _logger.info("SwingWorkerThreadExecutor ready with {} threads", getMaximumPoolSize());
 
             _executor = executor;
         }
@@ -356,6 +379,11 @@ public final class TaskSwingWorkerExecutor {
         protected void beforeExecute(final Thread t, final Runnable r) {
             if (DEBUG_FLAG) {
                 _logger.info("beforeExecute: {}", r);
+            }
+            if (r instanceof TaskSwingWorker<?>) {
+                final TaskSwingWorker<?> worker = (TaskSwingWorker<?>) r;
+                // define the thread name:
+                worker.setThreadName(t.getName());
             }
         }
 
@@ -394,6 +422,9 @@ public final class TaskSwingWorkerExecutor {
             }
             if (r instanceof TaskSwingWorker<?>) {
                 final TaskSwingWorker<?> worker = (TaskSwingWorker<?>) r;
+                // reset the thread name:
+                worker.setThreadName(null);
+
                 if (!worker.isCancelled()) {
                     _executor.clearWorker(worker);
                 }

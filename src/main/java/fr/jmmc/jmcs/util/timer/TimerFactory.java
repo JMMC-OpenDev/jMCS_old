@@ -333,7 +333,7 @@ public final class TimerFactory {
             } else {
                 final StringBuilder sb = new StringBuilder(1024);
                 for (final AbstractTimer timer : _timerList) {
-                    sb.append("\n");
+                    sb.append('\n');
                     timer.toString(sb, true);
                 }
                 res = sb.toString();

@@ -287,7 +287,7 @@ public final class SessionSettingsPreferences extends Preferences {
             _logger.error("Could not store dimension '{}' for key '{}' in preference", dimension, key, pe);
         }
 
-        _logger.debug("saveDimension('" + key + "') = " + dimension);
+        _logger.debug("saveDimension('{}') = {}", key, dimension);
     }
 
     private static String computeDimensionKey(final String key) {

@@ -27,6 +27,7 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.data.preference;
 
+import edu.stanford.ejalbert.launching.IBrowserLaunching;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,17 +49,13 @@ public final class CommonPreferences extends Preferences {
     public static final String FEEDBACK_REPORT_USER_EMAIL = "feedback_report.user_email";
     /** Name of the preference which stores the flag to display or not the splash screen */
     public static final String SHOW_STARTUP_SPLASHSCREEN = "startup.splashscreen.show";
-
+    /** Name of the preference which stores the user selected browser */
+    public static final String WEB_BROWSER = "web.browser";
     /* Proxy settings */
     /** HTTP proxy host */
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
     /** HTTP proxy port */
     public static final String HTTP_PROXY_PORT = "http.proxyPort";
-
-    /** Private constructor that must be empty. */
-    private CommonPreferences() {
-        super();
-    }
 
     /**
      * Return the singleton instance of CommonPreferences.
@@ -77,6 +74,24 @@ public final class CommonPreferences extends Preferences {
     }
 
     /**
+     * Try to save the preferences to file if needed.
+     */
+    public static void saveToFileIfNeeded() {
+        if (_singleton != null) {
+            try {
+                _singleton.saveToFile();
+            } catch (PreferencesException pe) {
+                _logger.warn("Could not save common preferences", pe);
+            }
+        }
+    }
+
+    /** Private constructor that must be empty. */
+    private CommonPreferences() {
+        super();
+    }
+
+    /**
      * Define the default properties used to reset default preferences.
      * @throws PreferencesException if any preference value has a unsupported class type
      */
@@ -84,9 +99,10 @@ public final class CommonPreferences extends Preferences {
     protected void setDefaultPreferences() throws PreferencesException {
         // Display the splash screen during app launch.
         setDefaultPreference(SHOW_STARTUP_SPLASHSCREEN, true);
+        setDefaultPreference(FEEDBACK_REPORT_USER_EMAIL, "");
+        setDefaultPreference(WEB_BROWSER, IBrowserLaunching.BROWSER_DEFAULT);
         setDefaultPreference(HTTP_PROXY_HOST, "");
         setDefaultPreference(HTTP_PROXY_PORT, "");
-        setDefaultPreference(FEEDBACK_REPORT_USER_EMAIL, "");
     }
 
     /**
@@ -112,10 +128,7 @@ public final class CommonPreferences extends Preferences {
      * @param args CLI parameters.
      */
     public static void main(String[] args) {
-        try {
-            CommonPreferences.getInstance().saveToFile();
-        } catch (PreferencesException pe) {
-            _logger.error("Property failure: ", pe);
-        }
+        CommonPreferences.getInstance();
+        saveToFileIfNeeded();
     }
 }

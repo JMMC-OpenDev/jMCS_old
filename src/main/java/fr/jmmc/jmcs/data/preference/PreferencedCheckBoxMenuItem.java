@@ -43,9 +43,9 @@ public class PreferencedCheckBoxMenuItem extends JCheckBoxMenuItem implements Ob
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1L;
     /** Menu item corresponding preference property */
-    private String _preferenceProperty;
+    private final String _preferenceProperty;
     /** Shared instance */
-    private Preferences _preferences;
+    private final Preferences _preferences;
 
     /**
      * PreferencedCheckBoxMenuItem constructor
@@ -89,8 +89,8 @@ public class PreferencedCheckBoxMenuItem extends JCheckBoxMenuItem implements Ob
 
     /**
      * Triggered if the preference shared instance has been modified.
-     * @param o
-     * @param arg  
+     * @param o the Observable object
+     * @param arg parameter
      */
     @Override
     public void update(Observable o, Object arg) {

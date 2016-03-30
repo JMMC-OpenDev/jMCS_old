@@ -52,7 +52,7 @@ public abstract class PropertyUtils {
     /** Flag to indicate whether the resource bundle is resolved or not */
     private static boolean _resolved = false;
     /** Store whether the execution platform is a Mac or not */
-    private static boolean MAC_OS_X = SystemUtils.IS_OS_MAC_OSX;
+    private static final boolean MAC_OS_X = SystemUtils.IS_OS_MAC_OSX;
 
     /**
      * Indicates the property file where informations will be extracted.

@@ -28,26 +28,28 @@
 package fr.jmmc.jmcs.util;
 
 import ch.qos.logback.classic.Level;
+import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
+import fr.jmmc.jmcs.data.ArgumentDefinition;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.logging.LogbackGui;
 import fr.jmmc.jmcs.logging.LoggingService;
+import fr.jmmc.jmcs.util.runner.EmptyJobListener;
+import fr.jmmc.jmcs.util.runner.JobListener;
+import fr.jmmc.jmcs.util.runner.LocalLauncher;
+import fr.jmmc.jmcs.util.runner.RootContext;
 import gnu.getopt.Getopt;
 import gnu.getopt.LongOpt;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import fr.jmmc.jmcs.util.runner.EmptyJobListener;
-import fr.jmmc.jmcs.util.runner.JobListener;
-import fr.jmmc.jmcs.util.runner.LocalLauncher;
-import fr.jmmc.jmcs.util.runner.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper on http://code.google.com/p/vo-urp/ task runner.
- * 
+ *
  * @author Sylvain LAFRASSE, Laurent BOURGES.
  */
 public final class CommandLineUtils {
@@ -65,7 +67,7 @@ public final class CommandLineUtils {
 
     /**
      * Launch the given command-line path application in background.
-     * 
+     *
      * @param cliPath command-line path to launch the application (simple one without arguments only)
      * @return the job context identifier
      * @throws IllegalStateException if the job can not be submitted to the job queue
@@ -76,7 +78,7 @@ public final class CommandLineUtils {
 
     /**
      * Launch the given command-line path application in background.
-     * 
+     *
      * @param cliPath command-line path to launch the application (simple one without arguments only)
      * @param jobListener job event listener (not null)
      * @return the job context identifier
@@ -111,11 +113,13 @@ public final class CommandLineUtils {
      * @param args raw arguments string.
      * @param customArguments custom argument definition : map storing a boolean (true for a required value,
      *                        false for a simple flag) keyed by desired custom argument name).
-     * @param customHelp arguments.
      * @return the map of parsed custom arguments keyed by argument names if any, null otherwise.
      */
-    public static Map<String, String> interpretArguments(final String[] args, final Map<String, Boolean> customArguments,
-            final String customHelp) {
+    public static Map<String, String> interpretArguments(final String[] args, final Map<String, ArgumentDefinition> customArguments) {
+        // Just leave method if no argument has been given
+        if (args == null) {
+            return null;
+        }
 
         // List received arguments
         if (_logger.isDebugEnabled()) {
@@ -123,12 +127,7 @@ public final class CommandLineUtils {
                 _logger.debug("args[{}] = '{}'.", i, args[i]);
             }
         }
-
-        // Just leave method if no argument has been given
-        if (args == null) {
-            return null;
-        }
-
+        
         // Define default arguments (help, version, log, open file)
         final List<LongOpt> longOpts = new ArrayList<LongOpt>();
         longOpts.clear();
@@ -139,15 +138,17 @@ public final class CommandLineUtils {
 
         // In case the application needs custom arguments
         for (String argumentName : customArguments.keySet()) {
-            final boolean hasArgument = customArguments.get(argumentName);
-            final int requiredFlag = (hasArgument) ? LongOpt.REQUIRED_ARGUMENT : LongOpt.NO_ARGUMENT;
-            longOpts.add(new LongOpt(argumentName, requiredFlag, null, 'c')); // 'c' means custom
+            final ArgumentDefinition def = customArguments.get(argumentName);
+            final int hasArgument = (def.hasArgument()) ? LongOpt.REQUIRED_ARGUMENT : LongOpt.NO_ARGUMENT;
+            longOpts.add(new LongOpt(argumentName, hasArgument, null, 'c')); // 'c' means custom
         }
 
         // Instantiate the getopt object
         final LongOpt[] longOptArray = new LongOpt[longOpts.size()];
         longOpts.toArray(longOptArray);
         final ApplicationDescription applicationDescription = ApplicationDescription.getInstance();
+
+        // Parse arguments:
         final Getopt getOpt = new Getopt(applicationDescription.getProgramName(), args, "hv:", longOptArray, true);
 
         /** Temporary store the command line arguments (long opt = value) */
@@ -162,7 +163,7 @@ public final class CommandLineUtils {
             switch (c) {
                 // Show the arguments help
                 case 'h':
-                    showArgumentsHelp(customHelp);
+                    showArgumentsHelp(customArguments);
                     break;
 
                 // Show the name and the version of the program
@@ -210,14 +211,14 @@ public final class CommandLineUtils {
                         } else if (arg.equals("5")) {
                             jmmcLogger.setLevel(Level.ALL);
                         } else {
-                            showArgumentsHelp(customHelp);
+                            showArgumentsHelp(customArguments);
                         }
                     }
                     break;
 
                 // Show the arguments help
                 case '?':
-                    showArgumentsHelp(customHelp);
+                    showArgumentsHelp(customArguments);
                     break;
 
                 // Custom argument case
@@ -236,27 +237,38 @@ public final class CommandLineUtils {
             }
         }
 
-        _logger.debug("Application arguments interpreted");
+        _logger.debug("Application arguments interpreted: {}", parsedArgumentValues);
         return (parsedArgumentValues.size() > 0 ? parsedArgumentValues : null);
     }
 
     /** Show command arguments help. */
-    private static void showArgumentsHelp(final String customHelp) {
+    public static void showArgumentsHelp(final Map<String, ArgumentDefinition> customArguments) {
         System.out.println("---------------------------------- Arguments help ------------------------------");
         System.out.println("| Key          Value           Description                                     |");
         System.out.println("|------------------------------------------------------------------------------|");
         System.out.println("| [-h]                         Show the options help                           |");
+        System.out.println("| [-h|-help]                   Show arguments help                             |");
         System.out.println("| [-loggui]                    Show the logging tool                           |");
         System.out.println("| [-v]         [0|1|2|3|4|5]   Define console logging level                    |");
         System.out.println("| [-version]                   Show application name and version               |");
-        System.out.println("| [-h|-help]                   Show arguments help                             |");
+        System.out.println("| [-open <file>]               Open the given file (if supported)              |");
         System.out.println("|------------------------------------------------------------------------------|");
 
         // Print custom help if any
-        if ((customHelp != null) && (!customHelp.isEmpty())) {
-            System.out.println(customHelp);
+        if (!customArguments.isEmpty()) {
+            for (String argumentName : customArguments.keySet()) {
+                final ArgumentDefinition def = customArguments.get(argumentName);
+                System.out.print("| [-");
+                System.out.print(def.getName());
+                System.out.print("]                    ");
+                System.out.print(def.getHelp());
+                if (def.getMode() == App.ExecMode.TTY) {
+                    System.out.print(" [SHELL]");
+                }
+                System.out.println("    |");
+            }
+            System.out.println("|------------------------------------------------------------------------------|");
         }
-
         System.out.println("LOG LEVELS : 0 = OFF, 1 = SEVERE, 2 = WARNING, 3 = INFO, 4 = FINE, 5 = ALL\n");
 
         // Exit the application

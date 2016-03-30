@@ -27,30 +27,37 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.network.http;
 
-import fr.jmmc.jmcs.gui.component.MessagePane;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.network.NetworkSettings;
+import static fr.jmmc.jmcs.network.NetworkSettings.getJmmcHttpURI;
+import fr.jmmc.jmcs.network.ProxyConfig;
 import fr.jmmc.jmcs.util.FileUtils;
-import fr.jmmc.jmcs.util.StringUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.HttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.auth.AuthenticationException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,15 +72,14 @@ import org.slf4j.LoggerFactory;
 public final class Http {
 
     /** logger */
-    private final static Logger logger = LoggerFactory.getLogger(Http.class.getName());
-    /** JMMC web to detect proxies */
-    private final static String JMMC_WEB = "http://www.jmmc.fr";
-    /** JMMC socks to detect proxies */
-    private final static String JMMC_SOCKS = "socket://jmmc.fr";
-    /** cached JMMC web URL */
-    private static URI JMMC_WEB_URI = null;
-    /** cached JMMC socks URL */
-    private static URI JMMC_SOCKS_URI = null;
+    private final static Logger _logger = LoggerFactory.getLogger(Http.class.getName());
+
+    /** shared HTTP Client (thread safe) */
+    private static volatile HttpClient _sharedHttpClient = null;
+    /** shared connection manager (thread safe) */
+    private static volatile MultiThreadedHttpConnectionManager _sharedConnectionManager = null;
+    /** shared Http retry handler that disabled http retries */
+    private static final HttpMethodRetryHandler _httpNoRetryHandler = new DefaultHttpMethodRetryHandler(0, false);
 
     /**
      * Forbidden constructor
@@ -91,20 +97,19 @@ public final class Http {
      * @return httpClient instance
      */
     public static HttpClient getHttpClient() {
-        return getHttpClient(getJmmcHttpURI(), true);
+        return getHttpClient(getJmmcHttpURI(), false);
     }
 
     /**
-     * This class returns an HTTP client.
+     * This class returns a single-threaded HTTP client for the associated URI.
      * This client:
-     *  * uses the default proxy configuration (based on http://www.jmmc.fr).
-     *
-     * @param multiThreaded true indicates to create a multi threaded HTTP client
+     *  * uses the default proxy configuration (based on the given uri).
+     * @param uri reference URI used to get the proper proxy
      *
      * @return httpClient instance
      */
-    public static HttpClient getHttpClient(final boolean multiThreaded) {
-        return getHttpClient(getJmmcHttpURI(), multiThreaded);
+    private static HttpClient createNewHttpClient(final URI uri) {
+        return getHttpClient(uri, true);
     }
 
     /**
@@ -113,27 +118,41 @@ public final class Http {
      *  * uses the default proxy configuration (based on http://www.jmmc.fr).
      *  * is thread safe.
      * @param uri reference URI used to get the proper proxy
-     * @param multiThreaded true indicates to create a multi threaded HTTP client
+     * @param useDedicatedClient use one dedicated HttpClient if true (proxy resolver) or the shared multi-threaded one else
      *
      * @todo remove the limit for support of the first proxy.
      *
      * @return httpClient instance
      */
-    private static HttpClient getHttpClient(final URI uri, final boolean multiThreaded) {
-
-        final HttpClient httpClient;
-        if (multiThreaded) {
-            // Create an HttpClient with the MultiThreadedHttpConnectionManager.
+    private static synchronized HttpClient getHttpClient(final URI uri, final boolean useDedicatedClient) {
+        // Create an HttpClient with the MultiThreadedHttpConnectionManager.
+        if (_sharedConnectionManager == null) {
             // This connection manager must be used if more than one thread will
             // be using the HttpClient.
-            httpClient = new HttpClient(new MultiThreadedHttpConnectionManager());
+            _sharedConnectionManager = new MultiThreadedHttpConnectionManager();
+        }
+        final HttpClient httpClient;
+        if (useDedicatedClient) {
+            // create a new client to use custom proxy settings:
+            httpClient = new HttpClient(_sharedConnectionManager);
         } else {
-            httpClient = new HttpClient();
+            if (_sharedHttpClient != null) {
+                // reuse shared http client:
+                return _sharedHttpClient;
+            } else {
+                _sharedHttpClient = httpClient = new HttpClient(_sharedConnectionManager);
+            }
         }
 
         setConfiguration(httpClient);
 
-        httpClient.setHostConfiguration(getProxyConfiguration(uri));
+        // Get Proxy settings for the given URI:
+        final ProxyConfig config = NetworkSettings.getProxyConfiguration(uri);
+        if (config.getHostname() != null) {
+            final HostConfiguration hostConfig = new HostConfiguration();
+            hostConfig.setProxy(config.getHostname(), config.getPort());
+            httpClient.setHostConfiguration(hostConfig);
+        }
 
         return httpClient;
     }
@@ -143,11 +162,7 @@ public final class Http {
      * @param httpClient instance to configure
      */
     private static void setConfiguration(final HttpClient httpClient) {
-        // define timeout value for allocation of connections from the pool
-        httpClient.getParams().setConnectionManagerTimeout(NetworkSettings.DEFAULT_CONNECT_TIMEOUT);
-
         final HttpConnectionManagerParams httpParams = httpClient.getHttpConnectionManager().getParams();
-
         // define connect timeout:
         httpParams.setConnectionTimeout(NetworkSettings.DEFAULT_CONNECT_TIMEOUT);
         // define read timeout:
@@ -159,29 +174,12 @@ public final class Http {
 
         // set content-encoding to UTF-8 instead of default ISO-8859
         final HttpClientParams httpClientParams = httpClient.getParams();
+        // define timeout value for allocation of connections from the pool
+        httpClientParams.setConnectionManagerTimeout(NetworkSettings.DEFAULT_CONNECT_TIMEOUT);
+        // encoding to UTF-8
         httpClientParams.setParameter(HttpClientParams.HTTP_CONTENT_CHARSET, "UTF-8");
-    }
-
-    /**
-     * Get JMMC HTTP URI
-     * @return JMMC HTTP URI
-     */
-    private static URI getJmmcHttpURI() {
-        if (JMMC_WEB_URI == null) {
-            JMMC_WEB_URI = validateURL(JMMC_WEB);
-        }
-        return JMMC_WEB_URI;
-    }
-
-    /**
-     * Get JMMC Socks URI
-     * @return JMMC Socks URI
-     */
-    private static URI getJmmcSocksURI() {
-        if (JMMC_SOCKS_URI == null) {
-            JMMC_SOCKS_URI = validateURL(JMMC_SOCKS);
-        }
-        return JMMC_SOCKS_URI;
+        // avoid retries (3 by default):
+        httpClientParams.setParameter(HttpMethodParams.RETRY_HANDLER, _httpNoRetryHandler);
     }
 
     /**
@@ -194,57 +192,8 @@ public final class Http {
         try {
             return new URI(url);
         } catch (URISyntaxException use) {
-            throw new IllegalStateException("Invalid URL:" + url, use);
+            throw new IllegalArgumentException("Invalid URL:" + url, use);
         }
-    }
-
-    /**
-     * This class returns the HTTP proxy configuration (based on http://www.jmmc.fr).
-     * @return HostConfiguration instance (proxy host and port only are defined)
-     */
-    public static HostConfiguration getHttpProxyConfiguration() {
-        return getProxyConfiguration(getJmmcHttpURI());
-    }
-
-    /**
-     * This class returns the socks proxy configuration (based on socks://jmmc.fr).
-     * @return HostConfiguration instance (proxy host and port only are defined)
-     */
-    public static HostConfiguration getSocksProxyConfiguration() {
-        return getProxyConfiguration(getJmmcSocksURI());
-    }
-
-    /**
-     * This class returns the proxy configuration for the associated URI.
-     * @param uri reference URI used to get the proper proxy
-     * @return HostConfiguration instance (proxy host and port only are defined)
-     */
-    public static HostConfiguration getProxyConfiguration(final URI uri) {
-        final HostConfiguration hostConfiguration = new HostConfiguration();
-
-        if (uri != null) {
-            final ProxySelector proxySelector = ProxySelector.getDefault();
-            final List<Proxy> proxyList = proxySelector.select(uri);
-            final Proxy proxy = proxyList.get(0);
-
-            logger.debug("using {} in proxyList = {}", proxy, proxyList);
-
-            if (proxy.type() != Proxy.Type.DIRECT) {
-                final String host;
-                final InetSocketAddress epoint = (InetSocketAddress) proxy.address();
-                if (epoint.isUnresolved()) {
-                    host = epoint.getHostName();
-                } else {
-                    host = epoint.getAddress().getHostName();
-                }
-                final int port = epoint.getPort();
-
-                if (!StringUtils.isTrimmedEmpty(host) && port > 0) {
-                    hostConfiguration.setProxy(host, port);
-                }
-            }
-        }
-        return hostConfiguration;
     }
 
     /**
@@ -254,13 +203,15 @@ public final class Http {
      * 
      * @param uri URI to download
      * @param outputFile file to save into
-     * @param useDedicatedClient use one dedicated HttpClient if true or the common multi-threaded one else
+     * @param useDedicatedClient use one dedicated HttpClient if true (proxy resolver) or the shared multi-threaded one else
      * @return true if successful
      * @throws IOException if any I/O operation fails (HTTP or file) 
      */
     public static boolean download(final URI uri, final File outputFile, final boolean useDedicatedClient) throws IOException {
+        // Create an HTTP client for the given URI to detect proxies for this host or use common one depending of given flag
+        final HttpClient client = (useDedicatedClient) ? Http.createNewHttpClient(uri) : Http.getHttpClient();
 
-        return download(uri, useDedicatedClient, null, new StreamProcessor() {
+        return download(uri, client, new StreamProcessor() {
             /**
              * Process the given input stream and CLOSE it anyway (try/finally)
              * @param in input stream to process
@@ -268,8 +219,18 @@ public final class Http {
              */
             @Override
             public void process(final InputStream in) throws IOException {
-                FileUtils.saveStream(in, outputFile);
-                logger.debug("File '{}' saved ({} bytes).", outputFile, outputFile.length());
+                try {
+                    FileUtils.saveStream(in, outputFile);
+                    if (_logger.isDebugEnabled()) {
+                        _logger.debug("File '{}' saved ({} bytes).", outputFile, outputFile.length());
+                    }
+                } catch (IOException ioe) {
+                    if (outputFile.exists()) {
+                        _logger.debug("File '{}' deleted (partial download).", outputFile);
+                        outputFile.delete();
+                    }
+                    throw ioe;
+                }
             }
         });
     }
@@ -278,16 +239,32 @@ public final class Http {
      * Read a text file from the given URI into a string
      *
      * @param uri URI to load
-     * @param useDedicatedClient use one dedicated HttpClient if true or the common multi-threaded one else
+     * @param useDedicatedClient use one dedicated HttpClient if true (proxy resolver) or the shared multi-threaded one else
      * @return text file content or null if no result
      *
      * @throws IOException if an I/O exception occurred
      */
     public static String download(final URI uri, final boolean useDedicatedClient) throws IOException {
+        // Create an HTTP client for the given URI to detect proxies for this host or use common one depending of given flag
+        final HttpClient client = (useDedicatedClient) ? Http.createNewHttpClient(uri) : Http.getHttpClient();
+
+        return download(uri, client);
+    }
+
+    /**
+     * Read a text file from the given URI into a string
+     *
+     * @param uri URI to load
+     * @param client http client to use
+     * @return text file content or null if no result
+     *
+     * @throws IOException if an I/O exception occurred
+     */
+    public static String download(final URI uri, final HttpClient client) throws IOException {
 
         final StringStreamProcessor stringProcessor = new StringStreamProcessor();
 
-        if (download(uri, useDedicatedClient, null, stringProcessor)) {
+        if (download(uri, client, stringProcessor)) {
             return stringProcessor.getResult();
         }
 
@@ -298,22 +275,114 @@ public final class Http {
      * Post a request to the given URI and get a string as result.
      *
      * @param uri URI to load
-     * @param useDedicatedClient use one dedicated HttpClient if true or the common multi-threaded one else
+     * @param useDedicatedClient use one dedicated HttpClient if true (proxy resolver) or the shared multi-threaded one else
      * @param queryProcessor post query processor to define query parameters
      * @return result as string or null if no result
      *
      * @throws IOException if an I/O exception occurred
      */
     public static String post(final URI uri, final boolean useDedicatedClient,
-            final PostQueryProcessor queryProcessor) throws IOException {
+                              final PostQueryProcessor queryProcessor) throws IOException {
+
+        // Create an HTTP client for the given URI to detect proxies for this host or use common one depending of given flag
+        final HttpClient client = (useDedicatedClient) ? Http.createNewHttpClient(uri) : Http.getHttpClient();
+
+        return post(uri, client, queryProcessor);
+    }
+
+    /**
+     * Post a request to the given URI and get a string as result.
+     *
+     * @param uri URI to load
+     * @param client http client to use
+     * @param queryProcessor post query processor to define query parameters
+     * @return result as string or null if no result
+     *
+     * @throws IOException if an I/O exception occurred
+     */
+    public static String post(final URI uri, final HttpClient client,
+                              final PostQueryProcessor queryProcessor) throws IOException {
 
         final StringStreamProcessor stringProcessor = new StringStreamProcessor();
 
-        if (post(uri, useDedicatedClient, queryProcessor, stringProcessor)) {
+        if (post(uri, client, queryProcessor, stringProcessor)) {
             return stringProcessor.getResult();
         }
 
         return null;
+    }
+
+    /**
+     * Execute a request to the given URI and get a string as result.
+     *
+     * @param client HttpClient to use
+     * @param method http method to execute
+     * @return result as string or null if no result
+     *
+     * @throws IOException if an I/O exception occurred
+     */
+    public static String execute(final HttpClient client, final HttpMethodBase method) throws IOException {
+
+        final StringStreamProcessor stringProcessor = new StringStreamProcessor();
+
+        if (execute(client, method, stringProcessor)) {
+            return stringProcessor.getResult();
+        }
+
+        return null;
+    }
+
+    /**
+     * Abort the execution of the Http method associated to the given thread name
+     *
+     * @param threadName thread name
+     */
+    public static void abort(final String threadName) {
+        if (threadName != null) {
+            final HttpMethodBase method = HttpMethodThreadMap.get().get(threadName);
+
+            _logger.debug("abort: {} = {}", threadName, method);
+
+            if (method != null) {
+                // abort method:
+                try {
+                    /* This closes the socket handling our blocking I/O, which will
+                     * interrupt the request immediately. */
+                    method.abort();
+
+                } finally {
+                    // To be sure to call relaseConnection altought the thread should do it (normally):
+                    releaseConnection(method, threadName);
+                }
+            }
+        }
+    }
+
+    /**
+     * Release both connection and the HttpMethodBase reference to the current thread name
+     *
+     * @param method HttpMethodBase to release
+     */
+    public static void releaseConnection(final HttpMethodBase method) {
+        releaseConnection(method, Thread.currentThread().getName());
+    }
+
+    /**
+     * Release both connection and the HttpMethodBase reference to the given thread name
+     *
+     * @param method HttpMethodBase to release
+     * @param threadName thread name to use
+     */
+    public static void releaseConnection(final HttpMethodBase method, final String threadName) {
+        _logger.debug("releaseConnection: {} = {}", threadName, method);
+
+        // clear HttpMethodBase and release connection once:
+        HttpMethodThreadMap.release(threadName);
+
+        // release connection back to pool:
+        if (method != null) {
+            method.releaseConnection();
+        }
     }
 
     /**
@@ -323,65 +392,140 @@ public final class Http {
      * 
      * @param uri URI to download
      * @param resultProcessor stream processor to use to consume HTTP response
-     * @param useDedicatedClient use one dedicated HttpClient if true or the common multi-threaded one else
+     * @param client http client to use
      * @return true if successful
      * @throws IOException if any I/O operation fails (HTTP or file) 
      */
-    private static boolean download(final URI uri, final boolean useDedicatedClient, Credentials credentials,
-            final StreamProcessor resultProcessor) throws IOException {
+    private static boolean download(final URI uri, final HttpClient client,
+                                    final StreamProcessor resultProcessor) throws IOException {
+        return download(uri, client, resultProcessor, 0);
+    }
 
-        // Create an HTTP client for the given URI to detect proxies for this host or use common one depending of given flag
-        final HttpClient client = (useDedicatedClient) ? Http.getHttpClient(uri, false) : Http.getHttpClient();
-        final GetMethod method = new GetMethod(uri.toString());
+    /**
+     * Save the document located at the given URI and use the given processor to get the result.
+     * Requests with dedicatedClient will instance one new client with proxies compatible with given URI.
+     * Other requests will use the common multi-threaded HTTP client.
+     * 
+     * @param uri URI to download
+     * @param resultProcessor stream processor to use to consume HTTP response
+     * @param client http client to use
+     * @param level recursion level (authentication attempt)
+     * @return true if successful
+     * @throws IOException if any I/O operation fails (HTTP or file) 
+     * @throws AuthenticationException if authentication failed
+     */
+    private static boolean download(final URI uri, final HttpClient client,
+                                    final StreamProcessor resultProcessor,
+                                    final int level) throws IOException {
 
-        // when present, add the credential to the client 
-        if (credentials != null) {
-            HttpState state = client.getState();
-            state.setCredentials(AuthScope.ANY, credentials);
+        final String url = uri.toString();
+        final GetMethod method = new GetMethod(url);
+
+        if (_logger.isDebugEnabled()) {
+            _logger.debug("HTTP client and GET method have been created. doAuthentication = {}", method.getDoAuthentication());
         }
 
-        logger.info("HTTP client and GET method have been created. doAuthentication = {}", method.getDoAuthentication());
-
+        int resultCode = -1;
         try {
+            // memorize HTTPMethodBase associated to the current thread:
+            HttpMethodThreadMap.setCurrentThread(method);
+
             // Send HTTP GET query:
-            final int resultCode = client.executeMethod(method);
-            logger.debug("The query has been sent. Status code: {}", resultCode);
+            resultCode = client.executeMethod(method);
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("The query has been sent. Status code: {}", resultCode);
+            }
 
             // If everything went fine
-            if (resultCode == 200) {
+            if (resultCode == HttpStatus.SC_OK) {
 
                 // Get response
                 final InputStream in = new BufferedInputStream(method.getResponseBodyAsStream());
                 resultProcessor.process(in);
 
                 return true;
-
-            } else if (resultCode == 401) {
-
-                // Request user/login password and try again with given credential
-                HttpCredentialForm credentialForm = new HttpCredentialForm(method);
-                credentialForm.setVisible(true);
-                Credentials c = credentialForm.getCredentials();
-
-                // if user gives one login/password, try again with the new credential
-                if (c != null) {
-                    return download(uri, useDedicatedClient, credentialForm.getCredentials(), resultProcessor);
-                }
-                MessagePane.showWarning("Sorry, your file '" + uri + "' can't be retrieved properly\nresult code :" + resultCode + "\n status :" + method.getStatusText(), "Remote file can't be dowloaded");
-                logger.warn("download didn't succeed, result code: {}, status: {}", resultCode, method.getStatusText());
-
-            } else {
-                logger.warn("download didn't succeed, result code: {}, status: {}", resultCode, method.getStatusText());
-                return false;
             }
 
         } finally {
-
             // Release the connection.
-            method.releaseConnection();
-
+            releaseConnection(method);
         }
 
+        if (resultCode == 401) {
+            // Memorize the credentials into a session ... reuse login per host name ? or query part ?
+            String host;
+            URI nextURI;
+            try {
+                // try getting current host (redirection compatible):
+                org.apache.commons.httpclient.URI currentURI = method.getURI();
+
+                _logger.debug("method.uri : {}", currentURI);
+
+                nextURI = validateURL(currentURI.toString());
+                host = currentURI.getHost();
+
+            } catch (URIException ue) {
+                _logger.debug("uri failure:", ue);
+                nextURI = uri;
+                host = uri.getHost();
+            }
+
+            final String realm = method.getHostAuthState().getRealm();
+
+            final AuthScope authScope = new AuthScope(host, AuthScope.ANY_PORT, realm, AuthScope.ANY_SCHEME);
+
+            // check if already credentials ?
+            Credentials credentials = client.getState().getCredentials(authScope);
+
+            // check if 'skip' credentials ?
+            if (!shouldSkip(credentials)) {
+                final List<Credentials> holder = new ArrayList<Credentials>(1);
+
+                // Show Swing FORM using EDT:
+                SwingUtils.invokeAndWaitEDT(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Request user/login password and try again with given credential
+                        final HttpCredentialForm credentialForm = new HttpCredentialForm(method);
+                        // show modal dialog:
+                        credentialForm.setVisible(true);
+
+                        final Credentials credentials = credentialForm.getCredentials();
+                        if (credentials != null) {
+                            holder.add(credentials);
+                        }
+                    }
+                });
+
+                if (holder.isEmpty()) {
+                    // Cancel button => interrupt thread to cancel any background task:
+                    Thread.currentThread().interrupt();
+                } else {
+                    // if user gives one login/password, try again with the new credential
+                    credentials = holder.get(0);
+
+                    // when present, add the credential to the client  for the correct scope (host + realm):
+                    final HttpState state = client.getState();
+                    state.setCredentials(authScope, credentials);
+
+                    if (!shouldSkip(credentials)) {
+                        return download(nextURI, client, resultProcessor, level + 1);
+                    }
+                }
+            }
+            throw new AuthenticationException("Authentication failed for url:" + uri);
+        }
+
+        _logger.info("download failed [{}]: result code: {}, status: {}", uri, resultCode, method.getStatusText());
+
+        return false;
+    }
+
+    private static boolean shouldSkip(final Credentials credentials) {
+        if (credentials instanceof UsernamePasswordCredentials) {
+            final UsernamePasswordCredentials userPass = (UsernamePasswordCredentials) credentials;
+            return (HttpCredentialForm.SKIP.equals(userPass.getUserName()));
+        }
         return false;
     }
 
@@ -393,28 +537,31 @@ public final class Http {
      * @param uri URI to download
      * @param queryProcessor post query processor to define query parameters
      * @param resultProcessor stream processor to use to consume HTTP response
-     * @param useDedicatedClient use one dedicated HttpClient if true or the common multi-threaded one else
+     * @param client HttpClient to use
      * @return true if successful
      * @throws IOException if any I/O operation fails (HTTP or file) 
      */
-    private static boolean post(final URI uri, final boolean useDedicatedClient,
-            final PostQueryProcessor queryProcessor, final StreamProcessor resultProcessor) throws IOException {
+    private static boolean post(final URI uri, final HttpClient client,
+                                final PostQueryProcessor queryProcessor, final StreamProcessor resultProcessor) throws IOException {
 
-        // Create an HTTP client for the given URI to detect proxies for this host or use common one depending of given flag
-        final HttpClient client = (useDedicatedClient) ? Http.getHttpClient(uri, false) : Http.getHttpClient();
         final PostMethod method = new PostMethod(uri.toString());
-        logger.debug("HTTP client and POST method have been created");
+        _logger.debug("HTTP client and POST method have been created");
 
         try {
             // Define HTTP POST parameters
             queryProcessor.process(method);
 
-            // Send HTTP POST query
+            // memorize HTTPMethodBase associated to the current thread:
+            HttpMethodThreadMap.setCurrentThread(method);
+
+            // Send HTTP query
             final int resultCode = client.executeMethod(method);
-            logger.debug("The query has been sent. Status code: {}", resultCode);
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("The query has been sent. Status code: {}", resultCode);
+            }
 
             // If everything went fine
-            if (resultCode == 200) {
+            if (resultCode == HttpStatus.SC_OK) {
                 // Get response
                 final InputStream in = new BufferedInputStream(method.getResponseBodyAsStream());
                 resultProcessor.process(in);
@@ -423,7 +570,44 @@ public final class Http {
             }
         } finally {
             // Release the connection.
-            method.releaseConnection();
+            releaseConnection(method);
+        }
+
+        return false;
+    }
+
+    /**
+     * Execute the given Http method (GET, POST...) to the given URI and use the given processor to get the result.
+     * 
+     * @param client HttpClient to use
+     * @param method http method to execute
+     * @param resultProcessor stream processor to use to consume HTTP response
+     * @return true if successful
+     * @throws IOException if any I/O operation fails (HTTP or file) 
+     */
+    private static boolean execute(final HttpClient client,
+                                   final HttpMethodBase method, final StreamProcessor resultProcessor) throws IOException {
+        try {
+            // memorize HTTPMethodBase associated to the current thread:
+            HttpMethodThreadMap.setCurrentThread(method);
+
+            // Send HTTP query
+            final int resultCode = client.executeMethod(method);
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("The query has been sent. Status code: {}", resultCode);
+            }
+
+            // If everything went fine
+            if (resultCode == HttpStatus.SC_OK) {
+                // Get response
+                final InputStream in = new BufferedInputStream(method.getResponseBodyAsStream());
+                resultProcessor.process(in);
+
+                return true;
+            }
+        } finally {
+            // Release the connection.
+            releaseConnection(method);
         }
 
         return false;
@@ -444,10 +628,11 @@ public final class Http {
          */
         @Override
         public void process(final InputStream in) throws IOException {
-
             // TODO check if we can get response size from HTTP headers
             result = FileUtils.readStream(in);
-            logger.debug("String stored in memory ({} chars).", result.length());
+            if (_logger.isDebugEnabled()) {
+                _logger.debug("String stored in memory ({} chars).", result.length());
+            }
         }
 
         /**

@@ -39,15 +39,17 @@ import java.util.Map;
 /**
  * Mime type registry that are used by multiples applications using jMCS.
  * It is also possible to register the mime types specific to one application.
- * 
+ *
  * @author Sylvain LAFRASSE, Guillaume MELLA, Laurent BOURGES.
  */
 public final class MimeType {
 
     /** Mime type registry keyed by identifier ordered by insertion order */
-    private final static Map<String, MimeType> _registry = new LinkedHashMap<String, MimeType>();
+    private final static Map<String, MimeType> _registry = new LinkedHashMap<String, MimeType>(32);
 
     /* Predefined Mime types */
+    /** MimeType associated to VOTable */
+    public final static MimeType VOTABLE = MimeType.add("VOTABLE", "application/x-votable+xml", "VOTable document", "vot", "xml");
     /** MimeType associated to SearchCal calibrator list */
     public final static MimeType SEARCHCAL_CALIBRATORLIST = MimeType.add("SEARCHCAL_CALIBRATORLIST", "application/x-searchcal+votable+xml", "SearchCal Calibrator List", "scvot.gz", "scvot");
     /** MimeType associated to Observation settings */
@@ -62,8 +64,12 @@ public final class MimeType {
     public final static MimeType OIFITS = MimeType.add("OIFITS", "application/oifits", "Optical Interferometry FITS", "fits", "fits.gz", "oifits", "oifits.gz");
     /** MimeType associated to FITS format */
     public final static MimeType FITS_IMAGE = MimeType.add("FITS_IMAGE", "application/fits", "FITS Image", "fits", "fits.gz");
+    /** MimeType associated to JPG documents */
+    public final static MimeType JPG = MimeType.add("JPG", "image/jpeg", "Joint Photographic Experts Group", "jpg");
     /** MimeType associated to PDF documents */
     public final static MimeType PDF = MimeType.add("PDF", "application/pdf", "Portable Document Format", "pdf");
+    /** MimeType associated to PNG documents */
+    public final static MimeType PNG = MimeType.add("PNG", "image/x-png", "Portable Network Graphics", "png");
     /** MimeType associated to VEGA Star Lists */
     public final static MimeType STAR_LIST = MimeType.add("STAR_LIST", "text/plain", "Star Lists", "txt");
     /** MimeType associated to Character-Separated Values format */
@@ -177,7 +183,7 @@ public final class MimeType {
         return _extensions;
     }
 
-    /** 
+    /**
      * @return first accepted extension
      */
     public String getExtension() {
@@ -202,7 +208,7 @@ public final class MimeType {
     }
 
     /**
-     * Check if the given file has an accepted extension. 
+     * Check if the given file has an accepted extension.
      * If not, return a new file with the first accepted extension
      * @param file file to check
      * @return given file or new file with the first accepted extension

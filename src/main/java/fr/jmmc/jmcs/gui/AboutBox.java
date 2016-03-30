@@ -485,8 +485,6 @@ public class AboutBox extends JDialog implements HyperlinkListener {
         contentPane.add(_copyrightLabel, BorderLayout.PAGE_END);
         pack();
 
-        // Center window on main screen
-        WindowUtils.centerOnMainScreen(this);
         // Handle window closing when using either Escape or ctrl-W keys.
         WindowUtils.setClosingKeyboardShortcuts(this);
 

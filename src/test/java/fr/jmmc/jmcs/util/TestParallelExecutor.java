@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author bourgesl
+ * @author Laurent BOURGES.
  */
 public class TestParallelExecutor {
 

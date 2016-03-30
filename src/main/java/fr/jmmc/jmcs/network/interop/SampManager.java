@@ -106,9 +106,10 @@ public final class SampManager {
      * @return true if SAMP hub should not prevent quitting, false otherwise.
      */
     public synchronized boolean allowHubKilling() {
-
+        final App application = App.getInstance();
+        
         // If the application wants to bypass SAMP hub killing warning message
-        if (App.getInstance().shouldSilentlyKillSampHubOnQuit()) {
+        if (application == null || application.shouldSilentlyKillSampHubOnQuit()) {
             // Let the hub die without prompting confirmation
             return true;
         }
@@ -215,7 +216,7 @@ public final class SampManager {
             meta.setDescriptionText(sampDescription);
         }
 
-        final String documentationUrl = applicationDataModel.getDocumetationUrl();
+        final String documentationUrl = applicationDataModel.getDocumentationLinkValue();
         if (documentationUrl != null) {
             meta.setDocumentationUrl(documentationUrl);
         }

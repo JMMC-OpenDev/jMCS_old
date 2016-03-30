@@ -51,7 +51,7 @@ public class HelpView {
     /** Logger */
     private static final Logger _logger = LoggerFactory.getLogger(HelpView.class.getName());
     /** internal reference to the help broker */
-    private static HelpBroker _helpBroker;
+    private static HelpBroker _helpBroker = null;
     /** instance of help view */
     private static HelpView _instance = null;
     /** initialization flag */
@@ -72,59 +72,64 @@ public class HelpView {
             _instance = new HelpView();
         }
 
-        if (_alreadyInitialized) {
-            return true;
-        }
+        if (!_alreadyInitialized) {
+            final ClassLoader appClassLoader = _instance.getClass().getClassLoader();
 
-        final ClassLoader appClassLoader = _instance.getClass().getClassLoader();
+            URL url = null;
+            try {
+                // Get the helpset file and create the centered help broker 
+                url = HelpSet.findHelpSet(appClassLoader, "documentation.hs");
 
-        URL url = null;
-        try {
-            // Get the helpset file and create the centered help broker 
-            url = HelpSet.findHelpSet(appClassLoader, "documentation.hs");
+                _logger.debug("HelpSet.findHelpSet(appClassLoader, 'documentation.hs') = '{}'.", url);
 
-            _logger.debug("HelpSet.findHelpSet(appClassLoader, 'documentation.hs') = '{}'.", url);
+                // http://forums.sun.com/thread.jspa?messageID=10522645
+                url = UrlUtils.fixJarURL(url);
 
-            // http://forums.sun.com/thread.jspa?messageID=10522645
-            url = UrlUtils.fixJarURL(url);
+                _logger.debug("using helpset url = '{}'.", url);
 
-            _logger.debug("using helpset url = '{}'.", url);
+                // check if the url is valid :
+                if (url == null) {
+                    _logger.info("No helpset document found.");
 
-            // check if the url is valid :
-            if (url == null) {
-                _logger.info("No helpset document found.");
+                    return false;
+                }
 
-                return false;
+                final HelpSet helpSet = new HelpSet(appClassLoader, url);
+
+                _helpBroker = helpSet.createHelpBroker();
+
+            } catch (Exception e) {
+                // skip complex case
+                _logger.error("Problem during helpset creation (url='{}', classloader={})",
+                        url, appClassLoader, e);
             }
 
-            final HelpSet helpSet = new HelpSet(appClassLoader, url);
-
-            _helpBroker = helpSet.createHelpBroker();
-
-            _helpBroker.setLocation(WindowUtils.getCenteringPoint(_helpBroker.getSize()));
-
-        } catch (Exception e) {
-            // skip complex case
-            _logger.error("Problem during helpset creation (url='{}', classloader={})",
-                    url, appClassLoader, e);
-
-            return false;
+            _alreadyInitialized = true;
         }
 
-        _alreadyInitialized = true;
-
-        return true;
+        return (_helpBroker != null);
     }
 
     /**
      * Show or hide the help view depending on the value of parameter b.
      *
-     * @param b if true, shows this component; otherwise, hides this componentShow or hide help view.
+     * @param visible if true, shows this component; otherwise, hides this componentShow or hide help view.
      */
-    public static void setVisible(boolean b) {
+    public static void setVisible(boolean visible) {
         if (isAvailable()) {
+            if (visible) {
+                // see WindowUtils.centerOnMainScreen:
+                // Next try catch is mandatory to catch null pointer exception that
+                // can occure on some virtual machine emulation (at least virtualBox)
+                try {
+                    _helpBroker.setLocation(WindowUtils.getCenteringPoint(_helpBroker.getSize()));
+                } catch (NullPointerException npe) {
+                    _logger.warn("Could not center help window");
+                }
+            }
+
             // Show the window
-            _helpBroker.setDisplayed(b);
+            _helpBroker.setDisplayed(visible);
         }
     }
 
@@ -134,37 +139,40 @@ public class HelpView {
      * @return null or full HelpId string
      */
     public static String getHelpID(String endOfHelpID) {
-        //search helpId into map that ends with label
-        Map m = _helpBroker.getHelpSet().getCombinedMap();
-        Enumeration<?> e = m.getAllIDs();
-        Map.ID id;
+        if (isAvailable()) {
+            //search helpId into map that ends with label
+            Map m = _helpBroker.getHelpSet().getCombinedMap();
+            Enumeration<?> e = m.getAllIDs();
+            Map.ID id;
 
-        while (e.hasMoreElements()) {
-            id = (Map.ID) e.nextElement();
+            while (e.hasMoreElements()) {
+                id = (Map.ID) e.nextElement();
 
-            if (id.getIDString().endsWith(endOfHelpID)) {
-                return id.getIDString();
+                if (id.getIDString().endsWith(endOfHelpID)) {
+                    return id.getIDString();
+                }
             }
         }
-
         return null;
     }
 
     /**
      * Ask the help view to show the page associated to the given helpID
-     * @param helpID
+     * @param helpID anchor identifier
      */
     public static void show(String helpID) {
-        // show without move if it is already visible
-        // one problem is still present : the window is not place in foreground
-        // and can be hidden by other windows
-        if (_helpBroker.isDisplayed()) {
-            _helpBroker.setViewDisplayed(true);
-        } else {
-            _helpBroker.setDisplayed(true);
-        }
+        if (isAvailable()) {
+            // show without move if it is already visible
+            // one problem is still present : the window is not place in foreground
+            // and can be hidden by other windows
+            if (_helpBroker.isDisplayed()) {
+                _helpBroker.setViewDisplayed(true);
+            } else {
+                setVisible(true);
+            }
 
-        _helpBroker.setCurrentID(helpID);
+            _helpBroker.setCurrentID(helpID);
+        }
     }
 }
 /*___oOo___*/

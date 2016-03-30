@@ -252,7 +252,7 @@ public class ActionRegistrar {
 
         final StringBuilder sb = new StringBuilder(2048);
         for (String key : keys) {
-            sb.append(key).append("\n");
+            sb.append(key).append('\n');
         }
         return sb.toString();
     }

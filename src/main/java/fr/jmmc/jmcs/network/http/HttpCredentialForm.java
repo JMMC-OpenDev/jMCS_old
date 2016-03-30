@@ -40,11 +40,21 @@ import org.apache.commons.httpclient.methods.GetMethod;
  */
 public class HttpCredentialForm extends javax.swing.JDialog {
 
-    /** Credential instance returned by getCredentials method */
-    Credentials _credentials = null;
+    private static final long serialVersionUID = 1L;
+    
+    public static final String SKIP = "_skip_";
 
-    /** Creates new form HttpCredentialForm */
-    public HttpCredentialForm(GetMethod getMethod) {
+    /** Realm from the method */
+    private String _realm = null;
+
+    /** Credential instance returned by getCredentials method */
+    private Credentials _credentials = null;
+
+    /**
+     * Creates new form HttpCredentialForm.
+     * @param getMethod GetMethod instance
+     */
+    public HttpCredentialForm(final GetMethod getMethod) {
         super(App.getFrame(), true);
         initComponents();
 
@@ -52,7 +62,7 @@ public class HttpCredentialForm extends javax.swing.JDialog {
         setTitle(getMethod.getStatusText());
 
         // prepare info content 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(256);
         sb.append("The web server requests a login/password  for the following URL :\n");
         try {
             sb.append(getMethod.getURI().toString());
@@ -60,19 +70,27 @@ public class HttpCredentialForm extends javax.swing.JDialog {
             // should not occur but add a fallback
             sb.append(getMethod.getPath());
         }
-        String realm = getMethod.getResponseHeader("WWW-Authenticate").getValue();
-        if (StringUtils.isSet(realm)) {
-            sb.append("\n").append(realm);
+
+        _realm = getMethod.getHostAuthState().getRealm();
+
+        if (StringUtils.isSet(_realm)) {
+            sb.append("\nRealm='").append(_realm).append('\'');
         }
         infoTextPane.setText(sb.toString());
 
         pack();
         setLocationRelativeTo(App.getFrame());
-
-        _credentials = null;
     }
 
-    /** Return the credential associated to the input fields
+    /**
+     * @return authentication realm
+     */
+    public String getRealm() {
+        return _realm;
+    }
+
+    /** 
+     * Return the credential associated to the input fields
      * @return a credential to be given to the state of an httpclient or 
      *         null if user press cancel or close the window
      */
@@ -99,20 +117,21 @@ public class HttpCredentialForm extends javax.swing.JDialog {
         submitButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         infoTextPane = new javax.swing.JTextPane();
+        jButtonSkip = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        usernameLabel.setText("username : ");
+        usernameLabel.setText("Username: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         jPanel1.add(usernameLabel, gridBagConstraints);
 
-        passwordLabel.setText("password : ");
+        passwordLabel.setText("Password: ");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -121,19 +140,20 @@ public class HttpCredentialForm extends javax.swing.JDialog {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.2;
         jPanel1.add(usernameTextField, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.2;
         jPanel1.add(passwordField, gridBagConstraints);
 
         cancelButton.setText("Cancel");
+        cancelButton.setToolTipText("Cancel all download operations");
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed(evt);
@@ -144,40 +164,57 @@ public class HttpCredentialForm extends javax.swing.JDialog {
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
         gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanel1.add(cancelButton, gridBagConstraints);
 
         submitButton.setText("Submit");
+        submitButton.setToolTipText("");
         submitButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 submitButtonActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         jPanel1.add(submitButton, gridBagConstraints);
 
         jScrollPane1.setBorder(null);
 
+        infoTextPane.setEditable(false);
         infoTextPane.setBorder(null);
         jScrollPane1.setViewportView(infoTextPane);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 4;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.weighty = 0.1;
         jPanel1.add(jScrollPane1, gridBagConstraints);
 
+        jButtonSkip.setText("Skip");
+        jButtonSkip.setToolTipText("Skip all downloads from the same host");
+        jButtonSkip.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonSkipActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        jPanel1.add(jButtonSkip, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.weighty = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(15, 15, 15, 15);
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 6, 6);
         getContentPane().add(jPanel1, gridBagConstraints);
 
         pack();
@@ -191,9 +228,16 @@ public class HttpCredentialForm extends javax.swing.JDialog {
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         setVisible(false);
     }//GEN-LAST:event_cancelButtonActionPerformed
+
+    private void jButtonSkipActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSkipActionPerformed
+        _credentials = new UsernamePasswordCredentials(SKIP, "");
+        setVisible(false);
+    }//GEN-LAST:event_jButtonSkipActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelButton;
     private javax.swing.JTextPane infoTextPane;
+    private javax.swing.JButton jButtonSkip;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPasswordField passwordField;
