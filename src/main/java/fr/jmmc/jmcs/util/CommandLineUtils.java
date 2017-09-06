@@ -73,7 +73,7 @@ public final class CommandLineUtils {
      * @throws IllegalStateException if the job can not be submitted to the job queue
      */
     public static Long exec(final String cliPath) throws IllegalStateException {
-        return exec(cliPath, new EmptyJobListener());
+        return exec(cliPath, EmptyJobListener.INSTANCE);
     }
 
     /**
@@ -127,7 +127,7 @@ public final class CommandLineUtils {
                 _logger.debug("args[{}] = '{}'.", i, args[i]);
             }
         }
-        
+
         // Define default arguments (help, version, log, open file)
         final List<LongOpt> longOpts = new ArrayList<LongOpt>();
         longOpts.clear();
@@ -275,68 +275,6 @@ public final class CommandLineUtils {
         Bootstrapper.stopApp(0);
     }
 
-    /*
-     private static String[] splitCliPath(final String cliPath) {
-
-     System.out.println("cliPath = " + cliPath);
-
-     final String delimiters = "'\" ";// + SystemUtils.PATH_SEPARATOR;
-     System.out.println("delimiters = " + delimiters);
-
-     final ArrayList<String> splittedPath = new ArrayList<String>();
-
-     int tokenBeginning = -1;
-     int tokenEnd;
-     String currentToken;
-     final int lenghtMinusOne = cliPath.length() - 1;
-     for (int i = 0; i < lenghtMinusOne; i++) {
-
-     // Fix the beginning of the current token if not yet defined
-     if (tokenBeginning < 0) {
-     tokenBeginning = i;
-     // Jump directly to next char
-     continue;
-     }
-
-     // If the current char is not a delimiter (and we are not reaching the end of the path)
-     final String currentChar = cliPath.substring(i, i + 1);
-     if ((!delimiters.contains(currentChar)) && (i < lenghtMinusOne - 1)) {
-     // Skip it
-     continue;
-     }
-
-     // Current char is delimiter, or we are reaching the end of the path !
-     // BUG : what about embedded delimiters "" or '' strings ???
-
-     // If previous char is an escape sequence
-     final String previousChar = cliPath.substring(i - 1, i);
-     if (previousChar.equals("\\")) { // Skip escaped delimiters
-     // Skip current char
-     // BUG : what about reaching the end of the path ???
-     continue;
-     }
-
-     // Otherwise we are at the end of a token, so memorize it
-     tokenEnd = i + 2;
-     currentToken = cliPath.substring(tokenBeginning, tokenEnd);
-     splittedPath.add(currentToken);
-     tokenBeginning = -1;
-     // Restart sequence from scratch at current position for next token
-     }
-
-     return splittedPath.toArray(new String[0]);
-     }
-
-     public static void main(String[] args) {
-     String[] pathes = {"/usr/X11/bin/xeyes",
-     "/Volumes/Backup\\ HD/Perso/Mac\\ OS\\ X\\ Install\\ DVD.dmg",
-     "say \"Hello crual world !\"",
-     "C:\\Program Files\\Inkscape\\inkscape.exe"};
-     for (String string : pathes) {
-     System.out.println("array = " + CollectionUtils.toString(splitCliPath(string)));
-     }
-     }
-     */
     /** Forbidden constructor */
     private CommandLineUtils() {
     }

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+
+<project name="JMCS" default="about" basedir=".">
+
+    <description>
+        JMCS ant build file.
+
+        To generate JAXB code from xsd:
+        ant -f build-java.xml genXsdCode
+    </description>
+
+
+    <!--
+    Get build properties (general).
+    Should only contain the location of the JMCS module where JAXB libraries can be found.
+    -->
+    <property file="build.properties" />
+
+    <!-- define folder properties -->
+    <property name="root" location=".."/>
+
+    <!-- JAXB library must be present in the jmcs module nearby -->
+    <property name="jaxb.version" value="2.2.11"/>
+    <property name="jaxb.libs" location="${jmcs.path}/tools/xjc"/>
+    <property name="mvn.libs" location="${root}/target/runtime-libs/"/>
+
+    <!-- JMCS src folder -->
+    <property name="sources"   location="${root}/src/main/java"/>
+
+    <property name="output" location="${sources}"/>
+
+    <!-- JMCS test folder -->
+    <property name="test" location="${root}/src/test/java"/>
+
+
+    <!-- custom macro to enhance XJC -->
+    <macrodef name="xjc">
+        <attribute name="destdir"/>
+        <attribute name="schema"/>
+
+        <sequential>
+            <java classname="com.sun.tools.xjc.XJCFacade" classpath="${jaxb.libs}/jaxb-xjc-${jaxb.version}.jar:${mvn.libs}/jaxb-api-${jaxb.version}.jar:${mvn.libs}/jaxb-core-${jaxb.version}.jar:${mvn.libs}/jaxb-impl-${jaxb.version}.jar" fork="true" failonerror="true" maxmemory="256m">
+
+                <jvmarg value="-Djavax.xml.accessExternalSchema=all" />
+
+                <arg value="-classpath"/>
+                <arg value="${jaxb.libs}/simple-regenerator-1.0.jar"/>
+
+                <arg value="-no-header"/>
+
+                <arg value="-extension"/>
+                <!-- preserve code extension -->
+                <arg value="-simple-preserve"/>
+
+                <arg value="-d"/>
+                <arg value="@{destdir}"/>
+
+                <arg value="@{schema}"/>
+                <env key="LANG" value="en_US"/>
+            </java>
+
+            <delete dir="@{destdir}">
+                <include name="**/*.java.backup"/>
+            </delete>
+        </sequential>
+    </macrodef>
+
+
+
+
+    <!-- targets -->
+
+    <!-- target about : -->
+    <target name="about" description="show information for public targets">
+        <echo>available ant targets : </echo>
+        <echo>-------------------------------------------------------------------------------</echo>
+        <echo>  - genXsdCode         : generates the java code from xml schema (xsd)</echo>
+        <echo>-------------------------------------------------------------------------------</echo>
+        <echo> jaxb libraries : ${jaxb.libs}</echo>
+    </target>
+
+
+
+
+    <target name="genXsdCode" description="generate java classes from XSD schemas">
+
+        <echo>generating java code for ApplicationDataModel.xsd</echo>
+        <mkdir dir="${output}/fr/jmmc/jmcs/data/app/model" />
+
+        <!-- test -->
+        <xjc destdir="${output}"
+             schema="${sources}/fr/jmmc/jmcs/data/app/ApplicationDataModel.xsd" />
+
+	    <!-- 
+	    remove several @XmlSchemaType in JAXB 2.2.11:
+	    - @XmlSchemaType(name = "string") by '' (bad enum)
+	    - @XmlSchemaType(name = "anySimpleType") by none (bad double[])
+	    -->
+<!--
+	    <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java" value="">
+		    <replacetoken>@XmlSchemaType(name = "string")</replacetoken>
+	    </replace>
+	    <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java" value="">
+		    <replacetoken>@XmlSchemaType(name = "anySimpleType")</replacetoken>
+	    </replace>
+-->
+
+	    <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java">
+		    <replacetoken>
+package fr.jmmc.jmcs.data.app.model;</replacetoken>
+            <replacevalue>/*******************************************************************************
+ *                 jMCS project ( http://www.jmmc.fr/dev/jmcs )
+ *******************************************************************************
+ * Copyright (c) 2016, CNRS. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     - Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     - Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     - Neither the name of the CNRS nor the names of its contributors may be
+ *       used to endorse or promote products derived from this software without
+ *       specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL CNRS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
+package fr.jmmc.jmcs.data.app.model;</replacevalue>
+	    </replace>
+
+    </target>
+
+</project>

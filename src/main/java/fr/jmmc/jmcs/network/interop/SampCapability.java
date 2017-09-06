@@ -93,6 +93,8 @@ public enum SampCapability {
     LITPRO_LOAD_USERMODEL("fr.jmmc.litpro.load.usermodel"),
     /** OCA Pivot load star list MType */
     LOAD_STAR_LIST("starlist.load"),
+    /** A2P2 load OB MType */
+    LOAD_OB_DATA("ob.load.data"),
     /** Aladin script loading MType */
     ALADIN_LOAD_SCRIPT("script.aladin.send"),
     /** TOPCAT STIL loading MType */

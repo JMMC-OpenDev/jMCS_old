@@ -191,7 +191,7 @@ public abstract class TaskSwingWorker<T> extends SwingWorker<T, Void> {
     }
 
     /**
-     * Call the refreshGUI with result if not canceled.
+     * Call the refreshUI with result if not canceled.
      * This code is executed by the Swing Event Dispatcher thread (EDT)
      */
     @Override

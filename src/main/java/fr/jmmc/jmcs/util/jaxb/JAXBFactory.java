@@ -44,13 +44,6 @@ public final class JAXBFactory {
 
     /** Class logger */
     private static final Logger logger = LoggerFactory.getLogger(JAXBFactory.class.getName());
-    /**
-     * JAXB 2 Context Factory (System property) "javax.xml.bind.JAXBContext" instead of "javax.xml.bind.context.factory"
-     * bug reported : http://java.net/jira/browse/JAXB-816
-     */
-    public static final String JAXB_CONTEXT_FACTORY = "javax.xml.bind.JAXBContext";
-    /** JAXB implementation 2.1.12 provided in JMCS libraries */
-    public static final String JAXB_CONTEXT_FACTORY_IMPLEMENTATION = "com.sun.xml.bind.v2.ContextFactory";
     /** all factories */
     private static final ConcurrentHashMap<String, JAXBFactory> managedInstances = new ConcurrentHashMap<String, JAXBFactory>(4);
     // Members
@@ -118,10 +111,7 @@ public final class JAXBFactory {
     private JAXBContext getContext(final String path) throws XmlBindException {
         JAXBContext context = null;
 
-        // Define the system property to define which JAXB implementation to use :
-        System.setProperty(JAXB_CONTEXT_FACTORY, JAXB_CONTEXT_FACTORY_IMPLEMENTATION);
-
-        logger.debug("JAXB implementation: {}", System.getProperty(JAXB_CONTEXT_FACTORY));
+        logger.debug("JAXB implementation: {}", System.getProperty(javax.xml.bind.JAXBContext.JAXB_CONTEXT_FACTORY));
 
         try {
             // create a JAXBContext capable of handling classes generated into

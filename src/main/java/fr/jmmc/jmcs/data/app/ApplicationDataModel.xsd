@@ -4,7 +4,7 @@
 *                  jMCS project ( http://www.jmmc.fr/dev/jmcs )
 ********************************************************************************
 *  Copyright (c) 2013, CNRS. All rights reserved.
-*  
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions are met:
 *      - Redistributions of source code must retain the above copyright
@@ -15,7 +15,7 @@
 *      - Neither the name of the CNRS nor the names of its contributors may be
 *        used to endorse or promote products derived from this software without
 *        specific prior written permission.
-*  
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,7 +46,7 @@ Description: Store jMCS Application meta data.
             xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
             jaxb:version="2.1" jaxb:extensionBindingPrefixes="xjc">
 
-    <xsd:annotation>           
+    <xsd:annotation>
         <xsd:documentation>
             jMCS Application Data Model
         </xsd:documentation>
@@ -84,7 +84,7 @@ Description: Store jMCS Application meta data.
                 jMCS application meta data
             </xsd:documentation>
         </xsd:annotation>
-            
+
         <xsd:sequence>
 
             <!-- Company element -->
@@ -151,6 +151,16 @@ Description: Store jMCS Application meta data.
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- Element compilation -->
+            <xsd:element name="distribution" type="Distribution" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Distribution information to perform automatic version checks
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
+
             <!-- Element dependences -->
             <xsd:element name="dependences" type="Dependences" minOccurs="0">
                 <xsd:annotation>
@@ -178,7 +188,7 @@ Description: Store jMCS Application meta data.
                     </xsd:documentation>
                 </xsd:annotation>
             </xsd:element>
-            
+
             <!-- Element acknowledgment -->
             <xsd:element name="acknowledgment" minOccurs="0" maxOccurs="1" type="xsd:string">
                 <xsd:annotation>
@@ -189,11 +199,11 @@ Description: Store jMCS Application meta data.
             </xsd:element>
 
         </xsd:sequence>
-        
-            
+
+
         <!-- TODO : Use URL type -->
         <xsd:attribute name="link" type="xsd:string" use="required">
-            <xsd:annotation>               
+            <xsd:annotation>
                 <xsd:documentation>
                     Application Homepage URL
                 </xsd:documentation>
@@ -202,7 +212,7 @@ Description: Store jMCS Application meta data.
 
         <!-- TODO : Use URL type -->
         <xsd:attribute name="iconlink" type="xsd:string" use="required">
-            <xsd:annotation>           
+            <xsd:annotation>
                 <xsd:documentation>
                     Application Icon URL
                 </xsd:documentation>
@@ -211,7 +221,7 @@ Description: Store jMCS Application meta data.
 
         <!-- TODO : Use URL type -->
         <xsd:attribute name="faqlink" type="xsd:string" use="optional">
-            <xsd:annotation>           
+            <xsd:annotation>
                 <xsd:documentation>
                     Application FAQ URL
                 </xsd:documentation>
@@ -220,7 +230,7 @@ Description: Store jMCS Application meta data.
 
         <!-- TODO : Use URL type -->
         <xsd:attribute name="rsslink" type="xsd:string" use="optional">
-            <xsd:annotation>           
+            <xsd:annotation>
                 <xsd:documentation>
                     Application RSS URL
                 </xsd:documentation>
@@ -229,7 +239,7 @@ Description: Store jMCS Application meta data.
 
         <!-- TODO : Use URL type -->
         <xsd:attribute name="documentationlink" type="xsd:string" use="optional">
-            <xsd:annotation>           
+            <xsd:annotation>
                 <xsd:documentation>
                     Application Documentation URL
                 </xsd:documentation>
@@ -237,8 +247,8 @@ Description: Store jMCS Application meta data.
         </xsd:attribute>
 
     </xsd:complexType>
-    
-    
+
+
     <!-- Store application company details -->
     <xsd:complexType name="Company">
         <xsd:sequence>
@@ -257,12 +267,23 @@ Description: Store jMCS Application meta data.
         <xsd:attribute name="name" type="xsd:string" use="required"/>
         <xsd:attribute name="version" type="xsd:string" use="required"/>
     </xsd:complexType>
-    
-    
+
+
     <!-- Store build date and used compiler -->
     <xsd:complexType name="Compilation">
         <xsd:attribute name="date" type="xsd:string" use="required"/>
         <xsd:attribute name="compiler" type="xsd:string" use="optional"/>
+    </xsd:complexType>
+
+
+    <!-- Store application distribution details -->
+    <xsd:complexType name="Distribution">
+        <xsd:sequence>
+            <xsd:element name="application_data_file" type="xsd:string"/>
+            <xsd:element name="public_url" type="xsd:string"/>
+            <xsd:element name="beta_url" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="alpha_url" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
     </xsd:complexType>
 
 
@@ -283,8 +304,8 @@ Description: Store jMCS Application meta data.
         <xsd:attribute name="license" type="License" use="required"/>
         <xsd:attribute name="file" type="xsd:string" use="optional"/>
     </xsd:complexType>
-    
-    
+
+
     <!-- Store application menu bar tree -->
     <xsd:complexType name="Menubar">
         <xsd:sequence>
@@ -292,7 +313,7 @@ Description: Store jMCS Application meta data.
         </xsd:sequence>
     </xsd:complexType>
 
-    
+
     <!-- Store menu bar entry (menu) -->
     <xsd:complexType name="Menu">
         <xsd:sequence>

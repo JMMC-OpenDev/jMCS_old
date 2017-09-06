@@ -28,10 +28,10 @@
 package fr.jmmc.jmcs.gui.component;
 
 import fr.jmmc.jmcs.App;
-import fr.jmmc.jmcs.data.preference.SessionSettingsPreferences;
-import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.data.MimeType;
+import fr.jmmc.jmcs.data.preference.SessionSettingsPreferences;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
+import fr.jmmc.jmcs.util.FileUtils;
 import java.awt.Component;
 import java.awt.FileDialog;
 import java.awt.HeadlessException;
@@ -134,6 +134,19 @@ public final class FileChooser {
             updateDirectoryForMimeType(mimeType, selectedDirectory.getPath());
         }
         return selectedDirectory;
+    }
+
+    /**
+     * Show the Open File Dialog using following properties:
+     * @param title dialog title
+     * @param givenDirectory optional current directory as file (last one used for given mime type if null)
+     * @param mimeType optional file mime type used to get file extension(s), file filter and last directory used
+     * @return File instance or null if dialog was discarded
+     */
+    public static File showOpenFileChooser(final String title, final File givenDirectory, final MimeType mimeType) {
+        final File[] files = showOpenFileChooser(title, givenDirectory, mimeType, null, false);
+
+        return (files != null) ? files[0] : null;
     }
 
     /**

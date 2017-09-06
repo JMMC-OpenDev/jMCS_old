@@ -51,6 +51,12 @@ public final class CommonPreferences extends Preferences {
     public static final String SHOW_STARTUP_SPLASHSCREEN = "startup.splashscreen.show";
     /** Name of the preference which stores the user selected browser */
     public static final String WEB_BROWSER = "web.browser";
+    /** Name of the preference which stores the flag to show the unsupported JDK warning */
+    public static final String SHOW_UNSUPPORTED_JDK_WARNING = "showUnsupportedJdkWarning";
+    /** Name of the preference which stores the UI scale */
+    public static final String UI_SCALE = "ui.scale";
+    /** Name of the preference which stores the LAF class name */
+    public static final String UI_LAF_CLASSNAME = "ui.laf.class";
     /* Proxy settings */
     /** HTTP proxy host */
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
@@ -101,6 +107,9 @@ public final class CommonPreferences extends Preferences {
         setDefaultPreference(SHOW_STARTUP_SPLASHSCREEN, true);
         setDefaultPreference(FEEDBACK_REPORT_USER_EMAIL, "");
         setDefaultPreference(WEB_BROWSER, IBrowserLaunching.BROWSER_DEFAULT);
+        setDefaultPreference(SHOW_UNSUPPORTED_JDK_WARNING, true);
+        setDefaultPreference(UI_SCALE, 1.0);
+        setDefaultPreference(UI_LAF_CLASSNAME, "");
         setDefaultPreference(HTTP_PROXY_HOST, "");
         setDefaultPreference(HTTP_PROXY_PORT, "");
     }
@@ -123,6 +132,10 @@ public final class CommonPreferences extends Preferences {
         return 1;
     }
 
+    public float getUIScale() {
+        return (float) getPreferenceAsDouble(CommonPreferences.UI_SCALE);
+    }
+    
     /**
      * Run this program to generate the common preference file.
      * @param args CLI parameters.

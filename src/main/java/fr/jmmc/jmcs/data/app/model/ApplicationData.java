@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                 jMCS project ( http://www.jmmc.fr/dev/jmcs )
  *******************************************************************************
- * Copyright (c) 2013, CNRS. All rights reserved.
+ * Copyright (c) 2016, CNRS. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -45,30 +45,31 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ApplicationData">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="company" type="{}Company"/>
- *         &lt;element name="program" type="{}Program"/>
- *         &lt;element name="compilation" type="{}Compilation"/>
- *         &lt;element name="text" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="jnlp" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="sampdescription" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="authors" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="dependences" type="{}Dependences" minOccurs="0"/>
- *         &lt;element name="menubar" type="{}Menubar" minOccurs="0"/>
- *         &lt;element name="releasenotes" type="{}ReleaseNotes"/>
- *         &lt;element name="acknowledgment" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="link" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="iconlink" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="faqlink" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="rsslink" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="documentationlink" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="ApplicationData"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="company" type="{}Company"/&gt;
+ *         &lt;element name="program" type="{}Program"/&gt;
+ *         &lt;element name="compilation" type="{}Compilation"/&gt;
+ *         &lt;element name="text" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="jnlp" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="sampdescription" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="authors" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="distribution" type="{}Distribution" minOccurs="0"/&gt;
+ *         &lt;element name="dependences" type="{}Dependences" minOccurs="0"/&gt;
+ *         &lt;element name="menubar" type="{}Menubar" minOccurs="0"/&gt;
+ *         &lt;element name="releasenotes" type="{}ReleaseNotes"/&gt;
+ *         &lt;element name="acknowledgment" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="link" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="iconlink" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="faqlink" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="rsslink" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="documentationlink" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -82,6 +83,7 @@ import javax.xml.bind.annotation.XmlType;
     "jnlp",
     "sampdescription",
     "authors",
+    "distribution",
     "dependences",
     "menubar",
     "releasenotes",
@@ -100,6 +102,7 @@ public class ApplicationData {
     protected String jnlp;
     protected String sampdescription;
     protected String authors;
+    protected Distribution distribution;
     protected Dependences dependences;
     protected Menubar menubar;
     @XmlElement(required = true)
@@ -310,6 +313,34 @@ public class ApplicationData {
 
     public boolean isSetAuthors() {
         return (this.authors!= null);
+    }
+
+    /**
+     * Gets the value of the distribution property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Distribution }
+     *     
+     */
+    public Distribution getDistribution() {
+        return distribution;
+    }
+
+    /**
+     * Sets the value of the distribution property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Distribution }
+     *     
+     */
+    public void setDistribution(Distribution value) {
+        this.distribution = value;
+    }
+
+    public boolean isSetDistribution() {
+        return (this.distribution!= null);
     }
 
     /**

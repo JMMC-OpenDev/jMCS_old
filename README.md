@@ -37,8 +37,14 @@ cd jMCS/parent-pom
 mvn -Dassembly.skipAssembly -Djarsigner.skip=true clean install
 cd ..
 mvn process-resources
+
 # build jMCS jar files
 mvn clean package
 ```
 
 Jar files are then available in `target` directory !
+You also get the option to use prepared jar under the 'Download' section of prepared [releases](releases).   
+
+
+[![Build Status](https://travis-ci.org/gmella/jMCS.svg?branch=master)](https://travis-ci.org/gmella/jMCS)
+

@@ -53,14 +53,14 @@ public final class SpecialChars {
     public final static String UNIT_MICRO_METER = MU_LOWER + "m";
     /** Mega lambda unit (Ml) (lower case) */
     public final static String UNIT_MEGA_LAMBDA = "M" + LAMBDA_LOWER;
-    
+
     /**
      * Private constructor (utility class)
      */
     private SpecialChars() {
         // no-op
     }
-    
+
     /**
      * Test if the default font (SansSerif) can display the given character
      * @param ch character to check

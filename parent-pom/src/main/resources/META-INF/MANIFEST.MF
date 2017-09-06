@@ -1,4 +1,4 @@
-Built-By: JMMC (jmmc-tech-group@ujf-grenoble.fr)
+Built-By: JMMC (jmmc-tech-group@jmmc.fr)
 Built-Date: ${timestamp}
 Implementation-Title: ${project.artifactId} 
 Implementation-Version: ${project.version}

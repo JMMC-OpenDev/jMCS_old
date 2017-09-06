@@ -69,6 +69,13 @@ Else you will have :
                 <jarsigner.keystore>/home/MCS/etc/globalsign.jks</jarsigner.keystore>
                 <jarsigner.keypass>XXXXXX</jarsigner.keypass>
                 <jarsigner.storepass>XXXXXX</jarsigner.storepass>
+<!--
+                <jarsigner.tsa>tsa server url</jarsigner.tsa>
+-->
+<!-- enable timestamping but globalsign tsa server is too slow so left disabled. -->
+<!--
+                <jarsigner.tsa>http://timestamp.globalsign.com/scripts/timestamp.dll</jarsigner.tsa>
+-->
             </properties>
         </profile>
     </profiles>

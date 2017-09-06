@@ -62,7 +62,7 @@ public final class StatusBar extends JPanel {
     /** default serial UID for Serializable interface */
     private static final long serialVersionUID = 1;
     /** Logger */
-    private static final Logger _statusLogger = LoggingService.getInstance().getLogger(LoggingService.JMMC_STATUS_LOG);
+    private static final Logger STATUS_LOGGER = LoggingService.getInstance().getLogger(LoggingService.JMMC_STATUS_LOG);
     /** weak reference on the StatusBar singleton instance */
     private static volatile WeakReference<StatusBar> _weakSingleton = null;
     /* members */
@@ -215,7 +215,7 @@ public final class StatusBar extends JPanel {
         // Create text logo
         final JLabel textLogo = new JLabel();
         textLogo.setText("Provided by");
-        textLogo.setFont(new Font("Comic Sans MS", Font.ITALIC, 10));
+        textLogo.setFont(new Font("Comic Sans MS", Font.ITALIC, SwingUtils.adjustUISize(10)));
         jpanelRight.add(textLogo);
         jpanelRight.add(Box.createHorizontalStrut(spacer));
 
@@ -257,7 +257,7 @@ public final class StatusBar extends JPanel {
         _statusLabel.setText(message);
 
         // use status log:
-        _statusLogger.info(message);
+        STATUS_LOGGER.info(message);
     }
 
     /**

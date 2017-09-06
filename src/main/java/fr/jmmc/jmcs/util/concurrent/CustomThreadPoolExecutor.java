@@ -28,6 +28,8 @@
 package fr.jmmc.jmcs.util.concurrent;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +52,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor {
 
     /**
      * Single constructor allowed
-     * 
+     *
      * @param pPoolName thread pool name
      * @param corePoolSize the number of threads to keep in the
      * pool, even if they are idle.
@@ -108,7 +110,19 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor {
      * execution completed normally.
      */
     @Override
-    protected void afterExecute(final Runnable r, final Throwable th) {
+    protected void afterExecute(final Runnable r, Throwable th) {
+        if (th == null && r instanceof FutureTask) {
+            final FutureTask task = (FutureTask) r;
+            // If r is a FutureTask, the task is done
+            // Use get() to retrieve possible exception
+            try {
+                task.get();
+            } catch (InterruptedException ie) {
+                _logger.debug("{}.afterExecute : runnable: {}", _name, ie);
+            } catch (ExecutionException ee) {
+                th = ee.getCause();
+            }
+        }
         if (th == null) {
             _logger.debug("{}.afterExecute : runnable: {}", _name, r);
 
@@ -116,7 +130,16 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor {
                 _logger.warn("{}.afterExecute : runnable: {}", _name, r);
             }
         } else {
-            _logger.error("{}.afterExecute : uncaught exception: {}", _name, th);
+            final Thread thread = Thread.currentThread();
+            final Thread.UncaughtExceptionHandler handler = thread.getUncaughtExceptionHandler();
+
+            if (handler != null) {
+                _logger.debug("{}.afterExecute : uncaught exception: {}", _name, th);
+
+                handler.uncaughtException(thread, th);
+            } else {
+                _logger.error("{}.afterExecute : uncaught exception: {}", _name, th);
+            }
         }
     }
 

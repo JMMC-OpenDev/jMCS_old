@@ -222,6 +222,15 @@ public final class StringUtils {
         return PATTERN_NON_NUM.matcher(value).replaceAll(replaceBy);
     }
 
+    /**
+     * Split the given value at non numeric characters
+     * @param value input value
+     * @return numeric string values
+     */
+    public static String[] splitNonNumericChars(final String value) {
+        return PATTERN_NON_NUM.split(value);
+    }
+
     /* --- common file name helper methods ------------------------------ */
     /**
      * Replace invalid file name characters (1..n) by the underscore character

@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                 jMCS project ( http://www.jmmc.fr/dev/jmcs )
  *******************************************************************************
- * Copyright (c) 2013, CNRS. All rights reserved.
+ * Copyright (c) 2016, CNRS. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -42,23 +42,23 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Menu">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="menu" type="{}Menu" maxOccurs="unbounded" minOccurs="0"/>
- *       &lt;/sequence>
- *       &lt;attribute name="label" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="classpath" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="action" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="checkbox" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="radiogroup" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="accelerator" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="description" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="icon" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="Menu"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="menu" type="{}Menu" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="label" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="classpath" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="action" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="checkbox" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="radiogroup" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="accelerator" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="description" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="icon" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

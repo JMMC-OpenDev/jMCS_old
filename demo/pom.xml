@@ -68,14 +68,39 @@
         </dependency>
 
         <dependency>
-            <!-- Requires you to install manually the artifact:
-           mvn install:install-file -Dfile=lib/jmcs-demo-doc.jar -DgroupId=fr.jmmc.jmcs -DartifactId=jmcs-demo-doc -Dversion=1.0 -Dpackaging=jar
-            -->
+            <!-- Requires you to install the artifact: mvn preocess-resources-->
             <groupId>fr.jmmc.jmcs</groupId>
             <artifactId>jmcs-demo-doc</artifactId>
             <version>1.0</version>
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <id>jmcs-demo-doc</id>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <inherited>false</inherited>
+                        <phase>process-resources</phase> <!-- just before compilation -->
+                        <configuration>
+                            <file>lib/jmcs-demo-doc.jar</file>
+                            <groupId>fr.jmmc.jmcs</groupId>
+                            <artifactId>jmcs-demo-doc</artifactId>
+                            <version>1.0</version>
+                            <packaging>jar</packaging>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

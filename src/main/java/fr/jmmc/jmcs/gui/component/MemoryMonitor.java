@@ -28,8 +28,8 @@ public final class MemoryMonitor extends JPanel implements Disposable {
     private static final long serialVersionUID = 1;
     /** Logger */
     private static final Logger _logger = LoggerFactory.getLogger(MemoryMonitor.class.getName());
-    /** default refresh period = 1/4 second */
-    private static final int REFRESH_PERIOD = 250;
+    /** default refresh period = 1 second */
+    private static final int REFRESH_PERIOD = 1000;
 
     /* members */
     /** progress bar */
@@ -40,10 +40,8 @@ public final class MemoryMonitor extends JPanel implements Disposable {
     MemoryMonitor() {
         super(new BorderLayout());
 
-        final Dimension dim = new Dimension(80, 25);
+        final Dimension dim = new Dimension(100, 25);
         setMinimumSize(dim);
-        setPreferredSize(dim);
-        setMaximumSize(dim);
 
         progressBar = new JProgressBar();
         progressBar.setStringPainted(true);

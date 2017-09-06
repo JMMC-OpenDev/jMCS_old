@@ -25,56 +25,26 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package fr.jmmc.jmcs.util.runner;
+package fr.jmmc.jmcs.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Date;
+import org.apache.commons.lang.time.DateFormatUtils;
 
 /**
- * This class implements the JobListener interface (no op)
- * @author Laurent BOURGES.
+ * Date utility methods.
+ *
+ * @author Guillaume MELLA
  */
-public final class EmptyJobListener implements JobListener {
+public final class DateUtils {
 
-    /** Logger */
-    private static final Logger _logger = LoggerFactory.getLogger(EmptyJobListener.class.getName());
-
-    /** Listener singleton */
-    public static final EmptyJobListener INSTANCE = new EmptyJobListener();
-
-    private EmptyJobListener() {
-        // forbidden
-    }
-
+    // uncomment as soon as used in code /** Class logger */
+    //private static final Logger _logger = LoggerFactory.getLogger(DateUtils.class.getName());
     /**
-     * Perform the job event from the given root context.
-     * Called when the job has the following transitions : pending / running / finished
-     * @param rootCtx root context
+     * Get current datetime in ISO8601 format.
+     * @return datetime string in ISO8601 format.
      */
-    @Override
-    public void performJobEvent(final RootContext rootCtx) {
-        _logger.debug("performJobEvent: {}", rootCtx);
+    public static final String now() {
+        return DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.format(new Date());
     }
 
-    /**
-     * Perform the task event from the given run context
-     * @param rootCtx root context
-     * @param runCtx  current run context
-     */
-    @Override
-    public void performTaskEvent(final RootContext rootCtx, final RunContext runCtx) {
-        _logger.debug("performTaskEvent: {} - {}", rootCtx, runCtx);
-    }
-
-    /**
-     * Perform the event from the given run context
-     * @param rootCtx root context
-     * @param runCtx  current run context
-     * @return boolean: true if the processing should continue, false if the job should be terminated
-     */
-    @Override
-    public boolean performTaskDone(final RootContext rootCtx, final RunContext runCtx) {
-        _logger.debug("performTaskDone: {} - {}", rootCtx, runCtx);
-        return runCtx.getState() == RunState.STATE_FINISHED_OK;
-    }
 }

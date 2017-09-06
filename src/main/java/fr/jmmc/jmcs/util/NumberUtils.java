@@ -130,6 +130,15 @@ public final class NumberUtils {
     }
 
     /**
+     * Adjust the given double value to keep only 9 decimal digits
+     * @param value value to adjust
+     * @return double value with only 9 decimal digits
+     */
+    public static double trimTo9Digits(final double value) {
+        return ((long) (1e9d * value)) / 1e9d;
+    }
+
+    /**
      * Format the given double value using custom formaters:
      * - '0'     if abs(val) < 1e-9
      * - 0.000   if 1e-3 < abs(val) < 1e6
@@ -152,6 +161,33 @@ public final class NumberUtils {
             return FormatterUtils.format(_fmtScience, val);
         }
         return FormatterUtils.format(_fmtDef, val);
+    }
+
+    /**
+     * Returns true if two doubles are considered equal.  
+     * Test if the absolute difference between two doubles has a difference less than EPSILON.
+     *
+     * @param a double to compare.
+     * @param b double to compare.
+     * @return true true if two doubles are considered equal.
+     */
+    public static boolean equals(final float a, final float b) {
+        return equals(a, b, EPSILON);
+    }
+
+    /**
+     * Returns true if two doubles are considered equal. 
+     * 
+     * Test if the absolute difference between the two doubles has a difference less then a given
+     * double (epsilon).
+     *
+     * @param a double to compare.
+     * @param b double to compare
+     * @param epsilon double which is compared to the absolute difference.
+     * @return true if a is considered equal to b.
+     */
+    public static boolean equals(final float a, final float b, final float epsilon) {
+        return (a == b) ? true : (Math.abs(a - b) < epsilon);
     }
 
     /**
@@ -242,6 +278,26 @@ public final class NumberUtils {
      */
     public static boolean lessThan(final double a, final double b, final double epsilon) {
         return a - epsilon - b < 0d;
+    }
+
+    /**
+     * From OpenJDK7 Integer class:
+     *
+     * Compares two {@code int} values numerically.
+     * The value returned is identical to what would be returned by:
+     * <pre>
+     *    Integer.valueOf(x).compareTo(Integer.valueOf(y))
+     * </pre>
+     *
+     * @param  x the first {@code int} to compare
+     * @param  y the second {@code int} to compare
+     * @return the value {@code 0} if {@code x == y};
+     *         a value less than {@code 0} if {@code x < y}; and
+     *         a value greater than {@code 0} if {@code x > y}
+     * @since 1.7
+     */
+    public static int compare(final int x, final int y) {
+        return (x < y) ? -1 : ((x == y) ? 0 : 1);
     }
 
     /**

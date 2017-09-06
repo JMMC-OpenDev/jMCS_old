@@ -6,3 +6,6 @@
 mvn install:install-file -Dfile=lib/jhelpdev.jar -DgroupId=net.sourceforge.jhelpdev -DartifactId=jhelpdev -Dversion=0.63 -Dpackaging=jar
 
 mvn install:install-file -Dfile=lib/xmlenc.jar -DgroupId=org.znerd.xmlenc -DartifactId=xmlenc -Dversion=0.48 -Dpackaging=jar
+
+# Note: Tidy.jar is only used at runtime directly by the jmcsHTML2HelpSet.sh script
+ 

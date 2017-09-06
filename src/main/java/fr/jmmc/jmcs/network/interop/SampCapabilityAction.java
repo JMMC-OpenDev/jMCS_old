@@ -30,6 +30,8 @@ package fr.jmmc.jmcs.network.interop;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.JMenu;
@@ -188,14 +190,21 @@ public abstract class SampCapabilityAction extends RegisteredAction {
             menu.addSeparator();
         }
 
+        // sort clients by name:
+        final Client[] clients = new Client[nbOfClients];
+        for (int i = 0; i < nbOfClients; i++) {
+            clients[i] = (Client) _capableClients.getElementAt(i);
+        }
+        Arrays.sort(clients, ClientComparator.INSTANCE);
+        
         // Add each individual client
         for (int i = 0; i < nbOfClients; i++) {
-            final Client client = (Client) _capableClients.getElementAt(i);
+            final Client client = clients[i];
             final String clientName = client.toString();
             final String clientId = client.getId();
 
             final JMenuItem individualMenuItem = new JMenuItem(this);
-            individualMenuItem.setText(clientName);
+            individualMenuItem.setText(clientName + " [" + clientId + ']');
             individualMenuItem.setActionCommand(clientId);
 
             menu.add(individualMenuItem);
@@ -265,5 +274,22 @@ public abstract class SampCapabilityAction extends RegisteredAction {
             }
         }
         return ok;
+    }
+    
+    final static class ClientComparator implements Comparator<Client> {
+        
+        static final ClientComparator INSTANCE = new ClientComparator();
+
+        @Override
+        public int compare(final Client c1, final Client c2) {
+            if (c1 == c2) {
+                return 0;
+            }
+            if (c1 == null) {
+                return -1;
+            }
+            // toString() returns the client name or id (if name is undefined)
+            return c1.toString().compareToIgnoreCase(c2.toString());
+        }
     }
 }

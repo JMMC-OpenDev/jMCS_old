@@ -27,6 +27,7 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.util.concurrent;
 
+import fr.jmmc.jmcs.util.MCSExceptionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Custom Thread Factory for ThreadExecutors to create threads
- * 
+ *
  * @see ThreadFactory
  * @author Laurent BOURGES (voparis).
  */
@@ -54,7 +55,7 @@ public final class CustomThreadFactory implements ThreadFactory {
 
     /**
      * Constructor with the given thread pool name and use the normal thread priority
-     * 
+     *
      * @param pPoolName thread pool name
      */
     public CustomThreadFactory(final String pPoolName) {
@@ -63,7 +64,7 @@ public final class CustomThreadFactory implements ThreadFactory {
 
     /**
      * Constructor with the given thread pool name and thread priority
-     * 
+     *
      * @param pPoolName thread pool name
      * @param pPriority thread priority to set on created thread
      */
@@ -77,7 +78,7 @@ public final class CustomThreadFactory implements ThreadFactory {
     /**
      * Creates a new Thread (PoolThread) with the name [thread pool name]-thread-[number] and set its
      * priority
-     * 
+     *
      * @param r Runnable task
      * @return new thread created
      */
@@ -85,18 +86,21 @@ public final class CustomThreadFactory implements ThreadFactory {
     public Thread newThread(final Runnable r) {
         _logger.debug("CustomThreadFactory.newThread : enter with task: {}", r);
 
-        final Thread t = new PoolThread(r, _namePrefix + _threadNumber.getAndIncrement());
-        if (t.isDaemon()) {
-            t.setDaemon(false);
+        final Thread thread = new PoolThread(r, _namePrefix + _threadNumber.getAndIncrement());
+        if (thread.isDaemon()) {
+            thread.setDaemon(false);
         }
-        if (t.getPriority() != _priority) {
-            t.setPriority(_priority);
+        if (thread.getPriority() != _priority) {
+            thread.setPriority(_priority);
         } else {
-            t.setPriority(Thread.NORM_PRIORITY);
+            thread.setPriority(Thread.NORM_PRIORITY);
         }
 
-        _logger.debug("CustomThreadFactory.newThread : exit with thread {} for task: {}", t, r);
-        return t;
+        // define UncaughtExceptionHandler :
+        MCSExceptionHandler.installThreadHandler(thread);
+
+        _logger.debug("CustomThreadFactory.newThread : exit with thread {} for task: {}", thread, r);
+        return thread;
     }
 
     /**

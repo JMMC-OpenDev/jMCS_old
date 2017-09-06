@@ -27,9 +27,6 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.gui;
 
-import com.jidesoft.plaf.LookAndFeelFactory;
-import fr.jmmc.jmcs.App;
-import fr.jmmc.jmcs.util.JVMUtils;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.data.app.model.Menu;
 import fr.jmmc.jmcs.data.app.model.Menubar;
@@ -38,13 +35,9 @@ import fr.jmmc.jmcs.gui.action.RegisteredPreferencedBooleanAction;
 import fr.jmmc.jmcs.gui.action.internal.InternalActionFactory;
 import fr.jmmc.jmcs.network.interop.SampCapabilityAction;
 import fr.jmmc.jmcs.network.interop.SampManager;
-import fr.jmmc.jmcs.util.ImageUtils;
-import fr.jmmc.jmcs.util.IntrospectionUtils;
 import fr.jmmc.jmcs.service.RecentFilesManager;
+import fr.jmmc.jmcs.util.ImageUtils;
 import java.awt.Component;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,10 +54,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
-import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.text.DefaultEditorKit;
 import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
@@ -79,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * To access to the XML informations, this class uses <b>ApplicationDescription</b>
  * class. It's a class which has got getters in order to do that and which has
  * been written to abstract the way to access to these informations.
- * 
+ *
  * @author Brice COLUCCI, Sylvain LAFRASSE, Guillaume MELLA, Laurent BOURGES.
  */
 public class MainMenuBar extends JMenuBar {
@@ -169,11 +158,6 @@ public class MainMenuBar extends JMenuBar {
 
         // Create Interop menu :
         createInteropMenu();
-
-        final String lafMenu = System.getProperty(JVMUtils.SYSTEM_PROPERTY_LAF_MENU);
-        if (lafMenu != null && "true".equals(lafMenu)) {
-            createLAFMenu();
-        }
 
         createHelpMenu();
     }
@@ -342,57 +326,6 @@ public class MainMenuBar extends JMenuBar {
         // Keep this menu invisible until (at least) one capability is registered
         SampManager.hookMenu(interopMenu);
         _logger.debug("Add 'Interop' into the menubar.");
-    }
-
-    /** Create the 'Look & Feel' menu. */
-    private void createLAFMenu() {
-        // Create menu
-        final JMenu lafMenu = new JMenu("Look & Feel");
-
-        final ActionListener lafActionListener = new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             */
-            @Override
-            public void actionPerformed(final ActionEvent ae) {
-                final String className = ae.getActionCommand();
-                final String currentClassName = UIManager.getLookAndFeel().getClass().getName();
-
-                if (!className.equals(currentClassName)) {
-                    try {
-                        _logger.info("use Look and Feel : {}", className);
-
-                        final LookAndFeel newLaf = (LookAndFeel) IntrospectionUtils.getInstance(className);
-
-                        UIManager.setLookAndFeel(newLaf);
-
-                        // To ensure the use of TriStateCheckBoxes in the Jide CheckBoxTree
-                        LookAndFeelFactory.installJideExtension();
-
-                        final Frame mainFrame = App.getFrame();
-
-                        SwingUtilities.updateComponentTreeUI(mainFrame);
-                        mainFrame.pack();
-
-                    } catch (UnsupportedLookAndFeelException ulafe) {
-                        throw new RuntimeException("Change LAF failed : " + className, ulafe);
-                    }
-                }
-            }
-        };
-
-        JMenuItem menuItem;
-
-        for (UIManager.LookAndFeelInfo lookAndFeelInfo : UIManager.getInstalledLookAndFeels()) {
-
-            menuItem = new JMenuItem(lookAndFeelInfo.getName());
-            menuItem.setActionCommand(lookAndFeelInfo.getClassName());
-            menuItem.addActionListener(lafActionListener);
-
-            lafMenu.add(menuItem);
-        }
-
-        add(lafMenu);
     }
 
     /** Create the 'Help' menu. */
@@ -638,6 +571,15 @@ public class MainMenuBar extends JMenuBar {
     private void setAttributes(Menu menu, Action action) {
         if ((menu == null) || (action == null)) {
             return;
+        }
+
+        // Set action name
+        // This set the label of any button associated to any menu item's action
+        String xmlLabel = menu.getLabel();
+        String actionLabel = (String) action.getValue(Action.NAME);
+
+        if ((actionLabel == null) && (xmlLabel != null)) {
+            action.putValue(Action.NAME, xmlLabel);
         }
 
         // Set action accelerator

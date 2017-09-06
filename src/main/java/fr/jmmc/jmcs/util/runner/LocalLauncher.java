@@ -28,6 +28,12 @@
 package fr.jmmc.jmcs.util.runner;
 
 import fr.jmmc.jmcs.util.CollectionUtils;
+import fr.jmmc.jmcs.util.concurrent.CustomThreadPoolExecutor;
+import fr.jmmc.jmcs.util.concurrent.FastSemaphore;
+import fr.jmmc.jmcs.util.concurrent.ThreadExecutors;
+import fr.jmmc.jmcs.util.runner.process.ProcessContext;
+import fr.jmmc.jmcs.util.runner.process.ProcessRunner;
+import fr.jmmc.jmcs.util.runner.process.RingBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,12 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
-import fr.jmmc.jmcs.util.concurrent.CustomThreadPoolExecutor;
-import fr.jmmc.jmcs.util.concurrent.FastSemaphore;
-import fr.jmmc.jmcs.util.concurrent.ThreadExecutors;
-import fr.jmmc.jmcs.util.runner.process.ProcessContext;
-import fr.jmmc.jmcs.util.runner.process.ProcessRunner;
-import fr.jmmc.jmcs.util.runner.process.RingBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -175,8 +175,8 @@ public final class LocalLauncher {
     }
 
     /**
-     * Return the total job count 
-     * @return total job count 
+     * Return the total job count
+     * @return total job count
      */
     public static int getTotalJobs() {
         return JOBS_TOTAL.get();
@@ -266,7 +266,7 @@ public final class LocalLauncher {
     /**
      * Adds a job context in the queue and call the registered listener if job is accepted in the queue (pending).
      * The job will be executed by the Process Thread pool.
-     * 
+     *
      * @param rootCtx root context to execute
      */
     public static void startJob(final RootContext rootCtx) {
@@ -278,10 +278,11 @@ public final class LocalLauncher {
         rootCtx.setState(RunState.STATE_PENDING);
 
         // Get the registered job listener :
-        final JobListener listener = JOB_LISTENER.get(rootCtx.getName());
+        JobListener listener = JOB_LISTENER.get(rootCtx.getName());
 
         if (listener == null) {
-            throw new IllegalStateException("No Job listener for application [" + rootCtx.getName() + "] !");
+            // No Job listener for application [ rootCtx.getName() ] !
+            listener = EmptyJobListener.INSTANCE;
         }
 
         queueJob(rootCtx, listener);
@@ -292,7 +293,7 @@ public final class LocalLauncher {
     /**
      * Adds a job context in the queue and call the given listener if job is accepted in the queue (pending).
      * The job will be executed by the Process Thread pool.
-     * 
+     *
      * @param rootCtx root context to execute
      * @param listener job listener to use
      */
@@ -330,7 +331,6 @@ public final class LocalLauncher {
         JOBS_TOTAL.incrementAndGet();
 
         // Here : job has been accepted and queued in ThreadExecutor (maybe already running) :
-
         // define the future associated to the root context :
         rootCtx.setFuture(future);
 
@@ -385,6 +385,7 @@ public final class LocalLauncher {
         final RunContext runCtx = LocalLauncher.getJob(id);
         if (runCtx != null) {
             try {
+                _logger.info("LocalLauncher.killJob: {}", runCtx);
                 if (runCtx instanceof RootContext) {
                     // kill the root context :
                     final RootContext ctx = ((RootContext) runCtx);
@@ -473,10 +474,8 @@ public final class LocalLauncher {
 
             if (runCtx == null) {
                 _logger.warn("LocalLauncher.removeFromQueue: job not found in queue: {}", id);
-            } else {
-                if (_logger.isDebugEnabled()) {
-                    _logger.debug("LocalLauncher.removeFromQueue: job removed from queue: ", runCtx.shortString());
-                }
+            } else if (_logger.isDebugEnabled()) {
+                _logger.debug("LocalLauncher.removeFromQueue: job removed from queue: ", runCtx.shortString());
             }
         } catch (final InterruptedException ie) {
             _logger.error("LocalLauncher.removeFromQueue: interrupted: ", ie);
@@ -669,18 +668,15 @@ public final class LocalLauncher {
                     _logger.error("JobRunner.run : runtime exception : ", re);
                     ok = false;
                 } finally {
-
                     _rootCtx.getRing().add("Job '" + _rootCtx.getName() + "' Ended.");
 
                     // handle states :
                     if (RunState.STATE_INTERRUPTED == lastState && this._executor.isShutdown()) {
                         // interrupted due to thread pool shutdown :
                         _rootCtx.setState(RunState.STATE_INTERRUPTED);
-                    } else {
-                        if (_rootCtx.getState() != RunState.STATE_CANCELED && _rootCtx.getState() != RunState.STATE_KILLED) {
-                            // set finished state :
-                            _rootCtx.setState(ok ? RunState.STATE_FINISHED_OK : RunState.STATE_FINISHED_ERROR);
-                        }
+                    } else if (_rootCtx.getState() != RunState.STATE_CANCELED && _rootCtx.getState() != RunState.STATE_KILLED) {
+                        // set finished state :
+                        _rootCtx.setState(ok ? RunState.STATE_FINISHED_OK : RunState.STATE_FINISHED_ERROR);
                     }
 
                     // call listener :
@@ -692,6 +688,8 @@ public final class LocalLauncher {
                     if (!QUEUE_MANUAL_REMOVE_JOBS) {
                         removeFromQueue(_rootCtx.getId());
                     }
+                    // anyway close the context:
+                    _rootCtx.close();
                 }
 
                 // decrement live counter :
@@ -722,7 +720,6 @@ public final class LocalLauncher {
 
                 // starts program & waits for its end (and std threads) :
                 // uses a ring buffer for stdout/stderr :
-
                 if (runCtx instanceof ProcessContext) {
                     status = ProcessRunner.execute((ProcessContext) runCtx);
                 } else {

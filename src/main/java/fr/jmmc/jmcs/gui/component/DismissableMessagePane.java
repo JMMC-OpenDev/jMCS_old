@@ -41,6 +41,8 @@ import javax.swing.JOptionPane;
  */
 public final class DismissableMessagePane {
 
+    public static final String DO_NOT_SHOW_THIS_MESSAGE_AGAIN = "Do not show this message again.";
+
     private static String composePreferenceName(final String preferenceName) {
         final String dontShowPreferenceName = "MCSGUI.DismissableMessagePane." + preferenceName + ".dontShow";
         return dontShowPreferenceName;
@@ -69,7 +71,7 @@ public final class DismissableMessagePane {
             boolean dontShow = preferences.getPreferenceAsBoolean(dontShowPreferenceName, true);
 
             if (!dontShow) {
-                final JCheckBox checkbox = new JCheckBox("Do not show this message again.");
+                final JCheckBox checkbox = new JCheckBox(DO_NOT_SHOW_THIS_MESSAGE_AGAIN);
                 final Object[] params = {message, checkbox};
 
                 JOptionPane.showMessageDialog(App.getFrame(), params);

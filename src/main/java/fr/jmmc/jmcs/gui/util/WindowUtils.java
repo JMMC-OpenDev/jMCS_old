@@ -170,7 +170,7 @@ public final class WindowUtils {
      */
     public static Point getCenteringPoint(final Dimension frameDimension) throws NullPointerException {
         // refresh the screen dimensions (may throw NPE):
-        final Rectangle bounds = getScreenBounds(App.getFrame());
+        final Rectangle bounds = getScreenBounds(App.getExistingFrame());
 
         int x = Math.max(0, bounds.x) + Math.max(0, (bounds.width - frameDimension.width) / 2);
         int y = Math.max(0, bounds.y) + Math.max(0, (bounds.height - frameDimension.height) / 2);

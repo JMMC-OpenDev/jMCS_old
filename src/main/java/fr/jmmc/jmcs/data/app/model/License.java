@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                 jMCS project ( http://www.jmmc.fr/dev/jmcs )
  *******************************************************************************
- * Copyright (c) 2013, CNRS. All rights reserved.
+ * Copyright (c) 2016, CNRS. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -38,22 +38,22 @@ import javax.xml.bind.annotation.XmlType;
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="License">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="AFL v2.1"/>
- *     &lt;enumeration value="Apache v2"/>
- *     &lt;enumeration value="BSD"/>
- *     &lt;enumeration value="Eclipse v1"/>
- *     &lt;enumeration value="GPL v2"/>
- *     &lt;enumeration value="GPL v3"/>
- *     &lt;enumeration value="LGPL"/>
- *     &lt;enumeration value="LGPL v2"/>
- *     &lt;enumeration value="LGPL v2.1"/>
- *     &lt;enumeration value="MIT"/>
- *     &lt;enumeration value="Proprietary"/>
- *     &lt;enumeration value="UNKNOWN"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="License"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="AFL v2.1"/&gt;
+ *     &lt;enumeration value="Apache v2"/&gt;
+ *     &lt;enumeration value="BSD"/&gt;
+ *     &lt;enumeration value="Eclipse v1"/&gt;
+ *     &lt;enumeration value="GPL v2"/&gt;
+ *     &lt;enumeration value="GPL v3"/&gt;
+ *     &lt;enumeration value="LGPL"/&gt;
+ *     &lt;enumeration value="LGPL v2"/&gt;
+ *     &lt;enumeration value="LGPL v2.1"/&gt;
+ *     &lt;enumeration value="MIT"/&gt;
+ *     &lt;enumeration value="Proprietary"/&gt;
+ *     &lt;enumeration value="UNKNOWN"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  * 
  */

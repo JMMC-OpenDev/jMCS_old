@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                 jMCS project ( http://www.jmmc.fr/dev/jmcs )
  *******************************************************************************
- * Copyright (c) 2013, CNRS. All rights reserved.
+ * Copyright (c) 2016, CNRS. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -88,6 +88,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Distribution }
+     * 
+     */
+    public Distribution createDistribution() {
+        return new Distribution();
+    }
+
+    /**
      * Create an instance of {@link Dependences }
      * 
      */
@@ -112,11 +120,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Release }
+     * Create an instance of {@link Package }
      * 
      */
-    public Release createRelease() {
-        return new Release();
+    public Package createPackage() {
+        return new Package();
     }
 
     /**
@@ -128,11 +136,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Change }
+     * Create an instance of {@link Release }
      * 
      */
-    public Change createChange() {
-        return new Change();
+    public Release createRelease() {
+        return new Release();
     }
 
     /**
@@ -144,11 +152,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Package }
+     * Create an instance of {@link Change }
      * 
      */
-    public Package createPackage() {
-        return new Package();
+    public Change createChange() {
+        return new Change();
     }
 
 }

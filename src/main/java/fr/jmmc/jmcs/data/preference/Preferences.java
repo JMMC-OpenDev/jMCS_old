@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Properties;
 import javax.swing.Action;
@@ -1304,19 +1305,19 @@ public abstract class Preferences extends Observable {
      * @param sb buffer to append into
      * @return string representation of properties using the format "{name} : {value}"
      */
-    public static StringBuilder dumpProperties(final Properties properties, final StringBuilder sb) {
+    public static StringBuilder dumpProperties(final Map<?,?> properties, final StringBuilder sb) {
         if (properties == null) {
             return sb;
         }
 
         // Sort properties
-        final String[] keys = new String[properties.size()];
+        final Object[] keys = new Object[properties.size()];
         properties.keySet().toArray(keys);
         Arrays.sort(keys);
 
         // For each property, we make a string like "{name} : {value}"
-        for (String key : keys) {
-            sb.append(key).append(" : ").append(properties.getProperty(key)).append('\n');
+        for (Object key : keys) {
+            sb.append(key).append(" : ").append(properties.get(key)).append('\n');
         }
         return sb;
     }

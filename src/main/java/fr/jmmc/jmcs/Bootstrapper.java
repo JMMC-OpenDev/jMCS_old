@@ -131,6 +131,9 @@ public final class Bootstrapper {
         _jmmcLogger.info("jMCS environment bootstrapping...");
         setState(ApplicationState.ENV_BOOTSTRAP);
 
+        // Early load common preferences (jmcs):
+        CommonPreferences.getInstance();
+        
         // Define swing settings (laf, defaults...) before any Swing usage
         SwingSettings.setup();
 
@@ -298,7 +301,7 @@ public final class Bootstrapper {
      * @throws IllegalStateException TBD
      */
     public static boolean launchApp(final App application, final boolean waitBeforeExecution, final boolean exitWhenClosed,
-            final boolean shouldShowSplashScreen) throws IllegalStateException {
+                                    final boolean shouldShowSplashScreen) throws IllegalStateException {
 
         return ___internalLaunch(application, exitWhenClosed, shouldShowSplashScreen);
     }
@@ -345,6 +348,11 @@ public final class Bootstrapper {
 
             final double elapsedTime = 1e-6d * (System.nanoTime() - startTime);
             _jmmcLogger.info("Application startup done (duration = {} ms).", elapsedTime);
+
+            if (!isHeadless()) {
+                // Check Application updates
+                ApplicationDescription.checkUpdates();
+            }
 
         } catch (Throwable th) {
             final ApplicationState stateOnError = Bootstrapper.getState();
@@ -604,7 +612,7 @@ public final class Bootstrapper {
         try {
             // Save common settings if needed:
             CommonPreferences.saveToFileIfNeeded();
-            
+
             // Save session settings if needed:
             SessionSettingsPreferences.saveToFileIfNeeded();
 

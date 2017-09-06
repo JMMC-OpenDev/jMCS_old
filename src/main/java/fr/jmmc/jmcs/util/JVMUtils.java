@@ -33,12 +33,6 @@ package fr.jmmc.jmcs.util;
  */
 public final class JVMUtils {
 
-    /**
-     * This System property controls the Look & Feel menu (useful for debugging purposes).
-     * To show this menu, add "-Djmcs.laf.menu=true" to your JVM options.
-     */
-    public final static String SYSTEM_PROPERTY_LAF_MENU = "jmcs.laf.menu";
-
     /* JVM Heap information */
     /**
      * Return the memory information (heap) 

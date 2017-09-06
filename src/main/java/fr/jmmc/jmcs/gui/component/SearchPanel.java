@@ -322,7 +322,7 @@ public final class SearchPanel extends javax.swing.JFrame {
         final StringBuilder regexp = new StringBuilder(value.length() + 16);
 
         // Replace non regexp value to '*value*' to performs one contains operation (case sensitive)
-        regexp.append("*").append(value).append("*");
+        regexp.append('*').append(value).append('*');
 
         String token, replace;
         for (int i = 0, len = REGEXP_TOKEN_FROM.length; i < len; i++) {

@@ -180,6 +180,9 @@ public final class Http {
         httpClientParams.setParameter(HttpClientParams.HTTP_CONTENT_CHARSET, "UTF-8");
         // avoid retries (3 by default):
         httpClientParams.setParameter(HttpMethodParams.RETRY_HANDLER, _httpNoRetryHandler);
+        
+        // Customize the user agent:
+        httpClientParams.setParameter(HttpMethodParams.USER_AGENT, System.getProperty(NetworkSettings.PROPERTY_USER_AGENT));
     }
 
     /**

@@ -54,6 +54,8 @@ public final class MimeType {
     public final static MimeType SEARCHCAL_CALIBRATORLIST = MimeType.add("SEARCHCAL_CALIBRATORLIST", "application/x-searchcal+votable+xml", "SearchCal Calibrator List", "scvot.gz", "scvot");
     /** MimeType associated to Observation settings */
     public final static MimeType ASPRO_OBSERVATION = MimeType.add("ASPRO_OBSERVATION", "application/x-aspro+xml", "Aspro Observation Settings", "asprox");
+    /** MimeType associated to Observing Block definition */
+    public final static MimeType ASPRO_OB_XML = MimeType.add("ASPRO_OBSERVING_BLOCK", "application/x-aspro+ob+xml", "Aspro Observing Blocks", "obxml");
     /** MimeType associated to XML LITpro settings */
     public final static MimeType LITPRO_SETTINGS = MimeType.add("LITPRO_SETTINGS", "application/vnd.jmmc.litpro+xml", "LITpro XML Settings", "litprox", "xml");
     /** MimeType associated to OiFits explorer collection */
@@ -80,6 +82,8 @@ public final class MimeType {
     public final static MimeType PLAIN_TEXT = MimeType.add("PLAIN_TEXT", "text/plain", "Text files", "txt");
     /** MimeType associated to URL */
     public final static MimeType URL = MimeType.add("URL", "text/plain", "URL", "url");
+    /** MimeType associated to PAL format */
+    public final static MimeType PAL = MimeType.add("PAL", "text/palette", "Color palette files (hex or RGB triplets)", "pal");
     // Members
     /** mime-type identifier */
     private final String _id;

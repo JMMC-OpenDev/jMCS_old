@@ -39,8 +39,8 @@
         <feedback_form_url>http://jmmc.fr/feedback/feedback.php</feedback_form_url>
     </company>
 
-    <program name="jMCS Framework" version="1.0.4"/>
-    <compilation date="30/03/2016" compiler="1.6"/>
+    <program name="jMCS Framework" version="1.0.5"/>
+    <compilation date="06/09/2016" compiler="1.6"/>
 
     <text>JMMC framework, enabling better user interface and platform integration across Mac, Linux and Windows through numerous third-party libraries and in-house code</text>
 
@@ -188,14 +188,19 @@
     </dependences>
 
     <releasenotes>
-        <release version="1.0.4">
-          <!--
-            <prerelease version="1.0.4b8" tag="UNKNOWN">
-              <change type="CHANGE">In Readme.md : updated build procedure (mainly add support for process-resources maven target).</change>
+        <release version="1.0.5">
+            <pubDate>Wed, 06 Sep 2017 16:00:00 GMT</pubDate>
+            <prerelease version="1.0.5b1" tag="UNKNOWN">
+              <change type="CHANGE">Update release note still TBD !</change>
+              <!--
+                   <change type="CHANGE">In Readme.md : updated build procedure (mainly add support for process-resources maven target).</change>
               <change type="CHANGE">In fr.jmmc.jmcs.util.TestFileUtils.java : disabled too specific test.</change>
+-->
             </prerelease>
-           --> 
-            <prerelease version="1.0.4b7" tag="UNKNOWN">
+        </release>
+        <release version="1.0.4">
+            <pubDate>Wed, 30 Mar 2016 16:00:00 GMT</pubDate>
+           <prerelease version="1.0.4b7" tag="UNKNOWN">
                 <change type="FEATURE">In fr.jmmc.jmcs.service.BrowserLauncher.java : improved linux browser support and use the WEB_BROWSER preference.</change>
                 <change type="FEATURE">In fr.jmmc.jmcs.gui.component.CommonPreferencesView.java : added new embeddable JPanel to edit common preferences (web browser selector).</change>
                 <change type="FEATURE">In fr.jmmc.jmcs.data.preference.CommonPreferences.java : added the WEB_BROWSER preference.</change>

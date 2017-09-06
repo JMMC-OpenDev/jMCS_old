@@ -654,10 +654,16 @@ public class FeedbackReport extends javax.swing.JDialog implements KeyListener {
      */
     private static String getSystemConfig() {
         final StringBuilder sb = new StringBuilder(16384);
-        sb.append(JVMUtils.getMemoryInfo()).append("\n\n");
+        sb.append(JVMUtils.getMemoryInfo());
 
+        sb.append("\n\n\nSystem properties:\n");
         // Get all informations about the system running the application
-        return Preferences.dumpProperties(System.getProperties(), sb).toString();
+        Preferences.dumpProperties(System.getProperties(), sb);
+        
+        sb.append("\n\nEnvironment settings:\n");
+        Preferences.dumpProperties(System.getenv(), sb);
+        
+        return sb.toString();
     }
 
     /**

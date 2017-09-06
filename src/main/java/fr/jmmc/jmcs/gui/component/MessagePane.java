@@ -60,7 +60,7 @@ public final class MessagePane {
     /** Margin trick used to get better layout */
     private static final int MARGIN = 35;
     /** Maximum height for message component of dialog frames */
-    private static final int MAXIMUM_HEIGHT = 3 * MARGIN;
+    private static final int MAXIMUM_HEIGHT = 9 * MARGIN;
     /** default title for error messages */
     private final static String TITLE_ERROR = "Error";
     /** default title for warning messages */
@@ -400,13 +400,13 @@ public final class MessagePane {
 
         final FutureTask<String> future = new FutureTask<String>(
                 new Callable<String>() {
-                    @Override
-                    public String call() {
-                        // ensure window is visible (not iconified):
-                        App.showFrameToFront();
-                        return JOptionPane.showInputDialog(getApplicationFrame(), getMessageComponent(message), title, JOptionPane.INFORMATION_MESSAGE);
-                    }
-                });
+            @Override
+            public String call() {
+                // ensure window is visible (not iconified):
+                App.showFrameToFront();
+                return JOptionPane.showInputDialog(getApplicationFrame(), getMessageComponent(message), title, JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
 
         SwingUtils.invokeEDT(future);
 

@@ -31,18 +31,30 @@ import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.data.app.model.ApplicationData;
 import fr.jmmc.jmcs.data.app.model.Company;
 import fr.jmmc.jmcs.data.app.model.Compilation;
+import fr.jmmc.jmcs.data.app.model.Distribution;
 import fr.jmmc.jmcs.data.app.model.Menubar;
 import fr.jmmc.jmcs.data.app.model.Package;
+import fr.jmmc.jmcs.data.app.model.Prerelease;
 import fr.jmmc.jmcs.data.app.model.Program;
 import fr.jmmc.jmcs.data.app.model.Release;
+import fr.jmmc.jmcs.gui.action.ShowReleaseNotesAction;
+import fr.jmmc.jmcs.gui.component.ResizableTextViewFactory;
+import fr.jmmc.jmcs.network.http.Http;
+import fr.jmmc.jmcs.util.FileUtils;
 import fr.jmmc.jmcs.util.ResourceUtils;
 import fr.jmmc.jmcs.util.SpecialChars;
 import fr.jmmc.jmcs.util.StringUtils;
+import fr.jmmc.jmcs.util.concurrent.ThreadExecutors;
 import fr.jmmc.jmcs.util.jaxb.JAXBFactory;
 import fr.jmmc.jmcs.util.jaxb.XmlBindException;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -71,6 +83,8 @@ public final class ApplicationDescription {
 
     /** Logger */
     private static final Logger _logger = LoggerFactory.getLogger(ApplicationDescription.class.getName());
+    /** flag to dump release versions and dates */
+    private static boolean DUMP_RELEASES = false;
     /** Package name for JAXB generated code */
     private static final String APP_DATA_MODEL_JAXB_PATH = "fr.jmmc.jmcs.data.app.model";
     /** Application data file i.e. "ApplicationData.xml" */
@@ -79,19 +93,22 @@ public final class ApplicationDescription {
     private static ApplicationDescription _appDataModel = null;
     /** jMCS application data model */
     private static ApplicationDescription _defaultDataModel = null;
+    /** Flag indicating that loading the application data model happened */
+    private static boolean _loadAppDataModel = false;
 
     /**
      * ApplicationDescription instance initialization.
      */
     public static void init() {
         getJmcsInstance();
+        resetInstance();
         getInstance();
     }
 
     /**
      * @return jMCS ApplicationDescription instance.
      */
-    public static ApplicationDescription getJmcsInstance() {
+    public static synchronized ApplicationDescription getJmcsInstance() {
         if (_defaultDataModel == null) {
             loadJMcsData();
         }
@@ -99,11 +116,23 @@ public final class ApplicationDescription {
     }
 
     /**
+     * Reset the application ApplicationDescription instance.
+     */
+    private static synchronized void resetInstance() {
+        _appDataModel = null;
+        _loadAppDataModel = false;
+    }
+
+    /**
      * @return ApplicationDescription instance.
      */
-    public static ApplicationDescription getInstance() {
+    public static synchronized ApplicationDescription getInstance() {
         if (_appDataModel == null) {
-            loadApplicationData();
+            if (!_loadAppDataModel) {
+                // only try once:
+                _loadAppDataModel = true;
+                loadApplicationData();
+            }
             // if application is undefined: _appDataModel is still null and uses the default ApplicationData.xml.
             if (_appDataModel == null) {
                 return getJmcsInstance();
@@ -113,15 +142,153 @@ public final class ApplicationDescription {
     }
 
     /**
-     * Custom loader to load an ApplicationDescription from any URL (module for example)
-     * @param filePath path to any file included in the application class loader like 
+     * Check application updates (program version) using the optional Distribution information
+     */
+    public static synchronized void checkUpdates() {
+        if (_appDataModel == null) {
+            return;
+        }
+        final Distribution dist = _appDataModel.getDistribution();
+
+        if (dist != null && dist.isSetApplicationDataFile()) {
+            // Note: check updates at every application launch to gather better usage statistics (jnlp & java launchers)
+
+            String url = isAlphaVersion() ? dist.getAlphaUrl() : null;
+
+            if (url == null) {
+                url = isBetaVersion() ? dist.getBetaUrl() : null;
+            }
+            if (url == null) {
+                url = dist.getPublicUrl();
+            }
+
+            final String distURL = url;
+
+            if (distURL != null) {
+
+                // Make all the network stuff run in the background
+                ThreadExecutors.getGenericExecutor().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            final String currentVersion = _appDataModel.getProgramVersion();
+                            final Date currentPubDate = _appDataModel.parsePubDate(currentVersion);
+
+                            _logger.info("Current application version: {} @ {}",
+                                    _appDataModel.getProgramNameWithVersion(), currentPubDate);
+
+                            dumpVersions(_appDataModel);
+
+                            final String appName = _appDataModel.getProgramName();
+                            final float currentVersionNum = parseVersion(currentVersion, true);
+
+                            _logger.debug("currentName: {}", appName);
+                            _logger.debug("currentVersion: {} = {}", currentVersion, currentVersionNum);
+
+                            final File tmpFile = FileUtils.getTempFile(appName + '-', ".xml");
+
+                            final URI uri = new URI(distURL + dist.getApplicationDataFile());
+
+                            _logger.info("downloading {} to {}", uri, tmpFile);
+
+                            if (Http.download(uri, tmpFile, false)) {
+                                // check version and release notes ...
+                                _logger.info("{} downloaded: {} bytes", tmpFile, tmpFile.length());
+
+                                final ApplicationDescription remoteAppDataModel = loadDescription(tmpFile);
+
+                                final String remoteVersion = remoteAppDataModel.getProgramVersion();
+                                final Date remotePubDate = remoteAppDataModel.parsePubDate(remoteVersion);
+
+                                _logger.info("Remote application version: {} @ {}",
+                                        remoteAppDataModel.getProgramNameWithVersion(), remotePubDate);
+
+                                // Check program name and version increment
+                                final String remoteName = remoteAppDataModel.getProgramName();
+                                _logger.debug("remoteName: {}", remoteName);
+
+                                if (appName.equalsIgnoreCase(remoteName)) {
+
+                                    final float remoteVersionNum = parseVersion(remoteVersion, true);
+
+                                    _logger.debug("remoteVersion: {} = {}", remoteVersion, remoteVersionNum);
+
+                                    dumpVersions(remoteAppDataModel);
+
+                                    if (remoteVersionNum > currentVersionNum
+                                            || (remotePubDate != null && currentPubDate != null && remotePubDate.after(currentPubDate))) {
+
+                                        _logger.info("Application update available: {} < {}", currentVersion, remoteVersion);
+
+                                        final StringBuilder html = new StringBuilder(4 * 1024);
+                                        html.append("<html><body><h1>New <b>").append(appName).append("</b> release available:</h1><br>")
+                                                .append(remoteVersion).append(" > ").append(currentVersion)
+                                                .append("<br><br>Release date: ").append(remotePubDate)
+                                                .append(".<br><br>Please use the following link:<br><a href=\"").append(distURL)
+                                                .append("\">download</a><br><br><h2>Changes:</h2>");
+
+                                        // Show all changes since currentVersion:
+                                        ShowReleaseNotesAction.generateReleaseNotesHtml(_appDataModel, currentVersion, html);
+
+                                        html.append("</body></html>");
+
+                                        ResizableTextViewFactory.createHtmlWindow(html.toString(), appName + " update available", true);
+
+                                    } else {
+                                        _logger.info("Application is up-to-date: {} >= {}", currentVersion, remoteVersion);
+                                    }
+                                }
+                            }
+                        } catch (URISyntaxException use) {
+                            _logger.warn("Bad URI:", use);
+                        } catch (IOException ioe) {
+                            _logger.info("IO failure (no network / internet access ?):", ioe);
+                        } catch (RuntimeException re) {
+                            _logger.info("Runtime exception occured:", re);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private static void dumpVersions(ApplicationDescription appData) {
+        if (DUMP_RELEASES) {
+            for (Release r : appData.getReleases()) {
+                _logger.info("Release {}: {} @ {}", r.getVersion(),
+                        parseVersion(r.getVersion(), true),
+                        appData.parsePubDate(r.getVersion()));
+
+                for (Prerelease p : r.getPrereleases()) {
+                    _logger.info("Prerelease {}: {} @ {}", p.getVersion(),
+                            parseVersion(p.getVersion(), true),
+                            appData.parsePubDate(p.getVersion()));
+                }
+            }
+        }
+    }
+
+    /**
+     * Custom loader to load an ApplicationDescription from any classpath URL (module for example)
+     * @param classLoaderPath path to any file included in the application class loader 
      * @return new loaded and parsed ApplicationDescription instance
      * @throws IllegalStateException if the given URL can not be loaded
      */
-    public static ApplicationDescription loadDescription(final String filePath) throws IllegalStateException {
+    public static ApplicationDescription loadDescription(final String classLoaderPath) throws IllegalStateException {
         // TODO: fix that code : To be discussed
-        final URL fileURL = ResourceUtils.getResource(filePath);
+        final URL fileURL = ResourceUtils.getResource(classLoaderPath);
         return new ApplicationDescription(fileURL);
+    }
+
+    /**
+     * Custom loader to load an ApplicationDescription from any File
+     * @param filePath file path
+     * @return new loaded and parsed ApplicationDescription instance
+     * @throws IllegalStateException if the given file can not be loaded
+     * @throws MalformedURLException if the given file path can not be converted to an URL
+     */
+    public static ApplicationDescription loadDescription(final File filePath) throws IllegalStateException, MalformedURLException {
+        return new ApplicationDescription(filePath.toURI().toURL());
     }
 
     /**
@@ -160,10 +327,22 @@ public final class ApplicationDescription {
      * @return true if it is a alpha, false otherwise.
      */
     public static boolean isAlphaVersion() {
-        if (isBetaVersion()) {
+        return isAlphaVersion(getInstance().getProgramVersion());
+    }
+
+    /**
+     * Tell if the application is an alpha version or not.
+     * This flag is given searching one 'a' in the program version number.
+     * If one b is present the version is considered beta.
+     *
+     * @param version value of the "program version" element
+     * @return true if it is a alpha, false otherwise.
+     */
+    public static boolean isAlphaVersion(final String version) {
+        if (isBetaVersion(version)) {
             return false;
         }
-        return getInstance().getProgramVersion().contains("a");
+        return (version != null) && version.contains("a");
     }
 
     /**
@@ -173,7 +352,18 @@ public final class ApplicationDescription {
      * @return true if it is a beta, false otherwise.
      */
     public static boolean isBetaVersion() {
-        return getInstance().getProgramVersion().contains("b");
+        return isBetaVersion(getInstance().getProgramVersion());
+    }
+
+    /**
+     * Tell if the application is a beta version or not.
+     * This flag is given searching one 'b' in the program version number.
+     *
+     * @param version value of the "program version" element
+     * @return true if it is a beta, false otherwise.
+     */
+    public static boolean isBetaVersion(final String version) {
+        return (version != null) && version.contains("b");
     }
 
     /**
@@ -182,12 +372,22 @@ public final class ApplicationDescription {
      * @return version number as float
      */
     public static float parseVersion(final String version) {
+        return parseVersion(version, false);
+    }
+
+    /**
+     * Parse the application's version string (0.9.4 beta 11 for example) as a float number to be comparable
+     * @param version version as string
+     * @param roundUp true to round up for major release (not beta nor alpha)
+     * @return version number as float
+     */
+    public static float parseVersion(final String version, final boolean roundUp) {
         float res = 0f;
 
         // Extract first numeric part '0.'
         String tmp = version;
         final String first;
-        
+
         int pos = tmp.indexOf('.');
         if (pos != -1) {
             pos++;
@@ -196,15 +396,54 @@ public final class ApplicationDescription {
         } else {
             first = "0.";
         }
-        
+
         // Remove whitespace and '.' in "9.4 beta 11" => "94beta11":
         tmp = StringUtils.removeNonAlphaNumericChars(tmp);
 
-        // Replace chars by '' in "94beta11" => "9411":
-        tmp = StringUtils.replaceNonNumericChars(tmp, "");
+        String level = null;
+        if (roundUp) {
+            if (isBetaVersion(tmp)) {
+                level = "009";
+            } else if (isAlphaVersion(tmp)) {
+                level = "001";
+            } else {
+                level = "099";
+            }
+        }
+
+        final String[] parts = StringUtils.splitNonNumericChars(tmp);
+
+        // (left) pad parts with 0:
+        // "9.4 beta 1" => "9401"
+        for (int i = 1; i < parts.length; i++) {
+            final String part = parts[i];
+            switch (part.length()) {
+                case 0:
+                    parts[i] = "00";
+                    break;
+                case 1:
+                    parts[i] = "0" + part;
+                    break;
+                default:
+            }
+        }
+
+        final StringBuilder sb = new StringBuilder(16);
+        sb.append(first);
+        if (parts.length != 0) {
+            sb.append(parts[0]);
+        }
+        if (level != null) {
+            sb.append(level);
+        }
+        for (int i = 1; i < parts.length; i++) {
+            sb.append(parts[i]);
+        }
+        tmp = sb.toString();
+
+        _logger.debug("parse: {}", tmp);
 
         try {
-            tmp = first + tmp;
             // parse tmp => 0.9411:
             res = Float.parseFloat(tmp);
         } catch (NumberFormatException nfe) {
@@ -214,8 +453,6 @@ public final class ApplicationDescription {
     }
 
     // Members
-    /** internal JAXB Factory */
-    private final JAXBFactory _jf;
     /** The JAVA class which JAXB has generated with the XSD file */
     private ApplicationData _applicationData = null;
     /** The JAVA class which JAXB has generated with the XSD file */
@@ -250,11 +487,6 @@ public final class ApplicationDescription {
      */
     private ApplicationDescription(final URL dataModelURL) throws IllegalStateException {
         _logger.debug("Loading Application data model from {}", dataModelURL);
-
-        // Start JAXB
-        _jf = JAXBFactory.getInstance(APP_DATA_MODEL_JAXB_PATH);
-
-        _logger.debug("JAXBFactory: {}", _jf);
 
         // Load application data
         _applicationData = loadData(dataModelURL);
@@ -311,12 +543,19 @@ public final class ApplicationDescription {
         _logger.debug("Application data model loaded.");
     }
 
-    /** Invoke JAXB to load ApplicationData.xml file */
-    private ApplicationData loadData(final URL dataModelURL) throws XmlBindException, IllegalArgumentException, IllegalStateException {
+    /** 
+     * Invoke JAXB to load ApplicationData.xml file
+     * @param dataModelURL url pointing to the ApplicationData.xml file
+     * @return ApplicationData instance
+     */
+    private static ApplicationData loadData(final URL dataModelURL) throws XmlBindException, IllegalArgumentException, IllegalStateException {
+
+        final JAXBFactory jf = JAXBFactory.getInstance(APP_DATA_MODEL_JAXB_PATH);
+        _logger.debug("JAXBFactory: {}", jf);
 
         // Note : use input stream to avoid JNLP offline bug with URL (Unknown host exception)
         try {
-            final Unmarshaller u = _jf.createUnMarshaller();
+            final Unmarshaller u = jf.createUnMarshaller();
             return (ApplicationData) u.unmarshal(new BufferedInputStream(dataModelURL.openStream()));
         } catch (IOException ioe) {
             throw new IllegalStateException("Load failure on " + dataModelURL, ioe);
@@ -514,8 +753,8 @@ public final class ApplicationDescription {
         int year;
         try {
             // Try to get the year from the compilation date
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-            Date date = formatter.parse(compilationDate);
+            DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+            Date date = df.parse(compilationDate);
             Calendar cal = Calendar.getInstance();
             cal.setTime(date);
             year = cal.get(Calendar.YEAR);
@@ -569,12 +808,58 @@ public final class ApplicationDescription {
         return _applicationData.getJnlp();
     }
 
+    public Distribution getDistribution() {
+        return _applicationData.getDistribution();
+    }
+
     /**
      * Return the release notes
      * @return release list.
      */
     public List<Release> getReleases() {
         return _applicationData.getReleasenotes().getReleases();
+    }
+
+    public Date parsePubDate() {
+        return parsePubDate(getProgramVersion());
+    }
+
+    public Date parsePubDate(final String version) {
+        final String pubDate = getPubDate(version);
+
+        if (pubDate != null) {
+            final DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+            try {
+                return df.parse(pubDate);
+            } catch (ParseException pe) {
+                _logger.warn("Cannot parse publication date '{}'.", pubDate, pe);
+            }
+        }
+        return null;
+    }
+
+    public String getPubDate() {
+        return getPubDate(getProgramVersion());
+    }
+
+    public String getPubDate(final String version) {
+        for (Release r : getReleases()) {
+            final String releasePubDate = r.getPubDate();
+
+            if (version.equalsIgnoreCase(r.getVersion())) {
+                return releasePubDate;
+            }
+
+            for (Prerelease p : r.getPrereleases()) {
+                final String preReleasePubDate = r.getPubDate();
+
+// TODO TRY            DateFormat.getDateTimeInstance().parse(version)
+                if (version.equalsIgnoreCase(p.getVersion())) {
+                    return (preReleasePubDate != null) ? preReleasePubDate : releasePubDate;
+                }
+            }
+        }
+        return null;
     }
 }
 /*___oOo___*/

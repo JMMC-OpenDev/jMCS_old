@@ -37,6 +37,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.List;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,8 @@ public final class NetworkSettings {
     public static final String PROPERTY_DEFAULT_READ_TIMEOUT = "sun.net.client.defaultReadTimeout";
     /** Use System Proxies */
     public static final String PROPERTY_USE_SYSTEM_PROXIES = "java.net.useSystemProxies";
+    /** HTTP User agent */
+    public static final String PROPERTY_USER_AGENT = "http.agent";
     /** Java plug-in proxy list */
     public static final String PROPERTY_JAVA_PLUGIN_PROXY_LIST = "javaplugin.proxy.config.list";
     /** HTTP proxy host */
@@ -113,9 +116,23 @@ public final class NetworkSettings {
      * Define default values (timeouts, proxy ...)
      */
     public static void defineDefaults() {
+        defineUserAgent();
         defineTimeouts();
-
         defineProxy();
+    }
+    
+    /**
+     * Define the HTTP User agent
+     */
+    public static void defineUserAgent() {
+        // Customize the http user-agent (as early as possible):
+        final String version = StringUtils.replaceNonAlphaNumericCharsByUnderscore(SystemUtils.JAVA_VERSION + '-' + SystemUtils.JAVA_VM_VERSION);
+        final String jvmName = SystemUtils.JAVA_VM_NAME;
+
+        final String osName = SystemUtils.OS_NAME;
+        final String osVersion = StringUtils.replaceNonAlphaNumericCharsByUnderscore(SystemUtils.OS_VERSION);
+
+        System.setProperty(PROPERTY_USER_AGENT, "Java/" + version + " (" + jvmName + ") [" + osName + '-' + osVersion + "] (JMMC)");
     }
 
     /**

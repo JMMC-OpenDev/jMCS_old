@@ -27,29 +27,27 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.data.app.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Prerelease complex type.
+ * <p>Java class for Distribution complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Prerelease"&gt;
+ * &lt;complexType name="Distribution"&gt;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="change" type="{}Change" maxOccurs="unbounded"/&gt;
+ *         &lt;element name="application_data_file" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="public_url" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="beta_url" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="alpha_url" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
- *       &lt;attribute name="version" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
- *       &lt;attribute name="tag" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
@@ -58,109 +56,133 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Prerelease", propOrder = {
-    "changes"
+@XmlType(name = "Distribution", propOrder = {
+    "applicationDataFile",
+    "publicUrl",
+    "betaUrl",
+    "alphaUrl"
 })
-public class Prerelease {
+public class Distribution {
 
-    @XmlElement(name = "change", required = true)
-    protected List<Change> changes;
-    @XmlAttribute(name = "version", required = true)
-    protected String version;
-    @XmlAttribute(name = "tag")
-    protected String tag;
-
-    /**
-     * Gets the value of the changes property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the changes property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getChanges().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Change }
-     * 
-     * 
-     */
-    public List<Change> getChanges() {
-        if (changes == null) {
-            changes = new ArrayList<Change>();
-        }
-        return this.changes;
-    }
-
-    public boolean isSetChanges() {
-        return ((this.changes!= null)&&(!this.changes.isEmpty()));
-    }
-
-    public void unsetChanges() {
-        this.changes = null;
-    }
+    @XmlElement(name = "application_data_file", required = true)
+    protected String applicationDataFile;
+    @XmlElement(name = "public_url", required = true)
+    protected String publicUrl;
+    @XmlElement(name = "beta_url")
+    protected String betaUrl;
+    @XmlElement(name = "alpha_url")
+    protected String alphaUrl;
 
     /**
-     * Gets the value of the version property.
+     * Gets the value of the applicationDataFile property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getVersion() {
-        return version;
+    public String getApplicationDataFile() {
+        return applicationDataFile;
     }
 
     /**
-     * Sets the value of the version property.
+     * Sets the value of the applicationDataFile property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setVersion(String value) {
-        this.version = value;
+    public void setApplicationDataFile(String value) {
+        this.applicationDataFile = value;
     }
 
-    public boolean isSetVersion() {
-        return (this.version!= null);
+    public boolean isSetApplicationDataFile() {
+        return (this.applicationDataFile!= null);
     }
 
     /**
-     * Gets the value of the tag property.
+     * Gets the value of the publicUrl property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getTag() {
-        return tag;
+    public String getPublicUrl() {
+        return publicUrl;
     }
 
     /**
-     * Sets the value of the tag property.
+     * Sets the value of the publicUrl property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setTag(String value) {
-        this.tag = value;
+    public void setPublicUrl(String value) {
+        this.publicUrl = value;
     }
 
-    public boolean isSetTag() {
-        return (this.tag!= null);
+    public boolean isSetPublicUrl() {
+        return (this.publicUrl!= null);
+    }
+
+    /**
+     * Gets the value of the betaUrl property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getBetaUrl() {
+        return betaUrl;
+    }
+
+    /**
+     * Sets the value of the betaUrl property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setBetaUrl(String value) {
+        this.betaUrl = value;
+    }
+
+    public boolean isSetBetaUrl() {
+        return (this.betaUrl!= null);
+    }
+
+    /**
+     * Gets the value of the alphaUrl property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getAlphaUrl() {
+        return alphaUrl;
+    }
+
+    /**
+     * Sets the value of the alphaUrl property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setAlphaUrl(String value) {
+        this.alphaUrl = value;
+    }
+
+    public boolean isSetAlphaUrl() {
+        return (this.alphaUrl!= null);
     }
 
 }

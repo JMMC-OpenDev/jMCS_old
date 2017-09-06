@@ -110,30 +110,46 @@ public final class ShowReleaseNotesAction extends RegisteredAction {
         _windowTitle += " Release Notes";
 
         // Compose standard header
-        final StringBuilder generatedHtml = new StringBuilder(8 * 1024);
-        generatedHtml.append("<html><body>");
-        generatedHtml.append("<h1><center><b>").append(_windowTitle).append("</b></center></h1>\n");
+        final StringBuilder html = new StringBuilder(8 * 1024);
+        html.append("<html><body>");
+        html.append("<h1><center><b>").append(_windowTitle).append("</b></center></h1>\n");
+
+        generateReleaseNotesHtml(_applicationDescription, null, html);
+
+        html.append("</body></html>");
+
+        return html.toString();
+    }
+
+    public static void generateReleaseNotesHtml(final ApplicationDescription appData,
+                                                final String lastVersion,
+                                                final StringBuilder html) {
 
         // Extracted changes per type:
         final List<Change> changeList = new ArrayList<Change>(20);
-        for (Release r : _applicationDescription.getReleases()) {
 
-            generatedHtml.append("<hr>").append("<h3>").append("Version ").append(r.getVersion());
+        boolean match = false;
+
+        for (Release r : appData.getReleases()) {
+
+            match |= (lastVersion != null && lastVersion.equalsIgnoreCase(r.getVersion()));
+
+            html.append("<hr>").append("<h3>").append("Version ").append(r.getVersion());
             String pubDate = r.getPubDate();
             if (pubDate == null) {
                 pubDate = "no publication date yet";
             }
-            generatedHtml.append(" (<i>").append(pubDate).append("</i>)</h3>\n");
+            html.append(" (<i>").append(pubDate).append("</i>)</h3>\n");
 
-            processChangeType("FEATURE", "Features", r.getPrereleases(), generatedHtml, changeList);
-            processChangeType("CHANGE", "Changes", r.getPrereleases(), generatedHtml, changeList);
-            processChangeType(null, null, r.getPrereleases(), generatedHtml, changeList); // empty type considered as 'Change'
-            processChangeType("BUGFIX", "Bug Fixes", r.getPrereleases(), generatedHtml, changeList);
+            match |= processChangeType("FEATURE", "Features", r.getPrereleases(), lastVersion, html, changeList);
+            match |= processChangeType("CHANGE", "Changes", r.getPrereleases(), lastVersion, html, changeList);
+            match |= processChangeType(null, null, r.getPrereleases(), lastVersion, html, changeList); // empty type considered as 'Change'
+            match |= processChangeType("BUGFIX", "Bug Fixes", r.getPrereleases(), lastVersion, html, changeList);
+
+            if (match) {
+                break;
+            }
         }
-
-        generatedHtml.append("</body></html>");
-
-        return generatedHtml.toString();
     }
 
     /**
@@ -144,9 +160,15 @@ public final class ShowReleaseNotesAction extends RegisteredAction {
      * @param prereleaseList list of prerelease 
      * @param generatedHtml HTML buffer to fill
      * @param changeList temporary list of Change to fill
+     * @return true if the lastVersion was found
      */
-    private void processChangeType(final String type, final String label, final List<Prerelease> prereleaseList, final StringBuilder generatedHtml, final List<Change> changeList) {
-        if (findChangeByType(type, prereleaseList, changeList)) {
+    private static boolean processChangeType(final String type, final String label, final List<Prerelease> prereleaseList,
+                                             final String lastVersion,
+                                             final StringBuilder generatedHtml, final List<Change> changeList) {
+
+        final boolean match = findChangeByType(type, prereleaseList, lastVersion, changeList);
+
+        if (!changeList.isEmpty()) {
             if (label != null) {
                 generatedHtml.append(label).append(":\n");
             }
@@ -157,6 +179,7 @@ public final class ShowReleaseNotesAction extends RegisteredAction {
             }
             generatedHtml.append("</ul>\n");
         }
+        return match;
     }
 
     /**
@@ -166,24 +189,30 @@ public final class ShowReleaseNotesAction extends RegisteredAction {
      * @param changeList list of Change to fill
      * @return true if Change instances found for the given type, false otherwise.
      */
-    private boolean findChangeByType(final String type, final List<Prerelease> prereleaseList, final List<Change> changeList) {
+    private static boolean findChangeByType(final String type, final List<Prerelease> prereleaseList,
+                                            final String lastVersion, final List<Change> changeList) {
         changeList.clear();
 
         final boolean noType = StringUtils.isEmpty(type);
 
         for (Prerelease p : prereleaseList) {
+
+            final boolean match = (lastVersion != null && lastVersion.equalsIgnoreCase(p.getVersion()));
+
             for (Change c : p.getChanges()) {
                 if (noType) {
                     if (StringUtils.isEmpty(c.getType())) {
                         changeList.add(c);
                     }
-                } else {
-                    if (type.equalsIgnoreCase(c.getType())) {
-                        changeList.add(c);
-                    }
+                } else if (type.equalsIgnoreCase(c.getType())) {
+                    changeList.add(c);
                 }
             }
+
+            if (match) {
+                return true;
+            }
         }
-        return !changeList.isEmpty();
+        return false;
     }
 }

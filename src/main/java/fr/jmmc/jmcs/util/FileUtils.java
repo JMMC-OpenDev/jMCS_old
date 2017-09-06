@@ -126,7 +126,7 @@ public final class FileUtils {
      * pathname.  This is just the last name in the pathname's name
      * sequence.  If the pathname's name sequence is empty, then the empty
      * string is returned.
-     * 
+     *
      * @param fileName long file name (local or remote)
      *
      * @return  The name of the file or directory denoted by this abstract
@@ -376,7 +376,7 @@ public final class FileUtils {
      */
     public static Writer openFile(final File file, final int bufferSize) {
         try {
-            // Should define UTF-8 encoding for cross platform compatibility 
+            // Should define UTF-8 encoding for cross platform compatibility
             // but we must stay compatible with existing files (windows vs unix)
             return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)), bufferSize);
         } catch (final IOException ioe) {
@@ -396,7 +396,7 @@ public final class FileUtils {
      */
     /*
      public static Writer openFile(final File file) throws IOException {
-     // Should define UTF-8 encoding for cross platform compatibility 
+     // Should define UTF-8 encoding for cross platform compatibility
      // but we must stay compatible with existing files (windows vs unix)
      return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
      // return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), FILE_ENCODING));
@@ -406,7 +406,7 @@ public final class FileUtils {
      * Close the given reader
      *
      * @param r reader to close
-     * 
+     *
      * @return null to optionally reset variable (fluent API)
      */
     public static Reader closeFile(final Reader r) {
@@ -424,7 +424,7 @@ public final class FileUtils {
      * Close the given writer
      *
      * @param w writer to close
-     * 
+     *
      * @return null to optionally reset variable (fluent API)
      */
     public static Writer closeFile(final Writer w) {
@@ -488,9 +488,8 @@ public final class FileUtils {
      * @param in input stream to save as file
      * @param dst destination file
      * @throws IOException if an I/O exception occurred
-     * @throws FileNotFoundException if input file is not found
      */
-    public static void saveStream(final InputStream in, final File dst) throws IOException, FileNotFoundException {
+    public static void saveStream(final InputStream in, final File dst) throws IOException {
         final OutputStream out = new BufferedOutputStream(new FileOutputStream(dst), 64 * 1024);
 
         // Transfer bytes from in to out
@@ -503,6 +502,31 @@ public final class FileUtils {
             }
         } finally {
             closeStream(in);
+            closeStream(out);
+        }
+    }
+
+    /**
+     * Save the input file to the given output stream.
+     *
+     * @param in input file
+     * @param dst destination outputstream
+     * @throws IOException if an I/O exception occurred
+     * @throws FileNotFoundException if the input file is not found
+     */
+    public static void saveFile(final File in, final OutputStream dst) throws IOException, FileNotFoundException {
+        final OutputStream out = new BufferedOutputStream(dst, 64 * 1024);
+        final InputStream is = new FileInputStream(in);
+        // Transfer bytes from in to out
+        try {
+            final byte[] buf = new byte[64 * 1024];
+
+            int len;
+            while ((len = is.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+        } finally {
+            closeStream(is);
             closeStream(out);
         }
     }
@@ -750,20 +774,21 @@ public final class FileUtils {
     /**
      * Retrieve a remote file onto local disk.
      * For now: limited to HTTP and HTTPS.
-     * 
+     *
      * Warning: calling this method may block the current thread for long time (slow transfer or big file or timeout)
      * Please take care of using it properly using a cancellable SwingWorker (Cancellable background task)
      *
+     * @see #download(fr.jmmc.jmcs.network.http.Http)
      * @param remoteLocation remote location
      * @param parentDir destination directory
      * @param mimeType mime type to fix missing file extension
      * @return a copy of the remote file
-     * @throws IOException if any I/O operation fails (HTTP or file) 
+     * @throws IOException if any I/O operation fails (HTTP or file)
      * @throws URISyntaxException if given fileLocation  is invalid
      */
     public static File retrieveRemoteFile(final String remoteLocation,
-                                          final String parentDir,
-                                          final MimeType mimeType) throws IOException, URISyntaxException {
+            final String parentDir,
+            final MimeType mimeType) throws IOException, URISyntaxException {
 
         // TODO improve handling of existing files (do we have to warn the user ?)
         // TODO add other remote file scheme (ftp, ssh?)

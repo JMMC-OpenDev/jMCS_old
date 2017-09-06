@@ -107,7 +107,7 @@ public final class SampManager {
      */
     public synchronized boolean allowHubKilling() {
         final App application = App.getInstance();
-        
+
         // If the application wants to bypass SAMP hub killing warning message
         if (application == null || application.shouldSilentlyKillSampHubOnQuit()) {
             // Let the hub die without prompting confirmation
@@ -289,7 +289,7 @@ public final class SampManager {
                 hub.shutdown();
                 _logger.info("SAMP Hub shutdown.");
             }
-            
+
             // Note: JVM ShutdownHook can not use j.u.l.Logger (log lost) because LogManager adds itself a Cleaner hook
             // to free all log handlers => lost logs !
         }
@@ -495,7 +495,8 @@ public final class SampManager {
 
         for (Iterator<?> it = getClientMap().values().iterator(); it.hasNext();) {
             final Client client = (Client) it.next();
-            if (client.getMetadata().getName().matches(name)) {
+            final Metadata metadata = client.getMetadata();
+            if (metadata != null && metadata.getName().matches(name)) {
                 clientIdList.add(client.getId());
             }
         }
@@ -558,7 +559,31 @@ public final class SampManager {
         public void stateChanged(final ChangeEvent e) {
             final GuiHubConnector connector = (GuiHubConnector) e.getSource();
 
-            _logger.info("SAMP Hub connection status : {}", ((connector.isConnected()) ? "registered" : "unregistered"));
+            String clientId = null;
+            if (connector.isConnected()) {
+                try {
+                    clientId = connector.getConnection().getRegInfo().getSelfId();
+                } catch (SampException se) {
+                    _logger.info("Unable to get client id", se);
+                    clientId = null;
+                }
+            }
+
+            _logger.info("SAMP Hub connection status : {}", (clientId != null) ? ("registered as " + clientId) : "unregistered");
+
+            // Update the main frame title:
+            final JFrame frame = App.getExistingFrame();
+            if (frame != null) {
+                final String oldTitle = frame.getTitle();
+                final int pos = oldTitle.indexOf('[');
+                final String prefix = (pos != -1) ? oldTitle.substring(0, pos) : oldTitle;
+
+                if (clientId != null) {
+                    frame.setTitle(prefix + " [" + clientId + ']');
+                } else {
+                    frame.setTitle(prefix);
+                }
+            }
         }
     }
 

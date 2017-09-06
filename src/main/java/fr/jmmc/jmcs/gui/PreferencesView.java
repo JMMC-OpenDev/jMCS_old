@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class provides one preference view containing tabbed panes.
  */
-public class PreferencesView extends JFrame implements ActionListener {
+public class PreferencesView extends JDialog implements ActionListener {
 
     public static final int FRAME_WIDTH = 600;
     public static final int FRAME_HEIGHT = 500;
@@ -71,8 +72,8 @@ public class PreferencesView extends JFrame implements ActionListener {
      * @param preferences your application Preferences instance.
      * @param panels a map of tab title (string) -> panel (JPanel).
      */
-    public PreferencesView(final Preferences preferences, final LinkedHashMap<String, JPanel> panels) {
-        super("Preferences");
+    public PreferencesView(final JFrame parent, final Preferences preferences, final LinkedHashMap<String, JPanel> panels) {
+        super(parent, "Preferences", false);
 
         // Check arguments validity
         if ((preferences == null) || (panels == null) || (panels.isEmpty())) {
@@ -99,9 +100,6 @@ public class PreferencesView extends JFrame implements ActionListener {
 
                 final String panelName = entry.getKey();
                 final JPanel panel = entry.getValue();
-
-                // To correctly match deeper background color of inner tab panes
-                panel.setOpaque(false);
 
                 tabbedPane.add(panelName, panel);
 

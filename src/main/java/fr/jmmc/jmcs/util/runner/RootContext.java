@@ -83,6 +83,7 @@ public final class RootContext extends RunContext implements Iterator<RunContext
     @Override
     public void close() {
         // clean up code :
+        super.close();
     }
 
     /**
