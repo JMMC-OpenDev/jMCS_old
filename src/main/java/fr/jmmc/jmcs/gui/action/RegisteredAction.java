@@ -125,7 +125,7 @@ public abstract class RegisteredAction extends ResourcedAction {
     /**
      * Flag the action as the one dedicated to handle Preference panel display.
      */
-    public void flagAsPreferenceAction() {
+    public final void flagAsPreferenceAction() {
         // Force the preference action name
         putValue(Action.NAME, "Preferences...");
 
@@ -135,7 +135,7 @@ public abstract class RegisteredAction extends ResourcedAction {
     /**
      * Flag the action as the one dedicated to file opening sequence.
      */
-    public void flagAsOpenAction() {
+    public final void flagAsOpenAction() {
         // Force the 'open' action name
         putValue(Action.NAME, "Open");
 
@@ -148,7 +148,7 @@ public abstract class RegisteredAction extends ResourcedAction {
     /**
      * Flag the action as the one dedicated to handle Quit sequence.
      */
-    public void flagAsQuitAction() {
+    public final void flagAsQuitAction() {
         // Force the 'quit' action name
         putValue(Action.NAME, "Quit");
 

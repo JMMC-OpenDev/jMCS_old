@@ -241,16 +241,16 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
   }
 
   /**
-   * Return the maximum value <= maximum Limit
-   * @return maximum value <= maximum Limit
+   * Return the maximum value &lt;= maximum Limit
+   * @return maximum value &lt;= maximum Limit
    */
   public double getMaxValue() {
     return maxValue;
   }
 
   /**
-   * Set the maximum value <= maximum Limit
-   * @param maxValue maximum value <= maximum Limit
+   * Set the maximum value &lt;= maximum Limit
+   * @param maxValue maximum value &lt;= maximum Limit
    */
   public void setMaxValue(double maxValue) {
     if (logger.isTraceEnabled()) {
@@ -260,16 +260,16 @@ public final class FieldSliderAdapter implements ChangeListener, PropertyChangeL
   }
 
   /**
-   * Return the minimum value >= minimum Limit
-   * @return minimum value >= minimum Limit
+   * Return the minimum value &gt;= minimum Limit
+   * @return minimum value &gt;= minimum Limit
    */
   public double getMinValue() {
     return minValue;
   }
 
   /**
-   * Set the minimum value >= minimum Limit
-   * @param minValue minimum value >= minimum Limit
+   * Set the minimum value &gt;= minimum Limit
+   * @param minValue minimum value &gt;= minimum Limit
    */
   public void setMinValue(double minValue) {
     if (logger.isTraceEnabled()) {

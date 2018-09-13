@@ -70,7 +70,7 @@ public class PreferencesView extends JDialog implements ActionListener {
     /**
      * Constructor.
      * @param preferences your application Preferences instance.
-     * @param panels a map of tab title (string) -> panel (JPanel).
+     * @param panels a map of tab title (string) -&gt; panel (JPanel).
      */
     public PreferencesView(final JFrame parent, final Preferences preferences, final LinkedHashMap<String, JPanel> panels) {
         super(parent, "Preferences", false);

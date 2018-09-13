@@ -68,7 +68,7 @@ public final class CollectionUtils {
     }
 
     /**
-     * Converts the given array to a List. <br/>
+     * Converts the given array to a List. <br>
      * If the array is empty, it gives the Collections.EMPTY_LIST
      *
      * @param <T> type of objects contained in the array
@@ -126,7 +126,7 @@ public final class CollectionUtils {
 
     //~ Methods ----------------------------------------------------------------------------------------------------------
     /**
-     * toString method for a Collection instance Format : <code><br/>
+     * toString method for a Collection instance Format : <code><br>
      * {value, ...}
      * </code>
      *
@@ -138,10 +138,10 @@ public final class CollectionUtils {
     }
 
     /**
-     * toString method for a Collection instance Format : <code><br/>
-     * {<br/>
-     * value<br/>
-     * ...<br/>
+     * toString method for a Collection instance Format : <code><br>
+     * {<br>
+     * value<br>
+     * ...<br>
      * }
      * </code>
      *
@@ -153,10 +153,10 @@ public final class CollectionUtils {
     }
 
     /**
-     * toString method for a Collection instance Format : <code><br/>
-     * {<br/>
-     * value<br/>
-     * ...<br/>
+     * toString method for a Collection instance Format : <code><br>
+     * {<br>
+     * value<br>
+     * ...<br>
      * }
      * </code>
      *
@@ -168,10 +168,10 @@ public final class CollectionUtils {
     }
 
     /**
-     * toString method for a Collection instance Format : <code><br/>
-     * {<br/>
-     * value<br/>
-     * ...<br/>
+     * toString method for a Collection instance Format : <code><br>
+     * {<br>
+     * value<br>
+     * ...<br>
      * }
      * </code>
      *
@@ -184,10 +184,10 @@ public final class CollectionUtils {
     }
 
     /**
-     * toString method for a Map instance Format : <code><br/>
-     * {<br/>
-     * key = value<br/>
-     * ...<br/>
+     * toString method for a Map instance Format : <code><br>
+     * {<br>
+     * key = value<br>
+     * ...<br>
      * }
      * </code>
      *
@@ -199,10 +199,10 @@ public final class CollectionUtils {
     }
 
     /**
-     * toString method for a Map instance Format : <code><br/>
-     * {<br/>
-     * key = value<br/>
-     * ...<br/>
+     * toString method for a Map instance Format : <code><br>
+     * {<br>
+     * key = value<br>
+     * ...<br>
      * }
      * </code>
      *

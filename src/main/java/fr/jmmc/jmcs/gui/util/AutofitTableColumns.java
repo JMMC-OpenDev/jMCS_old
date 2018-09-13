@@ -107,7 +107,7 @@ public final class AutofitTableColumns {
      * @return table width
      */
     private static int autoResizeTable(final JTable aTable, final boolean includeColumnHeaderWidth, final int columnPadding,
-            final boolean useRendererText) {
+                                       final boolean useRendererText) {
 
         final long startTime = System.nanoTime();
 
@@ -120,7 +120,6 @@ public final class AutofitTableColumns {
             final Dimension interCellSpacing = aTable.getIntercellSpacing();
 
             // STEP ONE : Work out the column widths
-
             final int columnWidth[] = new int[columnCount];
 
             for (int i = 0; i < columnCount; i++) {
@@ -132,7 +131,6 @@ public final class AutofitTableColumns {
             tableWidth += ((columnCount - 1) * interCellSpacing.width);
 
             // STEP TWO : Dynamically resize each column
-
             // try changing the size of the column names area
             final JTableHeader tableHeader = aTable.getTableHeader();
             final Dimension headerDim = tableHeader.getPreferredSize();
@@ -147,8 +145,6 @@ public final class AutofitTableColumns {
                 tableColumn = tableColumnModel.getColumn(i);
                 tableColumn.setPreferredWidth(columnWidth[i]);
             }
-
-            aTable.getPreferredSize().width = tableWidth;
 
             aTable.invalidate();
             aTable.doLayout();
@@ -173,7 +169,7 @@ public final class AutofitTableColumns {
      * @return table width
      */
     private static int getMaxColumnWidth(final JTable aTable, final int columnNo,
-            final boolean includeColumnHeaderWidth, final int columnPadding, final boolean useRendererText) {
+                                         final boolean includeColumnHeaderWidth, final int columnPadding, final boolean useRendererText) {
 
         int maxWidth = 0;
         int textWidth = 0;
@@ -274,7 +270,7 @@ public final class AutofitTableColumns {
 
                     text = (useRendererText) ? jLabelComp.getText() : cellValue.toString();
 
-                    if (useRendererText && text.charAt(0) == '<' && text.startsWith("<html>")) {
+                    if (useRendererText && (text != null) && (text.length() != 0) && (text.charAt(0) == '<') && (text.startsWith("<html>"))) {
                         text = cellValue.toString();
                     }
 
@@ -292,7 +288,7 @@ public final class AutofitTableColumns {
 
                     text = (useRendererText) ? jtextComp.getText() : cellValue.toString();
 
-                    if (useRendererText && text.charAt(0) == '<' && text.startsWith("<html>")) {
+                    if (useRendererText && (text != null) && (text.length() != 0) && (text.charAt(0) == '<') && (text.startsWith("<html>"))) {
                         text = cellValue.toString();
                     }
 

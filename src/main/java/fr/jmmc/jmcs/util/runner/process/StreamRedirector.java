@@ -98,7 +98,7 @@ public final class StreamRedirector implements Runnable {
         } else {
             try {
                 // 8K buffer :
-                final BufferedReader br = new BufferedReader(new InputStreamReader(_is));
+                final BufferedReader br = new BufferedReader(new InputStreamReader(_is, "UTF-8"));
                 for (String line = null; (line = br.readLine()) != null;) {
 
                     if (DEBUG) {

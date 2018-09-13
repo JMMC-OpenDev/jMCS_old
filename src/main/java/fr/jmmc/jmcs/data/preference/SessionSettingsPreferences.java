@@ -66,6 +66,10 @@ public final class SessionSettingsPreferences extends Preferences {
     /** Application file storage preference */
     private static final String APPLICATION_STORAGE_LOCATION = "app.storage.location";
 
+    // members
+    /** cached preference file name */
+    private String preferenceFilename = null;
+    
     /**
      * Private constructor that must be empty.
      */
@@ -130,16 +134,19 @@ public final class SessionSettingsPreferences extends Preferences {
      */
     @Override
     protected String getPreferenceFilename() {
+        if (preferenceFilename == null) {
+            final ApplicationDescription applicationDataModel = ApplicationDescription.getInstance();
+            final String shortCompanyName = applicationDataModel.getShortCompanyName();
+            final String programName = applicationDataModel.getProgramName();
 
-        final ApplicationDescription applicationDataModel = ApplicationDescription.getInstance();
-        final String shortCompanyName = applicationDataModel.getShortCompanyName();
-        final String programName = applicationDataModel.getProgramName();
+            String fileName = FILENAME_PREFIX + shortCompanyName + "." + programName + FILENAME_SUFFIX;
+            fileName = fileName.replace(" ", "");
+            fileName = fileName.toLowerCase();
+            
+            this.preferenceFilename = fileName;
+        }
 
-        String preferenceFileName = FILENAME_PREFIX + shortCompanyName + "." + programName + FILENAME_SUFFIX;
-        preferenceFileName = preferenceFileName.replace(" ", "");
-        preferenceFileName = preferenceFileName.toLowerCase();
-
-        return preferenceFileName;
+        return preferenceFilename;
     }
 
     /**

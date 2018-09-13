@@ -60,10 +60,17 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class App {
 
+    /**
+     * Static jMCS environment startup.
+     */
+    static {
+        Bootstrapper.bootstrap();
+    }
+
     /** Class Logger */
     private static final Logger _logger = LoggerFactory.getLogger(App.class.getName());
     /** Singleton reference */
-    private static App _instance;
+    private static App _instance = null;
     /** Main frame of the application (singleton) */
     private static JFrame _applicationFrame = null;
 
@@ -85,13 +92,6 @@ public abstract class App {
     private final Map<String, ArgumentDefinition> _customArgumentsDefinition = new LinkedHashMap<String, ArgumentDefinition>();
     /** Store the custom command line argument values (keyed by name) */
     private Map<String, String> _customArgumentValues = null;
-
-    /**
-     * Static jMCS environment startup.
-     */
-    static {
-        Bootstrapper.bootstrap();
-    }
 
     /**
      * Creates a new App object.
@@ -185,8 +185,7 @@ public abstract class App {
 
     /**
      * Optional hook to override in your App, to add support for custom command-line argument(s) and help using:
-     * @see #addCustomCommandLineArgument(java.lang.String, boolean)
-     * @see #addCustomArgumentsHelp(java.lang.String)
+     * @see #addCustomCommandLineArgument(java.lang.String, boolean, java.lang.String)
      */
     protected void defineCustomCommandLineArgumentsAndHelp() {
         // noop
@@ -195,7 +194,7 @@ public abstract class App {
     /**
      * Show command-line arguments help.
      */
-    protected final void showArgumentsHelp() {
+    public final void showArgumentsHelp() {
         CommandLineUtils.showArgumentsHelp(_customArgumentsDefinition);
     }
 
@@ -205,8 +204,8 @@ public abstract class App {
      * @param hasArgument true if an argument value is required, false otherwise.
      * @param help argument's description displayed in the command-line help.
      */
-    protected final void addCustomCommandLineArgument(final String name,
-                                                      final boolean hasArgument, final String help) {
+    public final void addCustomCommandLineArgument(final String name,
+                                                   final boolean hasArgument, final String help) {
         addCustomCommandLineArgument(name, hasArgument, help, ExecMode.GUI);
     }
 
@@ -217,8 +216,8 @@ public abstract class App {
      * @param help argument's description displayed in the command-line help.
      * @param mode execution mode (GUI or TTY mode).
      */
-    protected final void addCustomCommandLineArgument(final String name,
-                                                      final boolean hasArgument, final String help, final ExecMode mode) {
+    public final void addCustomCommandLineArgument(final String name,
+                                                   final boolean hasArgument, final String help, final ExecMode mode) {
         if ((name == null) || (name.isEmpty())) {
             return;
         }
@@ -374,7 +373,7 @@ public abstract class App {
      */
     public static void showFrameToFront() {
         // may create a new JFrame when displaying messages during application startup
-        final JFrame frame = getFrame();
+        final JFrame frame = getExistingFrame();
 
         if (frame != null) {
             // Ensure window is visible (not iconified)

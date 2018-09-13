@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,17 @@ public abstract class Preferences extends Observable {
     /** Store dimension height index prefix. */
     private static final String DIMENSION_HEIGHT_PREFIX = JMCS_PUBLIC_PREFIX + "dimension.height.";
 
+    /** Preference instance registrar */
+    private static final Map<String, Preferences> registrar = new HashMap<String, Preferences>(8);
+
+    /**
+     * TODO
+    @return 
+     */
+    public static Map<String, Preferences> getRegistrar() {
+        return registrar;
+    }
+
     /* members */
     /** Store preference filename. */
     private String _fullFilepath = null;
@@ -138,6 +150,9 @@ public abstract class Preferences extends Observable {
      * @param notify flag to enable/disable observer notifications
      */
     public Preferences(final boolean notify) {
+        // register the new Preferences instance into the registrar:
+        registrar.put(getPreferenceFilename(), this);
+
         setNotify(notify);
 
         computePreferenceFilepath();
@@ -929,10 +944,10 @@ public abstract class Preferences extends Observable {
      *
      * @param preferenceName the preference name.
      *
-     * @return one List<String> object representing the preference value.
+     * @return one List&lt;String&gt; object representing the preference value.
      *
      * @throws MissingPreferenceException if the preference value is missing
-     * @throws PreferencesException if the preference value is not a List<String>
+     * @throws PreferencesException if the preference value is not a List&lt;String&gt;
      */
     final public List<String> getPreferenceAsStringList(final Object preferenceName) throws MissingPreferenceException, PreferencesException {
 
@@ -1167,9 +1182,7 @@ public abstract class Preferences extends Observable {
      * according to execution platform.
      */
     final public String computePreferenceFilepath() {
-
-        _fullFilepath = FileUtils.getPlatformPreferencesPath();
-        _fullFilepath += getPreferenceFilename();
+        _fullFilepath = FileUtils.getPlatformPreferencesPath() + getPreferenceFilename();
         _logger.debug("Computed preference file path = '{}'.", _fullFilepath);
         return _fullFilepath;
     }
@@ -1305,7 +1318,7 @@ public abstract class Preferences extends Observable {
      * @param sb buffer to append into
      * @return string representation of properties using the format "{name} : {value}"
      */
-    public static StringBuilder dumpProperties(final Map<?,?> properties, final StringBuilder sb) {
+    public static StringBuilder dumpProperties(final Map<?, ?> properties, final StringBuilder sb) {
         if (properties == null) {
             return sb;
         }
@@ -1328,6 +1341,14 @@ public abstract class Preferences extends Observable {
      */
     public String dumpCurrentProperties() {
         return dumpProperties(_currentProperties);
+    }
+
+    /**
+     * Dump current properties (for debugging purposes) into the given buffer
+     * @param sb buffer to append into
+     */
+    public void dumpCurrentProperties(final StringBuilder sb) {
+        dumpProperties(_currentProperties, sb);
     }
 
     /**

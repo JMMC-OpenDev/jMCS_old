@@ -86,7 +86,7 @@ public final class RingBuffer {
     }
 
     /**
-     * Allocates temporary line & output buffers & file writer
+     * Allocates temporary line &amp; output buffers &amp; file writer
      */
     public void prepare() {
         _buffer = new StringBuilder(_maxCount * DEFAULT_LINE_SIZE / 2);
@@ -98,7 +98,7 @@ public final class RingBuffer {
     }
 
     /**
-     * Clear temporary line & output buffers & file writer
+     * Clear temporary line &amp; output buffers &amp; file writer
      */
     public void close() {
         _buffer = null;

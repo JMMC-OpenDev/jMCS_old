@@ -28,7 +28,6 @@
 package fr.jmmc.jmcs;
 
 import ch.qos.logback.classic.Logger;
-import com.apple.eawt.QuitResponse;
 import fr.jmmc.jmcs.App.ApplicationState;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.data.preference.CommonPreferences;
@@ -38,9 +37,9 @@ import fr.jmmc.jmcs.gui.MainMenuBar;
 import fr.jmmc.jmcs.gui.SplashScreen;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
 import fr.jmmc.jmcs.gui.component.MessagePane;
-import fr.jmmc.jmcs.gui.component.ResizableTextViewFactory;
 import fr.jmmc.jmcs.gui.task.TaskSwingWorkerExecutor;
 import fr.jmmc.jmcs.gui.util.MacOSXAdapter;
+import fr.jmmc.jmcs.gui.util.MacOSXQuitCallback;
 import fr.jmmc.jmcs.gui.util.SwingSettings;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
@@ -48,6 +47,7 @@ import fr.jmmc.jmcs.logging.LoggingService;
 import fr.jmmc.jmcs.network.NetworkSettings;
 import fr.jmmc.jmcs.network.interop.SampManager;
 import fr.jmmc.jmcs.util.IntrospectionUtils;
+import fr.jmmc.jmcs.util.JVMUtils;
 import fr.jmmc.jmcs.util.MCSExceptionHandler;
 import fr.jmmc.jmcs.util.concurrent.ParallelJobExecutor;
 import fr.jmmc.jmcs.util.runner.LocalLauncher;
@@ -94,6 +94,8 @@ public final class Bootstrapper {
     private static App _application = null;
     /** Flag to indicate headless mode */
     private static int _isHeadless = -1;
+    /** Flag to indicate if the MAC OS X integration was done successfully */
+    private static boolean macIntegrationDone = false;
 
     /**
      * Static Logger initialization and Network settings
@@ -133,7 +135,7 @@ public final class Bootstrapper {
 
         // Early load common preferences (jmcs):
         CommonPreferences.getInstance();
-        
+
         // Define swing settings (laf, defaults...) before any Swing usage
         SwingSettings.setup();
 
@@ -151,14 +153,6 @@ public final class Bootstrapper {
      * @see MacOSXAdapter
      */
     private static void setSystemProperties() {
-        // Force anti-aliasing
-        if (SystemUtils.IS_JAVA_1_6) {
-            final String old = System.getProperty("awt.useSystemAAFontSettings");
-            if (old == null) {
-                System.setProperty("awt.useSystemAAFontSettings", "on");
-            }
-        }
-
         if (SystemUtils.IS_OS_MAC_OSX) {
             // Always use screen menuBar on MacOS X
             System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -323,6 +317,12 @@ public final class Bootstrapper {
         _application.___internalSingletonInitialization();
 
         try {
+            // check JVM FIRST:
+            if (!JVMUtils.showUnsupportedJdkWarning()) {
+                // Exit the application anyway:
+                Bootstrapper.stopApp(-1);
+            }
+
             // Load jMCS and application data models
             ApplicationDescription.init();
             _jmmcLogger.debug("Application data loaded.");
@@ -426,21 +426,21 @@ public final class Bootstrapper {
                     ActionRegistrar.getInstance().performDeferedInitialization();
 
                     // Define the JFrame associated to the application which will get the JMenuBar
-                    final JFrame frame = App.getFrame();
+                    final JFrame frame = App.getExistingFrame();
 
-                    // Define OSXAdapter (menu bar integration)
-                    macOSXRegistration();
-                    // Create menus including the Interop menu (SAMP required)
-                    frame.setJMenuBar(new MainMenuBar());
-                    // Set application frame ideal size
-                    frame.pack();
-                    // Restore, then automatically save window size changes
-                    WindowUtils.rememberWindowSize(frame, MAIN_FRAME_DIMENSION_KEY);
+                    if (frame != null) {
+                        // Define OSXAdapter (menu bar integration)
+                        macOSXRegistration();
+                        // Create menus including the Interop menu (SAMP required)
+                        frame.setJMenuBar(new MainMenuBar());
+                        // Set application frame ideal size
+                        frame.pack();
+                        // Restore, then automatically save window size changes
+                        WindowUtils.rememberWindowSize(frame, MAIN_FRAME_DIMENSION_KEY);
+                    }
                 }
             }
         });
-
-        ResizableTextViewFactory.showUnsupportedJdkWarning();
 
         // Indicate that the application is ready (visible)
         setState(ApplicationState.APP_READY);
@@ -469,10 +469,19 @@ public final class Bootstrapper {
             } else {
                 final Method registerMethod = IntrospectionUtils.getMethod(osxAdapter, "registerMacOSXApplication", null);
                 if (registerMethod != null) {
-                    IntrospectionUtils.executeMethod(registerMethod, null);
+                    if (IntrospectionUtils.executeMethod(registerMethod, null)) {
+                        macIntegrationDone = true;
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * @return true if if the MAC OS X integration was done successfully, false otherwise.
+     */
+    public static boolean isMacIntegrationDone() {
+        return macIntegrationDone;
     }
 
     /**
@@ -500,20 +509,20 @@ public final class Bootstrapper {
     public static void quitApp(final ActionEvent evt) {
         _jmmcLogger.info("Quitting the application ...");
 
-        // Mac OS X Quit action handler
-        final QuitResponse response;
-        if (evt != null && evt.getSource() instanceof QuitResponse) {
-            response = (QuitResponse) evt.getSource();
+        // Mac OS X Quit action callback:
+        final MacOSXQuitCallback callback;
+        if (evt != null && evt.getSource() instanceof MacOSXQuitCallback) {
+            callback = (MacOSXQuitCallback) evt.getSource();
         } else {
-            response = null;
+            callback = null;
         }
 
         // Check if user is OK to kill SAMP hub (if any)
         if (!SampManager.getInstance().allowHubKilling()) {
             _jmmcLogger.debug("SAMP cancelled application kill.");
             // Otherwise cancel quit
-            if (response != null) {
-                response.cancelQuit();
+            if (callback != null) {
+                callback.cancelQuit();
             }
             return;
         }
@@ -528,7 +537,7 @@ public final class Bootstrapper {
                 setState(ApplicationState.APP_STOP);
 
                 // Max OS X quit
-                if (response != null) {
+                if (callback != null) {
                     disableSystemExit(true);
                 }
 
@@ -536,8 +545,8 @@ public final class Bootstrapper {
                 stopApp(0);
 
                 // Max OS X quit
-                if (response != null) {
-                    response.performQuit();
+                if (callback != null) {
+                    callback.performQuit();
                 }
                 return;
 
@@ -547,8 +556,8 @@ public final class Bootstrapper {
         } else {
             _jmmcLogger.debug("Application quit cancelled.");
         }
-        if (response != null) {
-            response.cancelQuit();
+        if (callback != null) {
+            callback.cancelQuit();
         }
     }
 

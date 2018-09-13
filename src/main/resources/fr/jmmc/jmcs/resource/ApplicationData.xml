@@ -76,7 +76,7 @@
         <package name="BrowserLauncher2"
                  description="Permit to use the default web browser."
                  link="http://browserlaunch2.sourceforge.net/"
-                 jars="BrowserLauncher2-1_3.jar"
+                 jars="BrowserLauncher2-1.4.jar"
                  license="LGPL"/>
 
         <!-- Documentation reader -->
@@ -191,6 +191,7 @@
         <release version="1.0.5">
             <pubDate>Wed, 06 Sep 2017 16:00:00 GMT</pubDate>
             <prerelease version="1.0.5b1" tag="UNKNOWN">
+              <change type="FEATURE">Fix Mac OS X integration for JDK9+</change>
               <change type="CHANGE">Update release note still TBD !</change>
               <!--
                    <change type="CHANGE">In Readme.md : updated build procedure (mainly add support for process-resources maven target).</change>

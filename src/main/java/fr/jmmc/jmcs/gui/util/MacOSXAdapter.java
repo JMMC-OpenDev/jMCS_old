@@ -27,21 +27,14 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.gui.util;
 
-import com.apple.eawt.AboutHandler;
-import com.apple.eawt.AppEvent.AboutEvent;
-import com.apple.eawt.AppEvent.OpenFilesEvent;
-import com.apple.eawt.AppEvent.PreferencesEvent;
-import com.apple.eawt.AppEvent.QuitEvent;
-import com.apple.eawt.Application;
-import com.apple.eawt.OpenFilesHandler;
-import com.apple.eawt.PreferencesHandler;
-import com.apple.eawt.QuitHandler;
-import com.apple.eawt.QuitResponse;
-import com.apple.eawt.QuitStrategy;
 import fr.jmmc.jmcs.gui.action.ActionRegistrar;
 import fr.jmmc.jmcs.gui.action.internal.InternalActionFactory;
+import fr.jmmc.jmcs.util.IntrospectionUtils;
 import fr.jmmc.jmcs.util.concurrent.ThreadExecutors;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.List;
 import javax.swing.AbstractAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Brice COLUCCI, Sylvain LAFRASSE, Laurent BOURGES.
  */
-public final class MacOSXAdapter implements AboutHandler, PreferencesHandler, QuitHandler, OpenFilesHandler {
+public final class MacOSXAdapter implements MacOSXInterface {
 
     /** Class logger */
     private static final Logger _logger = LoggerFactory.getLogger(MacOSXAdapter.class.getName());
@@ -61,8 +54,6 @@ public final class MacOSXAdapter implements AboutHandler, PreferencesHandler, Qu
     private static final boolean _debugEdtFix = false;
     /** pseudo-singleton model; no point in making multiple instances */
     private static MacOSXAdapter _instance = null;
-    /** application */
-    private static Application _application = null;
     /** Application's Event Dispatcher Thread (EDT) name */
     private static String _appEDTName = null;
     /* members */
@@ -76,14 +67,86 @@ public final class MacOSXAdapter implements AboutHandler, PreferencesHandler, Qu
         _registrar = ActionRegistrar.getInstance();
     }
 
+    ActionRegistrar getRegistrar() {
+        return _registrar;
+    }
+
+    /**
+     * Register this adapter (should be performed by EDT)
+     */
+    public static void registerMacOSXApplication() {
+        logEDT("registerMacOSXApplication");
+
+        // Avoid reentrance:
+        if (_instance != null) {
+            return;
+        }
+
+        // ensure events are fired by Swing EDT:
+        if (!SwingUtils.isEDT()) {
+            throw new IllegalStateException("invalid thread : use EDT", new Throwable());
+        }
+
+        // MacOSX EDT Fix (JDK <= 7):
+        if (_useEdtFix) {
+            // Create EDT submitter from EDT within AppClassLoader (not JNLPClassLoader):
+            invokeLaterUsingApplicationEDT(new Runnable() {
+                @Override
+                public void run() {
+                    if (SwingUtils.isEDT()) {
+                        setApplicationEDT(Thread.currentThread().getName());
+                    }
+                }
+            });
+        }
+
+        // Create singleton once:
+        _instance = new MacOSXAdapter();
+
+        try {
+            // Java 7/8 handlers:
+            registerMacOSXAdapter(_instance, "MacOSXAdapter8");
+        } catch (Throwable th) {
+            _logger.info("registerMacOSXAdapter(8): failure", th);
+            // Java 9 handlers
+            registerMacOSXAdapter(_instance, "MacOSXAdapter9");
+        }
+    }
+
+    /**
+     * Register this adapter using java.awt.Desktop (java 9+)
+     * @param instance MacOSXInterface implementation
+     * @param MacOSXAdapterName MacOSXAdapter class name (8 or 9)
+     */
+    private static void registerMacOSXAdapter(final MacOSXAdapter instance, final String MacOSXAdapterName) {
+        boolean done = false;
+
+        final Class<?> osxAdapter = IntrospectionUtils.getClass("fr.jmmc.jmcs.gui.util." + MacOSXAdapterName);
+        if (osxAdapter == null) {
+            // This will be thrown first if the MacOSXAdapter is loaded on a system without required (apple or java9 classes)
+            _logger.info("This version of Mac OS X does not support the jmcs [" + MacOSXAdapterName + "] integration.");
+        } else {
+            final Method registerMethod = IntrospectionUtils.getMethod(osxAdapter, "registerMacOSXApplication",
+                    new Class<?>[]{MacOSXInterface.class, boolean.class});
+
+            if (registerMethod != null) {
+                if (IntrospectionUtils.executeMethod(registerMethod,
+                        new Object[]{instance, (instance.getRegistrar().getPreferenceAction() != null)})) {
+                    done = true;
+                }
+            }
+        }
+
+        if (!done) {
+            throw new IllegalStateException("Unable to register " + MacOSXAdapterName + " integration !");
+        }
+    }
+
     /**
      * Handle about action 
-     * @param ae about event
      */
     @Override
-    public void handleAbout(final AboutEvent ae) {
-        logEDT("handleAbout");
-
+    public void handleAbout() {
         invokeLaterUsingApplicationEDT(new Runnable() {
             @Override
             public void run() {
@@ -95,12 +158,9 @@ public final class MacOSXAdapter implements AboutHandler, PreferencesHandler, Qu
 
     /** 
      * Show the user preferences
-     * @param pe preferences event
      */
     @Override
-    public void handlePreferences(final PreferencesEvent pe) {
-        logEDT("handlePreferences");
-
+    public void handlePreferences() {
         final AbstractAction preferenceAction = _registrar.getPreferenceAction();
         if (preferenceAction != null) {
             invokeLaterUsingApplicationEDT(new Runnable() {
@@ -115,18 +175,14 @@ public final class MacOSXAdapter implements AboutHandler, PreferencesHandler, Qu
 
     /** 
      * Handle quit action 
-     * @param qe quit event
-     * @param response quit response
+     * @param callback quit callback
      */
     @Override
-    public void handleQuitRequestWith(final QuitEvent qe, final QuitResponse response) {
-        logEDT("handleQuitRequestWith");
-
+    public void handleQuitRequestWith(final MacOSXQuitCallback callback) {
         /* This is important for cross-platform development -- have a universal quit
          * routine that chooses whether or not to quit, so the functionality is identical
          * on all platforms.  This example simply cancels the AppleEvent-based quit and
          * defers to that universal method. */
-
         invokeLaterUsingApplicationEDT(new Runnable() {
             @Override
             public void run() {
@@ -136,21 +192,20 @@ public final class MacOSXAdapter implements AboutHandler, PreferencesHandler, Qu
                  * the Quit action must call response.cancelQuit() or response.performQuit()
                  * Note: QuitResponse is thread safe and methods can be called after handleQuitRequestWith() returns.
                  */
-                _registrar.getQuitAction().actionPerformed(new ActionEvent(response, 0, null));
+                _registrar.getQuitAction().actionPerformed(new ActionEvent(callback, 0, null));
             }
         });
     }
 
     /** 
      * Handle the open action 
-     * @param ofe open files event
+     * @param files files to open
      */
     @Override
-    public void openFiles(final OpenFilesEvent ofe) {
-        logEDT("openFiles");
-
+    public void openFiles(final List<File> files) {
         final int FIRST_FILE_INDEX = 0;
-        final String firstFilePath = ofe.getFiles().get(FIRST_FILE_INDEX).getAbsolutePath();
+
+        final String firstFilePath = files.get(FIRST_FILE_INDEX).getAbsolutePath();
         if (_logger.isInfoEnabled()) {
             _logger.info("Should open '{}' file.", firstFilePath);
         }
@@ -162,58 +217,6 @@ public final class MacOSXAdapter implements AboutHandler, PreferencesHandler, Qu
                 _registrar.getOpenAction().actionPerformed(new ActionEvent(_registrar, 0, firstFilePath));
             }
         });
-    }
-
-    /**
-     * Register this adapter (should be performed by EDT)
-     */
-    public static void registerMacOSXApplication() {
-        logEDT("registerMacOSXApplication");
-
-        // ensure events are fired by Swing EDT:
-        if (!SwingUtils.isEDT()) {
-            throw new IllegalStateException("invalid thread : use EDT", new Throwable());
-        }
-
-        // MacOSX EDT Fix:
-        if (_useEdtFix) {
-            // Create EDT submitter from EDT within AppClassLoader (not JNLPClassLoader):
-            invokeLaterUsingApplicationEDT(new Runnable() {
-                @Override
-                public void run() {
-                    if (SwingUtils.isEDT()) {
-                        setApplicationEDT(Thread.currentThread().getName());
-                    }
-                }
-            });
-        }
-
-        if (_application == null) {
-            _application = Application.getApplication();
-        }
-
-        if (_instance == null) {
-            _instance = new MacOSXAdapter();
-        }
-
-        // Link 'About...' menu entry
-        _application.setAboutHandler(_instance);
-
-        // Set up quitiing behaviour
-        _application.setQuitHandler(_instance);
-        _application.disableSuddenTermination();
-        _application.setQuitStrategy(QuitStrategy.SYSTEM_EXIT_0);
-
-        // Set up double-clicked file opening handler
-        _application.setOpenFileHandler(_instance);
-
-        // Link 'Preferences' menu entry (if any)
-        AbstractAction preferenceAction = ActionRegistrar.getInstance().getPreferenceAction();
-        if (preferenceAction == null) {
-            _application.setPreferencesHandler(null);
-        } else {
-            _application.setPreferencesHandler(_instance);
-        }
     }
 
     /* --- EDT Fix ---------------------------------------------------------- */

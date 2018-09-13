@@ -45,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Job Management (queue & execution) on local machine
+ * Job Management (queue &amp; execution) on local machine
  *
  * @author Laurent BOURGES (voparis).
  */
@@ -550,7 +550,7 @@ public final class LocalLauncher {
 
             for (RootContext c : JOB_QUEUE.values()) {
                 if (owner.equals(c.getOwner())
-                        && (c.getState() == RunState.STATE_PENDING || c.getState() == RunState.STATE_PENDING)) {
+                        && ((c.getState() == RunState.STATE_PENDING) || (c.getState() == RunState.STATE_RUNNING))) {
                     count++;
                 }
             }

@@ -224,7 +224,8 @@ public final class ApplicationDescription {
                                         html.append("<html><body><h1>New <b>").append(appName).append("</b> release available:</h1><br>")
                                                 .append(remoteVersion).append(" > ").append(currentVersion)
                                                 .append("<br><br>Release date: ").append(remotePubDate)
-                                                .append(".<br><br>Please use the following link:<br><a href=\"").append(distURL)
+                                                .append(".<br><br>Please try restarting the application (Java Web Start)")
+                                                .append("<br><br>or use the following link:<br><a href=\"").append(distURL)
                                                 .append("\">download</a><br><br><h2>Changes:</h2>");
 
                                         // Show all changes since currentVersion:

@@ -235,7 +235,7 @@ public final class ParallelJobExecutor {
      * 
      * @param jobName job name used when throwing an exception
      * @param jobs callable jobs i.e. jobs that return results
-     * @return results as List<Object> or null if interrupted
+     * @return results as List&lt;Object&gt; or null if interrupted
      *
      * @throws InterruptedJobException if the current thread is interrupted (canceled)
      * @throws RuntimeException if any exception occurred during the computation
@@ -251,7 +251,7 @@ public final class ParallelJobExecutor {
      * @param jobName job name used when throwing an exception
      * @param jobs callable jobs i.e. jobs that return results
      * @param useThreads flag to enable or disable thread pool usage (async)
-     * @return results as List<Object> or null if interrupted
+     * @return results as List&lt;Object&gt; or null if interrupted
      *
      * @throws InterruptedJobException if the current thread is interrupted (canceled)
      * @throws RuntimeException if any exception occurred during the computation
@@ -408,7 +408,7 @@ public final class ParallelJobExecutor {
      *
      * @param jobName job name used when throwing an exception
      * @param futures Future objects to wait for
-     * @return results as List<Object> or null if interrupted
+     * @return results as List&lt;Object&gt; or null if interrupted
      *
      * @throws InterruptedJobException if the current thread is interrupted (canceled).
      * @throws RuntimeException if any exception occurred during the computation.

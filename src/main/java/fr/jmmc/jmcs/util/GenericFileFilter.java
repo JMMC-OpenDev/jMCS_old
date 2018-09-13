@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * Example - create a new filter that filters out all files but GIF and JPG files:
  *     GenericFileFilter filter = new GenericFileFilter(
- *                   new String{"gif", "jpg"}, "JPEG & GIF Images")
+ *                   new String{"gif", "jpg"}, "JPEG &amp; GIF Images")
  *
  * Strongly inspired of ExampleFileFilter class from FileChooserDemo under the
  * demo/JFC directory in the JDK.

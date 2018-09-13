@@ -90,7 +90,7 @@ public final class LogbackGui extends javax.swing.JPanel implements TreeSelectio
      * @param loggerPath logger path
      */
     public static void showLogConsoleForLogger(final String loggerPath) {
-        showWindow(App.getFrame(), ApplicationDescription.getInstance().getProgramName() + " Log Console", loggerPath);
+        showWindow(App.getExistingFrame(), ApplicationDescription.getInstance().getProgramName() + " Log Console", loggerPath);
     }
 
     /**

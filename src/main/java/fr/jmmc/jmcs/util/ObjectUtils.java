@@ -163,9 +163,9 @@ public final class ObjectUtils {
 
     /* identity string helper methods */
     /**
-     * Return the string representation "<simple class name>#<hashCode>"
+     * Return the string representation "&lt;simple class name&gt;#&lt;hashCode&gt;"
      * @param o any object
-     * @return "<class name>#<hashCode>"
+     * @return "&lt;class name&gt;#&lt;hashCode&gt;"
      */
     public static String getObjectInfo(final Object o) {
         if (o == null) {
@@ -177,7 +177,7 @@ public final class ObjectUtils {
     }
 
     /**
-     * Append the string representation "<simple class name>#<hashCode>"
+     * Append the string representation "&lt;simple class name&gt;#&lt;hashCode&gt;"
      * @param sb string builder to append to
      * @param o any object
      */
@@ -190,9 +190,9 @@ public final class ObjectUtils {
     }
 
     /**
-     * Return the string representation "{<simple class name>#<hashCode>, ...}"
+     * Return the string representation "{&lt;simple class name&gt;#&lt;hashCode&gt;, ...}"
      * @param col any collection
-     * @return "{<simple class name>#<hashCode>, ...}"
+     * @return "{&lt;simple class name&gt;#&lt;hashCode&gt;, ...}"
      */
     public static String getObjectInfo(final Collection<?> col) {
         if (col == null) {
@@ -207,7 +207,7 @@ public final class ObjectUtils {
     }
 
     /**
-     * Return the string representation "{<simple class name>#<hashCode>, ...}"
+     * Return the string representation "{&lt;simple class name&gt;#&lt;hashCode&gt;, ...}"
      * @param sb string builder to append to
      * @param col any collection
      */
@@ -228,9 +228,9 @@ public final class ObjectUtils {
     }
 
     /**
-     * Return the string representation "<full class name>#<hashCode>"
+     * Return the string representation "&lt;full class name&gt;#&lt;hashCode&gt;"
      * @param o any object
-     * @return "<full class name>#<hashCode>"
+     * @return "&lt;full class name&gt;#&lt;hashCode&gt;"
      */
     public static String getFullObjectInfo(final Object o) {
         if (o == null) {
@@ -242,7 +242,7 @@ public final class ObjectUtils {
     }
 
     /**
-     * Append the string representation "<full class name>#<hashCode>"
+     * Append the string representation "&lt;full class name&gt;#&lt;hashCode&gt;"
      * @param sb string builder to append to
      * @param o any object
      */

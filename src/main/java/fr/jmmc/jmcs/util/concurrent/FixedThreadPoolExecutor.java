@@ -104,7 +104,7 @@ public class FixedThreadPoolExecutor extends ThreadPoolExecutor {
 
     /**
      * Blocks the calling thread to wait for task termination ie
-     * while the running worker counter > 0
+     * while the running worker counter &gt; 0
      */
     public void waitForTaskFinished() {
         boolean wasInterrupted = false;

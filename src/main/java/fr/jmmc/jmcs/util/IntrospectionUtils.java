@@ -65,6 +65,8 @@ public final class IntrospectionUtils {
             searchedClass = Class.forName(classPath);
         } catch (ClassNotFoundException cnfe) {
             _logger.warn("Cannot find class '{}'", classPath, cnfe);
+        } catch (NoClassDefFoundError ncdfe) {
+            _logger.warn("Cannot find class '{}'", classPath, ncdfe);
         }
 
         return searchedClass;
@@ -193,7 +195,7 @@ public final class IntrospectionUtils {
      * @return sought method with parameters in class, null otherwise.
      */
     public static Method getMethod(final String classPath, final String methodName,
-            final Class<?>[] parameters) {
+                                   final Class<?>[] parameters) {
         final Class<?> clazz = getClass(classPath);
         if (clazz != null) {
             return getMethod(clazz, methodName, parameters);
@@ -212,7 +214,7 @@ public final class IntrospectionUtils {
      * @return sought method with parameters in class, null otherwise.
      */
     public static Method getMethod(final Class<?> clazz, final String methodName,
-            final Class<?>[] parameters) {
+                                   final Class<?>[] parameters) {
         if (clazz != null) {
             try {
                 return clazz.getMethod(methodName, parameters);
@@ -247,7 +249,7 @@ public final class IntrospectionUtils {
      * @return true if the method exists, false otherwise.
      */
     public static boolean hasMethod(final String classPath, final String methodName,
-            final Class<?>[] parameters) {
+                                    final Class<?>[] parameters) {
         if (getMethod(classPath, methodName, parameters) != null) {
             if (_logger.isDebugEnabled()) {
                 _logger.debug("Found method '{}' in class '{}'.", methodName, classPath);
@@ -283,7 +285,7 @@ public final class IntrospectionUtils {
      * @return result of the method execution, null otherwise.
      */
     public static Object getMethodValue(final String classPath, final String methodName,
-            final Class<?>[] parameters) {
+                                        final Class<?>[] parameters) {
         return getMethodValue(classPath, methodName, parameters, EMPTY_OBJECT_ARRAY);
     }
 
@@ -299,7 +301,7 @@ public final class IntrospectionUtils {
      * @return result of the method execution, null otherwise.
      */
     public static Object getMethodValue(final String classPath, final String methodName,
-            final Class<?>[] parameters, final Object[] arguments) {
+                                        final Class<?>[] parameters, final Object[] arguments) {
         final Method method = getMethod(classPath, methodName, parameters);
 
         return getMethodValue(method, getInstance(classPath), arguments);
@@ -377,7 +379,7 @@ public final class IntrospectionUtils {
      * @return true if invocation succeeded, false otherwise.
      */
     public static boolean executeMethod(final String classPath, final String methodName,
-            final Class<?>[] parameters) {
+                                        final Class<?>[] parameters) {
         return executeMethod(classPath, methodName, parameters, EMPTY_OBJECT_ARRAY);
     }
 
@@ -393,7 +395,7 @@ public final class IntrospectionUtils {
      * @return true if invocation succeeded, false otherwise.
      */
     public static boolean executeMethod(final String classPath, final String methodName,
-            final Class<?>[] parameters, final Object[] arguments) {
+                                        final Class<?>[] parameters, final Object[] arguments) {
         final Method method = getMethod(classPath, methodName, parameters);
 
         return executeMethod(method, null, arguments);

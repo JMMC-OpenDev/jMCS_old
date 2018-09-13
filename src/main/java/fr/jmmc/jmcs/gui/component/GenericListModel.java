@@ -34,7 +34,7 @@ import javax.swing.MutableComboBoxModel;
 /**
  * This custom implementation uses an existing List.
  *
- * @param <K> type of elements in the List<K>
+ * @param K: &lt;K&gt; type of elements in the List&lt;K&gt;
  *  
  * @author Laurent BOURGES.
  */

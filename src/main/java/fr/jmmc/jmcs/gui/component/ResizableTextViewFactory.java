@@ -29,12 +29,12 @@ package fr.jmmc.jmcs.gui.component;
 
 import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
-import fr.jmmc.jmcs.data.preference.CommonPreferences;
 import fr.jmmc.jmcs.data.preference.Preferences;
 import fr.jmmc.jmcs.data.preference.PreferencesException;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.service.BrowserLauncher;
+import fr.jmmc.jmcs.util.JVMUtils;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -95,7 +95,7 @@ public class ResizableTextViewFactory {
         SwingUtils.invokeAndWaitEDT(new Runnable() {
             @Override
             public void run() {
-                final JDialog dialog = new JDialog(App.getFrame(), title, modal);
+                final JDialog dialog = new JDialog(App.getExistingFrame(), title, modal);
                 final JEditorPane editorPane = startLayout(dialog);
 
                 // if modal, blocks until the dialog is closed:
@@ -160,8 +160,11 @@ public class ResizableTextViewFactory {
                                 if (url != null) {
                                     // Get it in the good format
                                     final String clickedURL = url.toExternalForm();
-                                    // Open the url in web browser
-                                    BrowserLauncher.openURL(clickedURL);
+
+                                    if (SystemUtils.JAVA_VERSION_FLOAT >= 1.7f) {
+                                        // Open the url in web browser
+                                        BrowserLauncher.openURL(clickedURL);
+                                    }
                                 } else { // Assume it was an anchor
                                     String anchor = event.getDescription();
                                     editorPane.scrollToReference(anchor);
@@ -221,7 +224,7 @@ public class ResizableTextViewFactory {
             final JButton button = new JButton("OK");
             button.addActionListener(new CloseWindowAction(dialog));
 
-            if (dismissablePreferenceName != null) {
+            if (preferences != null && dismissablePreferenceName != null) {
                 JPanel p = new JPanel();
                 final JButton button2 = new JButton(DismissableMessagePane.DO_NOT_SHOW_THIS_MESSAGE_AGAIN);
                 button2.addActionListener(new AbstractAction() {
@@ -283,69 +286,6 @@ public class ResizableTextViewFactory {
         dialog.setVisible(true);
     }
 
-    /**
-     * Check the JVM version and show a warning message if it is unsupported
-     */
-    public static void showUnsupportedJdkWarning() {
-        if (DismissableMessagePane.getPreferenceState(CommonPreferences.getInstance(), CommonPreferences.SHOW_UNSUPPORTED_JDK_WARNING)) {
-            return;
-        }
-        final float requiredRuntime = 1.6f;
-        final float javaRuntime = SystemUtils.JAVA_VERSION_FLOAT;
-
-        final String jvmVendor = SystemUtils.JAVA_VM_VENDOR;
-        final String jvmName = SystemUtils.JAVA_VM_NAME;
-        final String javaVersion = SystemUtils.JAVA_VERSION;
-        final String jvmVersion = SystemUtils.JAVA_VM_VERSION;
-        final String jvmHome = SystemUtils.getJavaHome().getAbsolutePath();
-
-        _logger.info("JVM runtime environment: {} {} ({} {}) [{}]", jvmVendor, jvmName, javaVersion, jvmVersion, jvmHome);
-
-        int timeoutMillis = 0; // disabled by default
-        boolean shouldWarn = false;
-        String message = "<HTML><BODY>";
-
-        if (jvmName != null && jvmName.toLowerCase().contains("openjdk")) {
-            shouldWarn = true;
-
-            final boolean isOpenJDK7 = (javaRuntime >= 1.7);
-
-            _logger.warn("Detected OpenJDK runtime environment: {} {} {} - {}", jvmVendor, jvmName, javaVersion, jvmVersion);
-
-            message += "<FONT COLOR='" + ((isOpenJDK7) ? "ORANGE" : "RED") + "'>WARNING</FONT> : ";
-            message += "Your Java Virtual Machine is an OpenJDK JVM, which may have known bugs (SWING look and feel,"
-                    + " fonts, time zones, PDF issues...) on several Linux distributions." + "<BR><BR>";
-
-            if (isOpenJDK7) {
-                // If OpenJDK 1.7+, set auto-hide delay to 5s:
-                timeoutMillis = 5000;
-            }
-        }
-
-        if (javaRuntime < requiredRuntime) {
-            shouldWarn = true;
-            _logger.warn("Detected JDK {} runtime environment: {} {} {} - {}", javaRuntime, jvmVendor, jvmName, javaVersion, jvmVersion);
-
-            message += "<FONT COLOR='RED'>WARNING</FONT> : ";
-            message += "Your Java Virtual Machine is too old and not supported anymore.<BR><BR>";
-        }
-        if (shouldWarn) {
-            message += "<BR>" + "<B>JMMC strongly recommends</B> Sun Java Runtime Environments version '" + requiredRuntime
-                    + "' or newer, available at:" + "<BR><CENTER><A HREF='http://java.sun.com/javase/downloads/'>"
-                    + "http://java.sun.com/javase/downloads/</A></CENTER>" + "<BR><BR>"
-                    + "<I>Your current JVM Information :</I><BR><TT>"
-                    + "java.vm.name    = '" + jvmName + "'<BR>"
-                    + "java.vm.vendor  = '" + jvmVendor + "'<BR>"
-                    + "java.version    = '" + javaVersion + "'<BR>"
-                    + "java.vm.version = '" + jvmVersion + "'<BR>"
-                    + "Java Home:<BR>'" + jvmHome + "'" + "</TT>";
-            message += "</BODY></HTML>";
-
-            ResizableTextViewFactory.createHtmlWindow(message, "Deprecated Java environment detected !",
-                    true, timeoutMillis, CommonPreferences.getInstance(), CommonPreferences.SHOW_UNSUPPORTED_JDK_WARNING);
-        }
-    }
-
     /** Action to close the given window by sending a window closing event */
     private final static class CloseWindowAction implements ActionListener {
 
@@ -395,7 +335,7 @@ public class ResizableTextViewFactory {
                 + "<p>Test Modal HTML Window with timeout: wait the dialog to auto-hide</p></body></html>", "HTML", true, autoHideDelay);
         System.out.println("modal dialog passed.");
 
-        ResizableTextViewFactory.showUnsupportedJdkWarning();
+        JVMUtils.showUnsupportedJdkWarning();
         System.out.println("modal dialog passed.");
 
         System.out.println("That's all Folks !");

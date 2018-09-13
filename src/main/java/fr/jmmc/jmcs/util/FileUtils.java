@@ -378,7 +378,7 @@ public final class FileUtils {
         try {
             // Should define UTF-8 encoding for cross platform compatibility
             // but we must stay compatible with existing files (windows vs unix)
-            return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)), bufferSize);
+            return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), FILE_ENCODING), bufferSize);
         } catch (final IOException ioe) {
             _logger.error("IO failure : ", ioe);
         }
@@ -386,22 +386,6 @@ public final class FileUtils {
         return null;
     }
 
-    /**
-     * Returns a Writer for the given file
-     *
-     * @param file file to write
-     * @return Writer (buffered)
-     *
-     * @throws IOException if an I/O exception occurred
-     */
-    /*
-     public static Writer openFile(final File file) throws IOException {
-     // Should define UTF-8 encoding for cross platform compatibility
-     // but we must stay compatible with existing files (windows vs unix)
-     return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-     // return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), FILE_ENCODING));
-     }
-     */
     /**
      * Close the given reader
      *
@@ -778,7 +762,7 @@ public final class FileUtils {
      * Warning: calling this method may block the current thread for long time (slow transfer or big file or timeout)
      * Please take care of using it properly using a cancellable SwingWorker (Cancellable background task)
      *
-     * @see #download(fr.jmmc.jmcs.network.http.Http)
+     * @see fr.jmmc.jmcs.network.http.Http
      * @param remoteLocation remote location
      * @param parentDir destination directory
      * @param mimeType mime type to fix missing file extension

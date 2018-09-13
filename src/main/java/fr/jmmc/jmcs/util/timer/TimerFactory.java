@@ -353,7 +353,7 @@ public final class TimerFactory {
     }
 
     /**
-     * Return true if there is no existing timer.<br/>
+     * Return true if there is no existing timer.<br>
      * This method is not thread safe but only useful before dumpTimers()
      *
      * @return true if there is no existing timer

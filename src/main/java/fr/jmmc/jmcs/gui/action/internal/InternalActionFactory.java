@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * Initiate all actions needed by jMCS.
  * @author Sylvain LAFRASSE.
  */
-public class InternalActionFactory {
+public final class InternalActionFactory {
 
     /** Class path */
     private static final String CLASS_PATH = InternalActionFactory.class.getName();
@@ -63,27 +63,27 @@ public class InternalActionFactory {
     private static InternalActionFactory _instance = null;
     // Members
     /** Acknowledgment handling action */
-    private Action _showAcknowledgmentAction = null;
+    final Action _showAcknowledgmentAction;
     /** Show About... box action */
-    private Action _showAboutBoxAction = null;
+    final Action _showAboutBoxAction;
     /** Show Feedback Report action */
-    private Action _showFeedbackReportAction = null;
+    final Action _showFeedbackReportAction;
     /** Show help handling action */
-    private Action _showHelpAction = null;
+    final Action _showHelpAction;
     /** Show hot news handling action */
-    private Action _showHotNewsAction = null;
+    final Action _showHotNewsAction;
     /** Show release handling action */
-    private Action _showReleaseNotesAction = null;
+    final Action _showReleaseNotesAction;
     /** Show FAQ handling action */
-    private Action _showFaqAction = null;
+    final Action _showFaqAction;
     /** Show Dependencies action */
-    private Action _showDependenciesAction = null;
+    final Action _showDependenciesAction;
     /** Show log GUI action */
-    private Action _showLogGuiAction = null;
+    final Action _showLogGuiAction;
     /** default Open handling action */
-    private Action _defaultOpenAction = null;
+    final Action _defaultOpenAction;
     /** Quit handling action */
-    private Action _quitAction = null;
+    final Action _quitAction;
 
     /** Hidden constructor */
     private InternalActionFactory() {
@@ -198,7 +198,7 @@ public class InternalActionFactory {
     }
 
     /** Action to show application About... box. */
-    protected static class ShowAboutBoxAction extends RegisteredAction {
+    protected static final class ShowAboutBoxAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -213,7 +213,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        ShowAboutBoxAction(String classPath, String fieldName) {
+        ShowAboutBoxAction(final String classPath, final String fieldName) {
             super(classPath, fieldName, "About...");
             _applicationData = ApplicationDescription.getInstance();
         }
@@ -223,12 +223,12 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             if (_aboutBox != null) {
                 if (!_aboutBox.isVisible()) {
                     // Center window on main screen
                     WindowUtils.centerOnMainScreen(_aboutBox);
-                    
+
                     _aboutBox.setVisible(true);
                 } else {
                     _aboutBox.toFront();
@@ -243,7 +243,7 @@ public class InternalActionFactory {
     }
 
     /** Action to copy acknowledgment text to the clipboard. */
-    protected static class ShowAcknowledgmentAction extends RegisteredAction {
+    protected static final class ShowAcknowledgmentAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -258,7 +258,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        ShowAcknowledgmentAction(String classPath, String fieldName) {
+        ShowAcknowledgmentAction(final String classPath, final String fieldName) {
 
             super(classPath, fieldName, "Copy Acknowledgement to Clipboard");
             _applicationData = ApplicationDescription.getInstance();
@@ -280,7 +280,7 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             StringSelection ss = new StringSelection(_acknowledgement);
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
 
@@ -297,7 +297,7 @@ public class InternalActionFactory {
     }
 
     /** Action to show hot news RSS feed. */
-    protected static class ShowFeedbackReportAction extends RegisteredAction {
+    protected static final class ShowFeedbackReportAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -310,7 +310,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        ShowFeedbackReportAction(String classPath, String fieldName) {
+        ShowFeedbackReportAction(final String classPath, final String fieldName) {
             super(classPath, fieldName, "Report Feedback to " + ApplicationDescription.getInstance().getShortCompanyName() + "...");
             _applicationData = ApplicationDescription.getInstance();
         }
@@ -320,7 +320,7 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             if (_applicationData != null) {
                 // Show the feedback report :
                 FeedbackReport.openDialog();
@@ -329,7 +329,7 @@ public class InternalActionFactory {
     }
 
     /** Action to show hot news RSS feed. */
-    protected static class ShowHotNewsAction extends RegisteredAction {
+    protected static final class ShowHotNewsAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -340,7 +340,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        ShowHotNewsAction(String classPath, String fieldName) {
+        ShowHotNewsAction(final String classPath, final String fieldName) {
             super(classPath, fieldName, "Hot News (RSS Feed)");
         }
 
@@ -349,13 +349,13 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             BrowserLauncher.openURL(ApplicationDescription.getInstance().getHotNewsRSSFeedLinkValue());
         }
     }
 
     /** Action to show FAQ. */
-    protected static class ShowFaqAction extends RegisteredAction {
+    protected static final class ShowFaqAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -366,7 +366,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        ShowFaqAction(String classPath, String fieldName) {
+        ShowFaqAction(final String classPath, final String fieldName) {
             super(classPath, fieldName, "Frequently Asked Questions");
         }
 
@@ -375,13 +375,13 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             BrowserLauncher.openURL(ApplicationDescription.getInstance().getFaqLinkValue());
         }
     }
 
     /** Action to show dependencies. */
-    protected static class ShowDependenciesAction extends RegisteredAction {
+    protected static final class ShowDependenciesAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -392,7 +392,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        ShowDependenciesAction(String classPath, String fieldName) {
+        ShowDependenciesAction(final String classPath, final String fieldName) {
             super(classPath, fieldName, "jMCS Dependencies Copyrights");
         }
 
@@ -401,13 +401,13 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             DependenciesView.display();
         }
     }
 
     /** Action to show help. */
-    protected static class ShowHelpAction extends RegisteredAction {
+    protected static final class ShowHelpAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -419,7 +419,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        ShowHelpAction(String classPath, String fieldName) {
+        ShowHelpAction(final String classPath, final String fieldName) {
             super(classPath, fieldName, "User Manual");
 
             // Set Icon only if not under Mac OS X
@@ -441,7 +441,7 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             if (_documentationURL != null) {
                 BrowserLauncher.openURL(_documentationURL);
             } else {
@@ -451,7 +451,7 @@ public class InternalActionFactory {
     }
 
     /** Action to show log GUI. */
-    protected static class ShowLogGuiAction extends RegisteredAction {
+    protected static final class ShowLogGuiAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -462,7 +462,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        ShowLogGuiAction(String classPath, String fieldName) {
+        ShowLogGuiAction(final String classPath, final String fieldName) {
             super(classPath, fieldName, "Show Log Console");
         }
 
@@ -471,13 +471,13 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             LogbackGui.showLogConsole();
         }
     }
 
     /** Action to correctly handle file opening. */
-    protected static class DefaultOpenAction extends RegisteredAction {
+    protected static final class DefaultOpenAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -488,7 +488,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        DefaultOpenAction(String classPath, String fieldName) {
+        DefaultOpenAction(final String classPath, final String fieldName) {
             super(classPath, fieldName);
 
             // Disabled as this default implementation does nothing
@@ -502,13 +502,13 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             _logger.warn("No handler for default file opening.");
         }
     }
 
     /** Action to correctly handle operations before closing application. */
-    protected static class QuitAction extends RegisteredAction {
+    protected static final class QuitAction extends RegisteredAction {
 
         /** default serial UID for Serializable interface */
         private static final long serialVersionUID = 1;
@@ -519,7 +519,7 @@ public class InternalActionFactory {
          * the action, in the form returned by 'getClass().getName();'.
          * @param fieldName the name of the field pointing to the action.
          */
-        QuitAction(String classPath, String fieldName) {
+        QuitAction(final String classPath, final String fieldName) {
             super(classPath, fieldName, "Quit", "ctrl Q");
 
             flagAsQuitAction();
@@ -530,7 +530,7 @@ public class InternalActionFactory {
          * @param evt action event
          */
         @Override
-        public void actionPerformed(ActionEvent evt) {
+        public void actionPerformed(final ActionEvent evt) {
             _logger.debug("Application is about to die, should we proceed ?");
 
             Bootstrapper.quitApp(evt);

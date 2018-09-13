@@ -133,8 +133,8 @@ public final class MessageContainer {
     }
 
     /**
-     * Return the highest level of messages ( Error > Debug )
-     * @return highest level of messages ( Error > Debug ) or null if empty
+     * Return the highest level of messages ( Error &gt; Debug )
+     * @return highest level of messages ( Error &gt; Debug ) or null if empty
      */
     public Level getLevel() {
         return this.level;

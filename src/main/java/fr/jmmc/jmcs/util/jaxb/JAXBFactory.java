@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * JAXBFactory is an utility class to configure JAXB context & properties
+ * JAXBFactory is an utility class to configure JAXB context &amp; properties
  *
  * @author Laurent BOURGES.
  */
@@ -46,6 +46,17 @@ public final class JAXBFactory {
     private static final Logger logger = LoggerFactory.getLogger(JAXBFactory.class.getName());
     /** all factories */
     private static final ConcurrentHashMap<String, JAXBFactory> managedInstances = new ConcurrentHashMap<String, JAXBFactory>(4);
+
+    /** JAXB implementation 2.3.0 provided in JMCS libraries */
+    public static final String JAXB_CONTEXT_FACTORY_IMPLEMENTATION = "com.sun.xml.bind.v2.ContextFactory";
+
+    static {
+        // Define the system property to define which JAXB implementation to use:
+        System.setProperty(JAXBContext.JAXB_CONTEXT_FACTORY, JAXB_CONTEXT_FACTORY_IMPLEMENTATION);
+
+        logger.info("JAXB ContextFactory: {}", System.getProperty(JAXBContext.JAXB_CONTEXT_FACTORY));
+    }
+
     // Members
     /** JAXB context path : used to find a factory */
     private final String _jaxbPath;
@@ -96,7 +107,7 @@ public final class JAXBFactory {
         try {
             _jaxbContext = getContext(_jaxbPath);
         } catch (XmlBindException xbe) {
-            logger.error("JAXBFactory.initialize : JAXB failure : ", xbe);
+            logger.error("JAXBFactory.initialize: JAXB failure : ", xbe);
             throw xbe;
         }
     }
@@ -111,21 +122,27 @@ public final class JAXBFactory {
     private JAXBContext getContext(final String path) throws XmlBindException {
         JAXBContext context = null;
 
-        logger.debug("JAXB implementation: {}", System.getProperty(javax.xml.bind.JAXBContext.JAXB_CONTEXT_FACTORY));
-
         try {
             // create a JAXBContext capable of handling classes generated into
             // package given by path:
             context = JAXBContext.newInstance(path, JAXBFactory.class.getClassLoader());
 
+            if (logger.isInfoEnabled()) {
+                if (context instanceof com.sun.xml.bind.v2.runtime.JAXBContextImpl) {
+                    logger.info("JAXBContext[{}] Version: {}", path, ((com.sun.xml.bind.v2.runtime.JAXBContextImpl) context).getBuildId());
+                } else {
+                    logger.info("JAXBContext[{}] unknown implementation: {}", path, context.getClass().getName());
+                }
+            }
+
         } catch (JAXBException je) {
             // Can happen if either JAXB library can not be loaded (classloader) or if ObjectFactory can not be loaded (classloader)
             // put stack trace in netbeans IDE logs:
-            je.printStackTrace();
-            System.err.println("ClassLoader (Jmcs): "+ JAXBFactory.class.getClassLoader());
-            System.err.println("ClassLoader (thread): "+ Thread.currentThread().getContextClassLoader());
-            
-            throw new XmlBindException("JAXBFactory.getContext : Unable to create JAXBContext : " + path, je);
+            je.printStackTrace(System.err);
+            System.err.println("ClassLoader (Jmcs): " + JAXBFactory.class.getClassLoader());
+            System.err.println("ClassLoader (thread): " + Thread.currentThread().getContextClassLoader());
+
+            throw new XmlBindException("JAXBFactory.getContext: Unable to create JAXBContext : " + path, je);
         }
 
         return context;
@@ -154,7 +171,7 @@ public final class JAXBFactory {
             unmarshaller = getJAXBContext().createUnmarshaller();
 
         } catch (JAXBException je) {
-            throw new XmlBindException("JAXBFactory.createUnMarshaller : JAXB Failure", je);
+            throw new XmlBindException("JAXBFactory.createUnMarshaller: JAXB Failure", je);
         }
 
         return unmarshaller;
@@ -176,7 +193,7 @@ public final class JAXBFactory {
             marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         } catch (JAXBException je) {
-            throw new XmlBindException("JAXBFactory.createMarshaller : JAXB Failure", je);
+            throw new XmlBindException("JAXBFactory.createMarshaller: JAXB Failure", je);
         }
 
         return marshaller;

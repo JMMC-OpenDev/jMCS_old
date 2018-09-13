@@ -72,7 +72,7 @@ public final class SwingUtils {
             return (JFrame) w;
         }
         // null or not JFrame
-        return App.getFrame();
+        return App.getExistingFrame();
     }
 
     /**

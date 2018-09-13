@@ -138,7 +138,7 @@ public class NumericJTable extends javax.swing.JTable {
             }
 
             try {
-                _value = new Double(str);
+                _value = Double.valueOf(str);
             } catch (NumberFormatException nfe) {
                 ((JComponent) getComponent()).setBorder(new LineBorder(Color.red));
                 return false;

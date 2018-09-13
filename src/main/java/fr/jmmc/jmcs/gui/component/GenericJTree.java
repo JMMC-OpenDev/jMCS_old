@@ -50,13 +50,13 @@ public abstract class GenericJTree<E> extends JTree {
     /** Class _logger */
     protected static final Logger _logger = LoggerFactory.getLogger(GenericJTree.class.getName());
     /* members */
-    /** class corresponding to <E> generic type */
+    /** class corresponding to &lt;E&gt; generic type */
     private final Class<E> _classType;
 
     /**
      * Public constructor changing default values : SINGLE_TREE_SELECTION
      * 
-     * @param classType class corresponding to <E> generic type
+     * @param classType class corresponding to &lt;E&gt; generic type
      */
     public GenericJTree(final Class<E> classType) {
         super(new DefaultMutableTreeNode("GenericJTree"), false);
@@ -138,7 +138,7 @@ public abstract class GenericJTree<E> extends JTree {
      * Fire node structure changed on the given tree node
      * @param node changed tree node
      */
-    public final void fireNodeChanged(final TreeNode node) {
+    public void fireNodeChanged(final TreeNode node) {
         // fire node structure changed :
         getTreeModel().nodeStructureChanged(node);
     }

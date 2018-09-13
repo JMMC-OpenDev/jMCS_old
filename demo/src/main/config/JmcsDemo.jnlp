@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<jnlp spec="1.0+" codebase="@GENERATED@" href="JmcsDemo.jnlp">
+<jnlp spec="6.0+" codebase="@GENERATED@" href="JmcsDemo.jnlp">
     <information>
         <title>JmcsDemo</title>
         <vendor>Your Great Company</vendor>
@@ -7,7 +7,7 @@
         <description kind="tooltip">JmcsAppExample</description>
         <description kind="short">jMCS Application Example</description>
         <icon href="com/yourcompany/example/resource/AppIcon.jpg"/>
-        <offline-allowed/> 
+        <offline-allowed/>
         <shortcut>
             <desktop/>
         </shortcut>
@@ -16,14 +16,14 @@
         <all-permissions/>
     </security>
     <resources>
-        <j2se version="1.6+" initial-heap-size="64m" max-heap-size="128m"/>
+        <j2se version="1.7+" initial-heap-size="64m" max-heap-size="128m"/>
 
         <!-- Application module first (main class) -->
-        <jar href="jar/jmcs-demo-TRUNK.jar" />
+        <jar href="jar/jmcs-demo-TRUNK.jar" main="true"/>
 
         <!-- JMMC modules -->
         <extension href="../jmcs/Jmcs.jnlp"/>
-        
+
     </resources>
     <application-desc main-class="com.yourcompany.example.Main"/>
 </jnlp>

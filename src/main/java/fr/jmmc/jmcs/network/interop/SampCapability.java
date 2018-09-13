@@ -86,11 +86,13 @@ public enum SampCapability {
     /** JMMC SearchCal Start Query MType */
     APPLAUNCHERTESTER_TRY_LAUNCH("fr.jmmc.applaunchertester.try.launch"),
     /** JMMC SearchCal Start Query MType */
-    SEARCHCAL_START_QUERY("fr.jmmc.searchcal.start.query"),
+    ASPRO_LOAD_OBSERVATION("fr.jmmc.aspro.load.observation"),
     /** JMMC LITpro open settings file MType */
     LITPRO_START_SETTING("fr.jmmc.litpro.start.setting"),
     /** JMMC LITpro load usermodel MType */
     LITPRO_LOAD_USERMODEL("fr.jmmc.litpro.load.usermodel"),
+    /** JMMC SearchCal Start Query MType */
+    SEARCHCAL_START_QUERY("fr.jmmc.searchcal.start.query"),
     /** OCA Pivot load star list MType */
     LOAD_STAR_LIST("starlist.load"),
     /** A2P2 load OB MType */

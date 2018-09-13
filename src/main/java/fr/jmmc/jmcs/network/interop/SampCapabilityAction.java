@@ -30,6 +30,7 @@ package fr.jmmc.jmcs.network.interop;
 import fr.jmmc.jmcs.gui.action.RegisteredAction;
 import fr.jmmc.jmcs.gui.component.StatusBar;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
@@ -248,6 +249,8 @@ public abstract class SampCapabilityAction extends RegisteredAction {
         final Map<?, ?> parameters = composeMessage();
 
         if (parameters != null) {
+            _logger.debug("composeAndSendMessage: parameters = {}", parameters);
+            
             StatusBar.show("Sending data through SAMP ...");
 
             try {
@@ -274,6 +277,23 @@ public abstract class SampCapabilityAction extends RegisteredAction {
             }
         }
         return ok;
+    }
+
+    protected void addUrlParameter(final Map<String, String> parameters, final File file) {
+        addUrlParameter(parameters, "url", file);
+    }
+    
+    protected void addUrlParameter(final Map<String, String> parameters, final String key, final File file) {
+        // uri gives an absolute file path:
+        String url = file.toURI().toString();
+        if (!url.startsWith("file:///")) {
+            int pos = 5;
+            while (url.charAt(pos) == '/') {
+                pos++;
+            }
+            url = "file:///" + url.substring(pos);
+        }
+        parameters.put(key, url);
     }
     
     final static class ClientComparator implements Comparator<Client> {

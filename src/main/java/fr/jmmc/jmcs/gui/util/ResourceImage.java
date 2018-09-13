@@ -39,9 +39,10 @@ public enum ResourceImage {
     JMMC_FAVICON("jmmc_favicon.png"),
     STATUS_HISTORY("script_start.png"), // http://www.iconseeker.com/search-icon/aspnet/script-start.html### by http://www.aspneticons.com/ (Creative Commons Attribution 3.0 License)
     HELP_ICON("help_icon.png"),
-    INFO_ICON("info_icon.png"),
     DISABLED_INFO_ICON("disabled_info_icon.png"),
+    INFO_ICON("info_icon.png"),
     WARNING_ICON("warning_icon.png"),
+    ERROR_ICON("error-icon.png"),
     UP_ARROW("up_arrow.png"),
     DOWN_ARROW("down_arrow.png");
     /** Common resource directory containing icon files */
@@ -49,7 +50,10 @@ public enum ResourceImage {
     /** Loaded icon resource */
     private final ImageIcon _icon;
 
-    /** Constructor */
+    /** 
+     * Constructor
+     * @param iconName
+     */
     private ResourceImage(String iconName) {
         _icon = ImageUtils.loadResourceIcon(IMAGE_RESOURCE_COMMON_PATH + iconName);
     }
@@ -67,7 +71,8 @@ public enum ResourceImage {
      */
     public static void main(String[] args) {
         for (ResourceImage rsc : ResourceImage.values()) {
-            System.out.println("Resource '" + rsc.name() + "' -> '" + rsc.icon() + "'.");
+            System.out.println("Resource '" + rsc.name() + "' -> '" + rsc.icon() 
+                    + "': (" + rsc.icon().getIconWidth() + " x " + rsc.icon().getIconHeight() + ").");
         }
     }
 }

@@ -136,11 +136,21 @@ public final class MessagePane {
             _logger.error("A problem occured: {}", message);
         }
 
-        final String msg;
-        if (th != null && th.getMessage() != null) {
+        final String msg = (th != null) ? message + getExceptionMessage(th) : message;
 
+        // display the message within EDT :
+        showMessageDialog(msg, title, JOptionPane.ERROR_MESSAGE);
+    }
+
+    /**
+     * Return the formatted message containing the exception message and its nested causes
+     * @param th exception to format
+     * @return formatted message
+     */
+    public static String getExceptionMessage(final Throwable th) {
+        if (th != null) {
             // try to get cause if possible
-            String cause = "";
+            String cause = (th.getMessage() != null) ? th.getMessage() : "";
 
             Throwable thCause = th.getCause();
 
@@ -154,13 +164,9 @@ public final class MessagePane {
             }
 
             // Add exception name to improve given information e.g. ArrayOutOfBound just returned a number as message...
-            msg = message + "\n\nExplanation (" + th.getClass().getName() + "): " + th.getMessage() + cause + "\n\n";
-        } else {
-            msg = message;
+            return "\n\nExplanation (" + th.getClass().getName() + "): " + cause + "\n\n";
         }
-
-        // display the message within EDT :
-        showMessageDialog(msg, title, JOptionPane.ERROR_MESSAGE);
+        return "";
     }
 
     /**
@@ -247,11 +253,7 @@ public final class MessagePane {
                 JOptionPane.WARNING_MESSAGE, null, FILE_OVERWRITE_OPTIONS, FILE_OVERWRITE_OPTIONS[0]);
 
         // If the user clicked the "Replace" button
-        if (result == 1) {
-            return true;
-        }
-
-        return false;
+        return (result == 1);
     }
 
     /**
@@ -270,11 +272,7 @@ public final class MessagePane {
                 JOptionPane.WARNING_MESSAGE, null, DIRECTORY_CREATE_OPTIONS, DIRECTORY_CREATE_OPTIONS[0]);
 
         // If the user clicked the "Create" button
-        if (result == 1) {
-            return true;
-        }
-
-        return false;
+        return (result == 1);
     }
 
     /**
@@ -442,7 +440,7 @@ public final class MessagePane {
      * @return application frame
      */
     private static JFrame getApplicationFrame() {
-        return App.getFrame();
+        return App.getExistingFrame();
     }
 
     /**

@@ -27,6 +27,7 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.gui;
 
+import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.data.app.model.Menu;
 import fr.jmmc.jmcs.data.app.model.Menubar;
@@ -195,13 +196,13 @@ public class MainMenuBar extends JMenuBar {
                     }
                 }
 
-                if (!_isRunningUnderMacOSX) {
+                if (!SystemUtils.IS_OS_MAC_OSX) {
                     fileMenu.add(new JSeparator());
                 }
             }
         }
 
-        if (!_isRunningUnderMacOSX) {
+        if (!SystemUtils.IS_OS_MAC_OSX) {
             fileMenu.add(_registrar.getQuitAction());
             haveMenu = true;
         }
@@ -255,7 +256,7 @@ public class MainMenuBar extends JMenuBar {
             }
         }
 
-        if (!_isRunningUnderMacOSX) {
+        if (!Bootstrapper.isMacIntegrationDone()) {
             Action preferenceAction = _registrar.getPreferenceAction();
 
             if (preferenceAction != null) {
@@ -390,7 +391,7 @@ public class MainMenuBar extends JMenuBar {
             helpMenu.add(InternalActionFactory.showFaqAction());
         }
 
-        if (!_isRunningUnderMacOSX) {
+        if (!Bootstrapper.isMacIntegrationDone()) {
             if (shouldAddSeparator) {
                 helpMenu.add(new JSeparator());
             }
@@ -555,7 +556,7 @@ public class MainMenuBar extends JMenuBar {
         }
 
         // Discard all menu icons under Mac OS X
-        if (_isRunningUnderMacOSX) {
+        if (SystemUtils.IS_OS_MAC_OSX) {
             item.setIcon(null);
         }
 

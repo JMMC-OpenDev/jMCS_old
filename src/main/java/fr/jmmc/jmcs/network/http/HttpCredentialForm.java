@@ -55,7 +55,7 @@ public class HttpCredentialForm extends javax.swing.JDialog {
      * @param getMethod GetMethod instance
      */
     public HttpCredentialForm(final GetMethod getMethod) {
-        super(App.getFrame(), true);
+        super(App.getExistingFrame(), true);
         initComponents();
 
         // set title
@@ -79,7 +79,7 @@ public class HttpCredentialForm extends javax.swing.JDialog {
         infoTextPane.setText(sb.toString());
 
         pack();
-        setLocationRelativeTo(App.getFrame());
+        setLocationRelativeTo(App.getExistingFrame());
     }
 
     /**

@@ -27,11 +27,25 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.util;
 
+import fr.jmmc.jmcs.data.preference.CommonPreferences;
+import fr.jmmc.jmcs.data.preference.Preferences;
+import fr.jmmc.jmcs.gui.component.ResizableTextViewFactory;
+import org.apache.commons.lang.SystemUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+
 /**
  * This class gathers few utility methods related to JVM (System or Runtime properties)
  * @author Laurent BOURGES.
  */
 public final class JVMUtils {
+
+    /** Logger */
+    private static final Logger _logger = LoggerFactory.getLogger(JVMUtils.class.getName());
+
+    /** minimal java version required for JMCS */
+    public static final float JAVA_MIN_VERSION = 1.7f;
 
     /* JVM Heap information */
     /**
@@ -96,6 +110,62 @@ public final class JVMUtils {
      */
     public static int availableProcessors() {
         return Runtime.getRuntime().availableProcessors();
+    }
+
+    /**
+     * Check the JVM version and show a warning message if it is unsupported
+     */
+    public static boolean showUnsupportedJdkWarning() {
+        final float javaRuntime = SystemUtils.JAVA_VERSION_FLOAT;
+        final String jvmVendor = SystemUtils.JAVA_VM_VENDOR;
+        final String jvmName = SystemUtils.JAVA_VM_NAME;
+        final String javaVersion = SystemUtils.JAVA_VERSION;
+        final String jvmVersion = SystemUtils.JAVA_VM_VERSION;
+        final String jvmHome = SystemUtils.getJavaHome().getAbsolutePath();
+
+        _logger.info("JVM runtime environment: {} {} ({} {}) [{}]", jvmVendor, jvmName, javaVersion, jvmVersion, jvmHome);
+
+        Level level = null;
+        int timeoutMillis = 0; // disabled by default
+        String message = "<HTML><BODY>";
+
+        if (javaRuntime < JAVA_MIN_VERSION) {
+            level = Level.ERROR;
+            _logger.warn("Detected JDK {} runtime environment: {} {} {} - {}", javaRuntime, jvmVendor, jvmName, javaVersion, jvmVersion);
+
+            message += "<FONT COLOR='RED'>WARNING</FONT>: ";
+            message += "Your Java Virtual Machine is not supported anymore.";
+        } else if (jvmName != null && jvmName.toLowerCase().contains("openjdk") && (javaRuntime < 1.8f)) {
+            level = Level.WARN;
+            _logger.warn("Detected OpenJDK runtime environment: {} {} {} - {}", jvmVendor, jvmName, javaVersion, jvmVersion);
+
+            message += "<FONT COLOR='ORANGE'>WARNING</FONT>: ";
+            message += "Your Java Virtual Machine is OpenJDK 7, which may have known bugs (SWING look and feel,"
+                    + " fonts, time zone, PDF issues...) on several Linux distributions.";
+
+            // If OpenJDK 1.7+, set auto-hide delay to 5s:
+            timeoutMillis = 5000;
+        }
+
+        if (level != null) {
+            message += "<BR><BR><B>JMMC recommends</B> Java 8, available at:"
+                    + "<BR><CENTER><A HREF='http://www.java.com/'>http://www.java.com/</A></CENTER>"
+                    + "<BR><BR><I>Your current JVM Information :</I><BR><TT>"
+                    + "java.vm.name    = '" + jvmName + "'<BR>"
+                    + "java.vm.vendor  = '" + jvmVendor + "'<BR>"
+                    + "java.version    = '" + javaVersion + "'<BR>"
+                    + "java.vm.version = '" + jvmVersion + "'<BR>"
+                    + "Java Home:<BR>'" + jvmHome + "'" + "</TT>";
+            message += "</BODY></HTML>";
+
+            final Preferences preferences = (level == Level.WARN) ? CommonPreferences.getInstance() : null;
+
+            // modal dialog (wait)
+            ResizableTextViewFactory.createHtmlWindow(message, "Deprecated Java environment detected !",
+                    true, timeoutMillis, preferences, CommonPreferences.SHOW_UNSUPPORTED_JDK_WARNING);
+        }
+
+        return (level != Level.ERROR);
     }
 
     /**

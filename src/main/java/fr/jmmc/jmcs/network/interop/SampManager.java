@@ -378,7 +378,7 @@ public final class SampManager {
             connector.createHubAction(false, getInternalHubMode())
         };
 
-        return connector.createRegisterOrHubAction(App.getFrame(), hubStartActions);
+        return connector.createRegisterOrHubAction(App.getExistingFrame(), hubStartActions);
     }
 
     /**

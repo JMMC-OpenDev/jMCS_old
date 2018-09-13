@@ -397,8 +397,12 @@ public final class SwingSettings {
         SwingUtils.invokeAndWaitEDT(new Runnable() {
             @Override
             public void run() {
+                try {
                 // Install JIDE extensions (Swing workaround):
                 LookAndFeelFactory.installJideExtension();
+                } catch (Throwable th) {
+                    _logger.warn("installJideLAFExtensions failed: ", th);
+                }
             }
         });
     }

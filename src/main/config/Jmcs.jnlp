@@ -29,7 +29,7 @@
 ********************************************************************************
 -->
 
-<jnlp spec="1.0+" codebase="@GENERATED@" href="Jmcs.jnlp">
+<jnlp spec="6.0+" codebase="@GENERATED@" href="Jmcs.jnlp">
     <information>
         <title>jMCS Framework</title>
         <vendor>JMMC (Jean-Marie MARIOTTI Center)</vendor>
@@ -46,6 +46,9 @@
         <!-- Module code -->
         <jar href="jar/jmcs-TRUNK.jar"/>
 
+        <!-- Mac OS X Desktop integration (jdk9) -->
+        <jar href="@SHARED@/jmcs-MacOSX-9-TRUNK.jar"/>
+
 
         <!-- Libraries -->
 
@@ -55,17 +58,17 @@
         <jar href="@SHARED@/jcl-over-slf4j-1.7.25.jar"/>
 
         <!-- logback -->
-        <jar href="@SHARED@/logback-core-1.2.2.jar"/>
-        <jar href="@SHARED@/logback-classic-1.2.2.jar"/>
+        <jar href="@SHARED@/logback-core-1.2.3.jar"/>
+        <jar href="@SHARED@/logback-classic-1.2.3.jar"/>
 
         <!-- VO interoperability -->
         <jar href="@SHARED@/jsamp-1.3.5.jar"/>
 
         <!-- Open URLs in user's default web browser -->
-        <jar href="@SHARED@/BrowserLauncher2.orig-1.3.jar"/>
+        <jar href="@SHARED@/BrowserLauncher2-1.4.jar"/>
 
         <!-- Missing Swing Widgets -->
-        <jar href="@SHARED@/jide-oss-3.6.12.jar"/>
+        <jar href="@SHARED@/jide-oss-3.7.4.jar"/>
 
         <!-- Documentation reader -->
         <jar href="@SHARED@/jhall-2.0.jar "/>
@@ -73,10 +76,17 @@
         <!-- Mac OS X Desktop integration -->
         <jar href="@SHARED@/AppleJavaExtensions-1.6.jar"/>
 
-        <!-- Xml binding -->
-        <jar href="@SHARED@/jaxb-core-2.2.11.jar"/>
-        <jar href="@SHARED@/jaxb-impl-2.2.11.jar"/>
-        <jar href="@SHARED@/jaxb-api-2.2.11.jar"/>
+        <!-- JAXB Xml binding -->
+        <jar href="@SHARED@/jaxb-api-2.3.0.jar"/>
+        <jar href="@SHARED@/jaxb-runtime-2.3.0.jar"/>
+        <jar href="@SHARED@/jaxb-core-2.3.0.jar"/>
+
+        <!-- JAXB dependencies -->
+        <jar href="@SHARED@/javax.activation-api-1.2.0.jar"/>
+        <jar href="@SHARED@/FastInfoset-1.2.13.jar"/>
+        <jar href="@SHARED@/istack-commons-runtime-3.0.5.jar"/>
+        <jar href="@SHARED@/stax-ex-1.7.8.jar"/>
+        <jar href="@SHARED@/txw2-2.3.0.jar"/>
 
         <!-- HttpClient -->
         <jar href="@SHARED@/commons-httpclient-3.1.jar "/>

@@ -73,7 +73,7 @@ public final class WindowUtils {
      * @throws NullPointerException on some platform (virtual box)
      * @return rectangle corresponding to the given window's display otherwise of the primary display
      */
-    private static Rectangle getScreenBounds(final Window screenWindow) throws NullPointerException {
+    public static Rectangle getScreenBounds(final Window screenWindow) throws NullPointerException {
         if (screenWindow != null) {
             final GraphicsConfiguration gc = screenWindow.getGraphicsConfiguration();
             if (gc != null) {

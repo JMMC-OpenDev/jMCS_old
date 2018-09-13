@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*******************************************************************************
+* JMMC project ( http://www.jmmc.fr ) - Copyright (C) CNRS.
+*******************************************************************************
+-->
+
+<project name="jmcs-xjc" basedir=".">
+
+    <description>
+        JMCS XJC macro.
+    </description>
+
+    <!-- define the jmcs tools folder -->
+    <dirname property="included.basedir" file="${ant.file.jmcs-xjc}"/>
+
+    <!-- JAXB library must be present in the jmcs/tools/xjc nearby -->
+    <property name="jaxb.libs" location="${included.basedir}/xjc"/>
+
+
+    <!-- custom macro to enhance XJC -->
+    <macrodef name="xjc">
+        <attribute name="destdir"/>
+        <attribute name="schema"/>
+
+        <sequential>
+            <java classname="com.sun.tools.xjc.XJCFacade" fork="true" failonerror="true" maxmemory="512m">
+                <classpath>
+                    <fileset dir="${jaxb.libs}" includes="libs/*.jar"/>
+                    <fileset dir="${jaxb.libs}" includes="simple-regenerator-1.0.jar"/>
+                </classpath>
+                <!-- classloader issue with extensions in JAXB 2.3.0: use XJCFacade.nohack=true as workaround -->
+                <jvmarg value="-Dcom.sun.tools.xjc.XJCFacade.nohack=true" />
+                <jvmarg value="-Dcom.sun.tools.xjc.Options.findServices=true" />
+                <jvmarg value="-Djavax.xml.accessExternalSchema=all" />
+
+                <arg value="-no-header"/>
+
+                <arg value="-extension"/>
+                <!-- preserve code extension -->
+                <arg value="-simple-preserve"/>
+
+                <arg value="-verbose"/>
+
+                <arg value="-d"/>
+                <arg value="@{destdir}"/>
+
+                <arg value="@{schema}"/>
+                <env key="LANG" value="en_US"/>
+            </java>
+
+            <delete dir="@{destdir}">
+                <include name="**/*.java.backup"/>
+            </delete>
+        </sequential>
+    </macrodef>
+
+</project>

@@ -91,9 +91,9 @@ public enum SampMetaData {
     public final static String STUB_TOKEN = "STUB";
 
     /**
-     * Return the Samp meta data key 'fr.jmmc.applauncher.<clientName>'
+     * Return the Samp meta data key 'fr.jmmc.applauncher.&lt;clientName&gt;'
      * @param name client name
-     * @return 'fr.jmmc.applauncher.<clientName>'
+     * @return 'fr.jmmc.applauncher.&lt;clientName&gt;'
      */
     public static String getStubMetaDataId(final String name) {
         return APP_LAUNCHER_PREFIX + name;

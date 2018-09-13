@@ -30,7 +30,7 @@ package fr.jmmc.jmcs.util.timer;
 import fr.jmmc.jmcs.util.NumberUtils;
 
 /**
- * Special Timer with a threshold to separate low & high values.
+ * Special Timer with a threshold to separate low &amp; high values.
  *
  * @author Laurent BOURGES (voparis).
  */

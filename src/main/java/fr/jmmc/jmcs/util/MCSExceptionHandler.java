@@ -44,11 +44,11 @@ import org.slf4j.LoggerFactory;
  *
  * JNLP issues :
  * - Thread.defaultUncaughtExceptionHandler never used
- * => do not use this default UncaughtExceptionHandler to have the same behavior using standard java runtime
+ * =&gt; do not use this default UncaughtExceptionHandler to have the same behavior using standard java runtime
  *
  * - main thread (starting the application) use a general try/catch (throwable) and opens a JNLP error dialog
- * => do not set the UncaughtExceptionHandler to this thread
- * => Be sure to catch all exceptions in main() and use the feedback report manually
+ * =&gt; do not set the UncaughtExceptionHandler to this thread
+ * =&gt; Be sure to catch all exceptions in main() and use the feedback report manually
  * 
  * @author Laurent BOURGES.
  */

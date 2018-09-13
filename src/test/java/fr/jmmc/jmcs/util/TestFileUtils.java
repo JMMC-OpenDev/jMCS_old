@@ -36,6 +36,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -617,8 +618,10 @@ public class TestFileUtils {
 
     /**
      * Test of retrieveRemoteFile method, of class FileUtils.
-     * Disabled too jmmc specific tests @Test
+     * Disabled too jmmc specific tests
      */
+    @Test
+    @Ignore
     public void couldtestRetrieveRemoteFile() throws Exception {
         System.out.println("retrieveRemoteFile");
 

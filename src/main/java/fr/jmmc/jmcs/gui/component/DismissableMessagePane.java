@@ -74,7 +74,7 @@ public final class DismissableMessagePane {
                 final JCheckBox checkbox = new JCheckBox(DO_NOT_SHOW_THIS_MESSAGE_AGAIN);
                 final Object[] params = {message, checkbox};
 
-                JOptionPane.showMessageDialog(App.getFrame(), params);
+                JOptionPane.showMessageDialog(App.getExistingFrame(), params);
 
                 dontShow = checkbox.isSelected();
 

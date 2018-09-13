@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class holds the mapping thread (name) <=> HTTPMethod
+ * This class holds the mapping thread (name) &lt;=&gt; HTTPMethod
  *
  * @author Laurent BOURGES.
  */

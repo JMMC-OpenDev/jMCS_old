@@ -48,9 +48,14 @@ public final class NumberUtils {
     /** shared Double = 1 instance */
     public final static Double DBL_ONE = Double.valueOf(1d);
     /** default formatter */
-    private final static NumberFormat _fmtDef = NumberFormat.getInstance();
+    private final static NumberFormat _fmtDef;
     /** scientific formatter */
     private final static NumberFormat _fmtScience = new DecimalFormat("0.0##E0");
+    
+    static {
+        _fmtDef = NumberFormat.getInstance();
+        _fmtDef.setGroupingUsed(false);
+    }
 
     /**
      * Private constructor
@@ -140,8 +145,8 @@ public final class NumberUtils {
 
     /**
      * Format the given double value using custom formaters:
-     * - '0'     if abs(val) < 1e-9
-     * - 0.000   if 1e-3 < abs(val) < 1e6
+     * - '0'     if abs(val) &lt; 1e-9
+     * - 0.000   if 1e-3 &lt; abs(val) &lt; 1e6
      * - 0.0##E0 else
      * 
      * Note: this method is not thread safe (synchronization must be performed by callers)
@@ -150,6 +155,9 @@ public final class NumberUtils {
      * @return formatted value
      */
     public static String format(final double val) {
+        if (Double.isNaN(val)) {
+            return "NaN";
+        }
         final double abs = Math.abs(val);
 
         if (abs < 1e-9d) {
@@ -364,7 +372,7 @@ public final class NumberUtils {
             cache = new Integer[(high - low) + 1];
             int j = low;
             for (int k = 0, len = cache.length; k < len; k++) {
-                cache[k] = new Integer(j++);
+                cache[k] = Integer.valueOf(j++);
             }
         }
 
@@ -377,7 +385,7 @@ public final class NumberUtils {
             if (i >= low && i <= high) {
                 return cache[i + (-low)];
             }
-            return new Integer(i);
+            return Integer.valueOf(i);
         }
 
         /**

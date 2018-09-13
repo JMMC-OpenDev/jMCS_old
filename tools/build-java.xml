@@ -15,19 +15,10 @@
     </description>
 
 
-    <!--
-    Get build properties (general).
-    Should only contain the location of the JMCS module where JAXB libraries can be found.
-    -->
-    <property file="build.properties" />
+    <include file="./build-include.xml"/>
 
     <!-- define folder properties -->
     <property name="root" location=".."/>
-
-    <!-- JAXB library must be present in the jmcs module nearby -->
-    <property name="jaxb.version" value="2.2.11"/>
-    <property name="jaxb.libs" location="${jmcs.path}/tools/xjc"/>
-    <property name="mvn.libs" location="${root}/target/runtime-libs/"/>
 
     <!-- JMCS src folder -->
     <property name="sources"   location="${root}/src/main/java"/>
@@ -36,39 +27,6 @@
 
     <!-- JMCS test folder -->
     <property name="test" location="${root}/src/test/java"/>
-
-
-    <!-- custom macro to enhance XJC -->
-    <macrodef name="xjc">
-        <attribute name="destdir"/>
-        <attribute name="schema"/>
-
-        <sequential>
-            <java classname="com.sun.tools.xjc.XJCFacade" classpath="${jaxb.libs}/jaxb-xjc-${jaxb.version}.jar:${mvn.libs}/jaxb-api-${jaxb.version}.jar:${mvn.libs}/jaxb-core-${jaxb.version}.jar:${mvn.libs}/jaxb-impl-${jaxb.version}.jar" fork="true" failonerror="true" maxmemory="256m">
-
-                <jvmarg value="-Djavax.xml.accessExternalSchema=all" />
-
-                <arg value="-classpath"/>
-                <arg value="${jaxb.libs}/simple-regenerator-1.0.jar"/>
-
-                <arg value="-no-header"/>
-
-                <arg value="-extension"/>
-                <!-- preserve code extension -->
-                <arg value="-simple-preserve"/>
-
-                <arg value="-d"/>
-                <arg value="@{destdir}"/>
-
-                <arg value="@{schema}"/>
-                <env key="LANG" value="en_US"/>
-            </java>
-
-            <delete dir="@{destdir}">
-                <include name="**/*.java.backup"/>
-            </delete>
-        </sequential>
-    </macrodef>
 
 
 
@@ -96,24 +54,24 @@
         <xjc destdir="${output}"
              schema="${sources}/fr/jmmc/jmcs/data/app/ApplicationDataModel.xsd" />
 
-	    <!-- 
-	    remove several @XmlSchemaType in JAXB 2.2.11:
-	    - @XmlSchemaType(name = "string") by '' (bad enum)
-	    - @XmlSchemaType(name = "anySimpleType") by none (bad double[])
-	    -->
-<!--
-	    <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java" value="">
-		    <replacetoken>@XmlSchemaType(name = "string")</replacetoken>
-	    </replace>
-	    <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java" value="">
-		    <replacetoken>@XmlSchemaType(name = "anySimpleType")</replacetoken>
-	    </replace>
--->
+        <!--
+        remove several @XmlSchemaType in JAXB 2.2.11:
+        - @XmlSchemaType(name = "string") by '' (bad enum)
+        - @XmlSchemaType(name = "anySimpleType") by none (bad double[])
+        -->
+        <!--
+                <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java" value="">
+                    <replacetoken>@XmlSchemaType(name = "string")</replacetoken>
+                </replace>
+                <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java" value="">
+                    <replacetoken>@XmlSchemaType(name = "anySimpleType")</replacetoken>
+                </replace>
+        -->
 
-	    <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java">
-		    <replacetoken>
-package fr.jmmc.jmcs.data.app.model;</replacetoken>
-            <replacevalue>/*******************************************************************************
+        <replace summary="true" dir="${output}/fr/jmmc/jmcs/data/app/model/" includes="*.java">
+            <replacetoken><![CDATA[
+package fr.jmmc.jmcs.data.app.model;]]></replacetoken>
+            <replacevalue><![CDATA[/*******************************************************************************
  *                 jMCS project ( http://www.jmmc.fr/dev/jmcs )
  *******************************************************************************
  * Copyright (c) 2016, CNRS. All rights reserved.
@@ -140,8 +98,8 @@ package fr.jmmc.jmcs.data.app.model;</replacetoken>
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package fr.jmmc.jmcs.data.app.model;</replacevalue>
-	    </replace>
+package fr.jmmc.jmcs.data.app.model;]]></replacevalue>
+        </replace>
 
     </target>
 
