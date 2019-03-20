@@ -1,11 +1,11 @@
 jMCS
 ====
 
-Java framework from [JMMC](http://www.jmmc.fr), to homogenize your GUI across all the 3 main desktop OS, and further integrates your app to them.
+jMCS is a Java framework from [JMMC](http://www.jmmc.fr), to homogenize your GUI across all the 3 main desktop OSes, and further integrate your app to them.
 
-Its primary goal is to centralize all GUI apps shared functionalities (e.g menubar handling, about box window, ...) in order to provide end users with a more consistent, feature-reach, desktop-class application family, as integrated as possible across Linux, Mac OS X and Windows, while freeing you developers of this tedious work !
+Its primary goal is to centralize all GUI apps shared functionalities (e.g menubar handling, about box window, ...) in order to provide end users with a more consistent, feature-reach, desktop-class application family, as integrated as possible across Linux, macOS and Windows, while freeing you developers of this tedious work !
 
-The ultimate goal is to leverage your end users knowledge of their favorite platform, to let them fill right at home while using your applications, thus improving the perceived quality of your products while factorizing and sharing your development efforts.
+The ultimate goal is to leverage your end users knowledge of their favorite platform, to let them feel right at home while using your applications, thus improving the perceived quality of your products while factorizing and sharing your development efforts.
 
 Your app then feels better to the end user (by truly respecting its platform of choice), and we free you of all those nasty details !
 
@@ -42,7 +42,7 @@ mvn process-resources
 mvn clean package
 ```
 
-Jar files are then available in `target` directory !
+Jar files are then available in `target/` directory !
 You also get the option to use prepared jar under the 'Download' section of prepared [releases](releases).   
 
 
