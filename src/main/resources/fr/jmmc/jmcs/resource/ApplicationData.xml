@@ -188,15 +188,23 @@
     </dependences>
 
     <releasenotes>
+        <release version="1.0.6">
+            <pubDate>Wed, 10 Jul 2019 16:00:00 GMT</pubDate>
+            <prerelease version="1.0.6b1" tag="UNKNOWN">
+              <change type="CHANGE">Handle font resizing 4K screen using preference</change>
+              <change type="CHANGE">Support JDK V 8,9,10,11</change>
+              <change type="CHANGE">Many improvements</change>
+              <!--
+                   <change type="CHANGE">In Readme.md : updated build procedure (mainly add support for process-resources maven target).</change>
+              <change type="CHANGE">In fr.jmmc.jmcs.util.TestFileUtils.java : disabled too specific test.</change>
+-->
+            </prerelease>
+        </release>
         <release version="1.0.5">
             <pubDate>Wed, 06 Sep 2017 16:00:00 GMT</pubDate>
             <prerelease version="1.0.5b1" tag="UNKNOWN">
               <change type="FEATURE">Fix Mac OS X integration for JDK9+</change>
               <change type="CHANGE">Update release note still TBD !</change>
-              <!--
-                   <change type="CHANGE">In Readme.md : updated build procedure (mainly add support for process-resources maven target).</change>
-              <change type="CHANGE">In fr.jmmc.jmcs.util.TestFileUtils.java : disabled too specific test.</change>
--->
             </prerelease>
         </release>
         <release version="1.0.4">
