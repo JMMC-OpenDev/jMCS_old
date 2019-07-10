@@ -52,11 +52,11 @@ Else you will have :
         <profile>
             <id>dev</id>
             <properties>
-		<!-- disable jar signer -->
+                <!-- disable jar signer -->
                 <jarsigner.skip>true</jarsigner.skip>
-		<!-- disable javadoc -->
-		<maven.javadoc.skip>true</maven.javadoc.skip>
-		<!-- disable tests -->
+                <!-- disable javadoc -->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <!-- disable tests -->
                 <maven.test.skip>true</maven.test.skip>
             </properties>
         </profile>
@@ -64,6 +64,11 @@ Else you will have :
         <profile>
             <id>deployer</id>
             <properties>
+                <!-- disable javadoc -->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <!-- disable tests -->
+                <maven.test.skip>true</maven.test.skip>
+
                 <jarsigner.skip>false</jarsigner.skip>
                 <jarsigner.alias>codesigningcert</jarsigner.alias>
                 <jarsigner.keystore>/home/MCS/etc/globalsign.jks</jarsigner.keystore>

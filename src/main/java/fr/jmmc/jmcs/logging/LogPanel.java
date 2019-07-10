@@ -27,6 +27,8 @@
  ******************************************************************************/
 package fr.jmmc.jmcs.logging;
 
+import fr.jmmc.jmcs.gui.util.SwingUtils;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
@@ -96,6 +98,8 @@ public class LogPanel extends javax.swing.JPanel implements ActionListener, Chan
         if (SystemUtils.IS_OS_MAC_OSX) {
             setOpaque(false);
         }
+        
+        logTextArea.setFont(new Font("Monospaced", Font.PLAIN, SwingUtils.adjustUISize(12)));
 
         // Refresh buttons listener :
         jButtonRefreshLogs.addActionListener(this);
@@ -246,7 +250,6 @@ public class LogPanel extends javax.swing.JPanel implements ActionListener, Chan
         logScrollPane.setOpaque(false);
 
         logTextArea.setEditable(false);
-        logTextArea.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         logTextArea.setTabSize(4);
         logScrollPane.setViewportView(logTextArea);
 

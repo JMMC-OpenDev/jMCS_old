@@ -67,7 +67,7 @@ public final class SpecialChars {
      * @return true if the default font (SansSerif) can display the given character; false otherwise
      */
     private static boolean canDisplay(final char ch) {
-        final Font font = new Font("SansSerif", Font.PLAIN, 12);
+        final Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
         return (font.canDisplay(ch));
     }
 }

@@ -30,7 +30,7 @@ package fr.jmmc.jmcs.gui.util;
 /**
  * Abstract Quit callback
  * 
- * @author bourgesl
+ * @author Laurent BOURGES.
  */
 public interface MacOSXQuitCallback {
 

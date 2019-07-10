@@ -43,6 +43,8 @@ public final class CommonPreferences extends Preferences {
     /** Logger */
     private static final Logger _logger = LoggerFactory.getLogger(CommonPreferences.class.getName());
     /* Preferences */
+    /** Name of the System property which overrides the UI scale */
+    public static final String SYSTEM_UI_SCALE = "jmcs.ui.scale";
     /** Store the filename of the common preference file */
     public static final String PREFERENCES_FILENAME = "fr.jmmc.jmcs.properties";
     /** Name of the preference which stores the user email in the feedback report */
@@ -92,6 +94,10 @@ public final class CommonPreferences extends Preferences {
         }
     }
 
+    /* members */
+    /** resolved System uiScale */
+    private Float systemUiScale = null;
+
     /** Private constructor that must be empty. */
     private CommonPreferences() {
         super();
@@ -133,9 +139,39 @@ public final class CommonPreferences extends Preferences {
     }
 
     public float getUIScale() {
+        // handle overriden value via -Djmcs.ui.scale=...
+        final Float systemPropUiScale = getSystemUiScale();
+        if (!Float.isNaN(systemPropUiScale)) {
+            return systemPropUiScale.floatValue();
+        }
         return (float) getPreferenceAsDouble(CommonPreferences.UI_SCALE);
     }
-    
+
+    public void setSystemUiScale(Float uiScale) {
+        Float value = Float.NaN;
+        if (uiScale.floatValue() > 0.0f) {
+            value = uiScale;
+        }
+        _logger.info("UI scale: {}", uiScale);
+        this.systemUiScale = value;
+    }
+
+    private Float getSystemUiScale() {
+        if (this.systemUiScale == null) {
+            final String uiScale = System.getProperty(SYSTEM_UI_SCALE);
+            Float parsedValue = Float.NaN;
+            if (uiScale != null) {
+                try {
+                    parsedValue = Float.valueOf(uiScale);
+                } catch (NumberFormatException nfe) {
+                    _logger.error("Invalid float value: '{}'", uiScale);
+                }
+            }
+            setSystemUiScale(parsedValue);
+        }
+        return this.systemUiScale;
+    }
+
     /**
      * Run this program to generate the common preference file.
      * @param args CLI parameters.

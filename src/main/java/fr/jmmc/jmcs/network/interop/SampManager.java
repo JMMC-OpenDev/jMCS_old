@@ -571,17 +571,19 @@ public final class SampManager {
 
             _logger.info("SAMP Hub connection status : {}", (clientId != null) ? ("registered as " + clientId) : "unregistered");
 
-            // Update the main frame title:
-            final JFrame frame = App.getExistingFrame();
-            if (frame != null) {
-                final String oldTitle = frame.getTitle();
-                final int pos = oldTitle.indexOf('[');
-                final String prefix = (pos != -1) ? oldTitle.substring(0, pos) : oldTitle;
+            if (SampCapabilityAction.SHOW_CLIENT_ID) {
+                // Update the main frame title:
+                final JFrame frame = App.getExistingFrame();
+                if (frame != null) {
+                    final String oldTitle = frame.getTitle();
+                    final int pos = oldTitle.indexOf('[');
+                    final String prefix = (pos != -1) ? oldTitle.substring(0, pos) : oldTitle;
 
-                if (clientId != null) {
-                    frame.setTitle(prefix + " [" + clientId + ']');
-                } else {
-                    frame.setTitle(prefix);
+                    if (clientId != null) {
+                        frame.setTitle(prefix + " [" + clientId + ']');
+                    } else {
+                        frame.setTitle(prefix);
+                    }
                 }
             }
         }

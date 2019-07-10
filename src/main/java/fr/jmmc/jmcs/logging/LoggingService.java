@@ -66,17 +66,26 @@ public final class LoggingService {
      * Get the singleton instance or create a new one if needed
      * @return singleton instance
      */
-    public static synchronized LoggingService getInstance() {
+    public static LoggingService getInstance() {
+        return getInstance(true);
+    }
+
+    /**
+     * Get the singleton instance or create a new one if needed
+     * @param createMappers true to create log mappers
+     * @return singleton instance
+     */
+    public static synchronized LoggingService getInstance(final boolean createMappers) {
         if (_instance == null) {
             init();
-            _instance = new LoggingService();
+            _instance = new LoggingService(createMappers);
         }
         return _instance;
     }
 
     /** @return the the JMMC logger (top level). */
-    public static ch.qos.logback.classic.Logger getJmmcLogger() {
-        return (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(JMMC_LOGGER);
+    public static Logger getJmmcLogger() {
+        return LoggerFactory.getLogger(JMMC_LOGGER);
     }
 
     /**
@@ -98,20 +107,29 @@ public final class LoggingService {
             ((ch.qos.logback.classic.Logger) logger).setLevel(level);
         }
     }
+    
+    public static ch.qos.logback.classic.Level getLoggerEffectiveLevel(Logger logger) {
+        if (logger instanceof ch.qos.logback.classic.Logger) {
+            return ((ch.qos.logback.classic.Logger) logger).getEffectiveLevel();
+        }
+        return null;
+    }
 
     /** slf4j / Logback initialization */
     private static void init() throws SecurityException, IllegalStateException {
-        final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        final URL logConf = ResourceUtils.getResource(JMMC_LOGBACK_CONFIG_RESOURCE);
-        try {
-            final JoranConfigurator configurator = new JoranConfigurator();
-            configurator.setContext(loggerContext);
-            loggerContext.reset();
-            configurator.doConfigure(logConf.openStream());
-        } catch (IOException ioe) {
-            throw new IllegalStateException("IO Exception occured", ioe);
-        } catch (JoranException je) {
-            StatusPrinter.printInCaseOfErrorsOrWarnings((LoggerContext) LoggerFactory.getILoggerFactory());
+        if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+            final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+            final URL logConf = ResourceUtils.getResource(JMMC_LOGBACK_CONFIG_RESOURCE);
+            try {
+                final JoranConfigurator configurator = new JoranConfigurator();
+                configurator.setContext(loggerContext);
+                loggerContext.reset();
+                configurator.doConfigure(logConf.openStream());
+            } catch (IOException ioe) {
+                throw new IllegalStateException("IO Exception occured", ioe);
+            } catch (JoranException je) {
+                StatusPrinter.printInCaseOfErrorsOrWarnings((LoggerContext) LoggerFactory.getILoggerFactory());
+            }
         }
 
         // Remove existing handlers attached to j.u.l root logger
@@ -154,13 +172,16 @@ public final class LoggingService {
      * </configuration>
      * 
      * - created here and attached to the root logger
+     * @param createMappers true to create log mappers
      */
-    private LoggingService() {
+    private LoggingService(final boolean createMappers) {
         super();
 
-        // define Log Mappers:
-        addLogMapper("Status history", JMMC_STATUS_LOG, "STATUSLOG");
-        addLogMapper("Execution log", JMMC_APP_LOG, "APPLOG");
+        if (createMappers) {
+            // define Log Mappers:
+            addLogMapper("Status history", JMMC_STATUS_LOG, "STATUSLOG");
+            addLogMapper("Execution log", JMMC_APP_LOG, "APPLOG");
+        }
     }
 
     /**

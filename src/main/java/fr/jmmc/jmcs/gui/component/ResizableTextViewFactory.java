@@ -69,9 +69,9 @@ public class ResizableTextViewFactory {
     // Constants
     private static final int MARGIN = 35;
     private static final int MINIMUM_WIDTH = 400;
-    private static final int MAXIMUM_WIDTH = 700;
+    private static final int MAXIMUM_WIDTH = 1000;
     private static final int MINIMUM_HEIGHT = 300;
-    private static final int MAXIMUM_HEIGHT = 550;
+    private static final int MAXIMUM_HEIGHT = 750;
     private static final int BUTTON_HEIGHT = 20;
 
     /**
@@ -190,6 +190,8 @@ public class ResizableTextViewFactory {
         dialog.setAlwaysOnTop(true);
 
         final JEditorPane editorPane = new JEditorPane();
+        // Use default fonts (hi-dpi) if no font defined in html:
+        editorPane.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
         editorPane.setEditable(false);
         editorPane.setMargin(new Insets(5, 5, 5, 5));
         return editorPane;

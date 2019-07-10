@@ -142,6 +142,15 @@ Description: Store jMCS Application meta data.
                 </xsd:annotation>
             </xsd:element>
 
+            <!-- Element logo_resource -->
+            <xsd:element name="logo_resource" type="xsd:string" minOccurs="0">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        Application logo
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+
             <!-- Element authors -->
             <xsd:element name="authors" type="xsd:string" minOccurs="0">
                 <xsd:annotation>

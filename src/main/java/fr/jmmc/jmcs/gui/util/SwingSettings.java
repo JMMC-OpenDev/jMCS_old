@@ -246,7 +246,7 @@ public final class SwingSettings {
 
                         // Force using Monospaced font for Tree & TextArea:
                         final String newName = ("Tree.font".equals(strKey)
-                                || "TextArea.font".equals(strKey)) ? "Monospaced" : name;
+                                || "TextArea.font".equals(strKey)) ? Font.MONOSPACED : name;
 
                         // Derive new font:
                         final Font newFont = new Font(newName, newStyle, newSize);

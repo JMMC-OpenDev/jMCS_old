@@ -51,6 +51,8 @@ public final class StreamRedirector implements Runnable {
     private final static boolean DEBUG = false;
     /** pause flag : waits 10 milliseconds after each line read */
     private final static boolean PAUSE = false;
+    /** default buffer size */
+    public static final int DEFAULT_BUFFER_SIZE = 512;
     // Members
     /** prefix for example : 'ERROR' */
     private final String _prefix;
@@ -98,7 +100,8 @@ public final class StreamRedirector implements Runnable {
         } else {
             try {
                 // 8K buffer :
-                final BufferedReader br = new BufferedReader(new InputStreamReader(_is, "UTF-8"));
+                final BufferedReader br = new BufferedReader(new InputStreamReader(_is, "UTF-8"), DEFAULT_BUFFER_SIZE);
+
                 for (String line = null; (line = br.readLine()) != null;) {
 
                     if (DEBUG) {

@@ -458,8 +458,10 @@ public final class ApplicationDescription {
     private ApplicationData _applicationData = null;
     /** The JAVA class which JAXB has generated with the XSD file */
     private Company _company = null;
-    /** Logo file name */
-    private String _companyLogoFileName = null;
+    /** Company logo resource path */
+    private String _companyLogoResourcePath = null;
+    /** Application logo resource path */
+    private String _applicationLogoResourcePath = null;
     /** Main web page URL */
     private String _mainWebPageURL = null;
     /** URL of the PHP script that handles Feedback reports */
@@ -515,7 +517,7 @@ public final class ApplicationDescription {
         // Mandatory data
         _shortCompanyName = _company.getShortName();
         _legalCompanyName = _shortCompanyName;
-        _companyLogoFileName = _company.getLogoResource();
+        _companyLogoResourcePath = _company.getLogoResource();
         _mainWebPageURL = _company.getHomepageUrl();
 
         // Optionnal data
@@ -539,6 +541,9 @@ public final class ApplicationDescription {
         }
         if (_applicationData.isSetDocumentationlink()) {
             _documentationLink = _applicationData.getDocumentationlink();
+        }
+        if (_applicationData.isSetLogoResource()) {
+            _applicationLogoResourcePath = _applicationData.getLogoResource();
         }
 
         _logger.debug("Application data model loaded.");
@@ -582,9 +587,18 @@ public final class ApplicationDescription {
      * @return the company logo resource path
      */
     public String getCompanyLogoResourcePath() {
-        _logger.debug("logoUrl: {}", _companyLogoFileName);
+        _logger.debug("companyLogoResourcePath: {}", _companyLogoResourcePath);
 
-        return _companyLogoFileName;
+        return _companyLogoResourcePath;
+    }
+
+    /**
+     * @return the application logo resource path
+     */
+    public String getApplicationLogoResourcePath() {
+        _logger.debug("applicationLogoResourcePath: {}", _applicationLogoResourcePath);
+
+        return _applicationLogoResourcePath;
     }
 
     /**

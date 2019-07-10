@@ -215,7 +215,7 @@ public final class StatusBar extends JPanel {
         // Create text logo
         final JLabel textLogo = new JLabel();
         textLogo.setText("Provided by");
-        textLogo.setFont(new Font("Comic Sans MS", Font.ITALIC, SwingUtils.adjustUISize(10)));
+        textLogo.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, SwingUtils.adjustUISize(10)));
         jpanelRight.add(textLogo);
         jpanelRight.add(Box.createHorizontalStrut(spacer));
 

@@ -27,7 +27,6 @@
  ******************************************************************************/
 package fr.jmmc.jmcs;
 
-import ch.qos.logback.classic.Logger;
 import fr.jmmc.jmcs.App.ApplicationState;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.data.preference.CommonPreferences;
@@ -60,6 +59,7 @@ import java.util.TimeZone;
 import javax.swing.JFrame;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.lang.SystemUtils;
+import org.slf4j.Logger;
 
 /**
  * This class ordinate App life-cycle.
@@ -129,7 +129,8 @@ public final class Bootstrapper {
 
         // Start the application log singleton
         LoggingService.getInstance();
-        _jmmcLogger.info("jMCS log created at {}. Current level is {}.", new Date(), _jmmcLogger.getEffectiveLevel());
+        _jmmcLogger.info("jMCS log created at {}. Current level is {}.", new Date(),
+                LoggingService.getLoggerEffectiveLevel(_jmmcLogger));
         _jmmcLogger.info("jMCS environment bootstrapping...");
         setState(ApplicationState.ENV_BOOTSTRAP);
 

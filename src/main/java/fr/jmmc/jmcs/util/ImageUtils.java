@@ -71,7 +71,6 @@ public final class ImageUtils {
     public static ImageIcon loadResourceIcon(final String url) {
 
         // TODO : Maybe cache previously loaded icon
-
         if (url == null) {
             _logger.debug(CANNOT_LOAD_ICON_MESSAGE, url);
             return null;
@@ -111,18 +110,17 @@ public final class ImageUtils {
      *
      * @return the scaled image
      */
-    public static ImageIcon getScaledImageIcon(final ImageIcon imageIcon, int maxHeight, int maxWidth) {
-
+    public static ImageIcon getScaledImageIcon(final ImageIcon imageIcon, final int maxHeight, final int maxWidth) {
         // Give up if params messed up
         if ((maxHeight == 0) && (maxWidth == 0)) {
             return imageIcon;
         }
 
-        final int iconHeight = imageIcon.getIconHeight();
         final int iconWidth = imageIcon.getIconWidth();
+        final int iconHeight = imageIcon.getIconHeight();
 
         // If no resizing required
-        if ((maxHeight == iconHeight) && (maxWidth == iconWidth)) {
+        if ((maxHeight >= iconHeight) && (maxWidth >= iconWidth)) {
             // Return early
             return imageIcon;
         }
@@ -132,21 +130,18 @@ public final class ImageUtils {
 
         if (maxHeight > 0) {
             newHeight = Math.min(iconHeight, maxHeight);
-            newWidth = (int) Math.floor((double) iconWidth * ((double) newHeight / (double) iconHeight));
+            newWidth = (int) Math.ceil(((double) newHeight / (double) iconHeight) * iconWidth);
         }
         if (maxWidth > 0) {
             newWidth = Math.min(iconWidth, maxWidth);
-            newHeight = (int) Math.floor((double) iconHeight * ((double) newWidth / (double) iconWidth));
+            newHeight = (int) Math.ceil(((double) newWidth / (double) iconWidth) * iconHeight);
         }
 
         if (_logger.isDebugEnabled()) {
             _logger.debug("Scaling image from {} x {} to {} x {}.",
                     iconWidth, iconHeight, newWidth, newHeight);
         }
-
-        final Image image = imageIcon.getImage();
-        final Image scaledImage = image.getScaledInstance(newWidth, newHeight, java.awt.Image.SCALE_SMOOTH);
-        return new ImageIcon(scaledImage);
+        return new ImageIcon(imageIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_AREA_AVERAGING));
     }
 
     /**

@@ -34,6 +34,7 @@ import fr.jmmc.jmcs.util.ImageUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
@@ -71,8 +72,10 @@ public class SplashScreen extends JFrame {
     // Members
     /** Splash screen has got the same model than about box */
     private final ApplicationDescription _applicationDataModel;
-    /** Logo label */
-    private final JLabel _logoLabel = new JLabel();
+    /** Company Logo label */
+    private final JLabel _companyLogoLabel = new JLabel();
+    /** Application Logo label */
+    private final JLabel _applicationLogoLabel = new JLabel();
     /** Panel */
     private final JPanel _panel = new JPanel();
     /** Program name label */
@@ -98,7 +101,6 @@ public class SplashScreen extends JFrame {
      * @param shouldShowSplashScreen true to effectively show the splash screen, false otherwise.
      */
     public static void display(final boolean shouldShowSplashScreen) {
-
         if (!shouldShowSplashScreen) {
             return;
         }
@@ -174,7 +176,11 @@ public class SplashScreen extends JFrame {
     private void setPanelProperties() {
         _panel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
         _panel.setLayout(new BorderLayout());
-        _panel.add(_logoLabel, BorderLayout.PAGE_START);
+        _panel.add(_companyLogoLabel, BorderLayout.PAGE_START);
+
+        if (_applicationLogoLabel.getIcon() != null) {
+            _panel.add(_applicationLogoLabel, BorderLayout.LINE_START);
+        }
         _panel.add(_programNameLabel, BorderLayout.CENTER);
         _panel.add(_programVersionLabel, BorderLayout.PAGE_END);
 
@@ -183,20 +189,29 @@ public class SplashScreen extends JFrame {
 
     /** Sets logo properties */
     private void setLogoLabelProperties() {
-
-        _logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        _companyLogoLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         final String companyLogoResourcePath = _applicationDataModel.getCompanyLogoResourcePath();
         final ImageIcon companyLogo = ImageUtils.loadResourceIcon(companyLogoResourcePath);
-        _logoLabel.setIcon(companyLogo);
-        _logoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        _companyLogoLabel.setIcon(companyLogo);
+        _companyLogoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+
+        final String applicationLogoResourcePath = _applicationDataModel.getApplicationLogoResourcePath();
+        if (applicationLogoResourcePath != null) {
+            final ImageIcon applicationLogo = ImageUtils.getScaledImageIcon(
+                    ImageUtils.loadResourceIcon(applicationLogoResourcePath),
+                    400, 400
+            );
+            _applicationLogoLabel.setIcon(applicationLogo);
+            _applicationLogoLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        }
 
         _logger.debug("Every logo label properties have been initialized");
     }
 
     /** Sets program name label properties */
     private void setProgramNameLabelProperties() {
-        _programNameLabel.setFont(new Font(null, 1, 28));
+        _programNameLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, SwingUtils.adjustUISize(28)));
         _programNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         _programNameLabel.setText(_applicationDataModel.getProgramName());
 
@@ -208,9 +223,7 @@ public class SplashScreen extends JFrame {
         _programVersionLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         // Pattern : "v{version} - {copyright}"
-        _programVersionLabel.setText("Version "
-                + _applicationDataModel.getProgramVersion()
-                + " - " + _applicationDataModel.getCopyrightValue());
+        _programVersionLabel.setText("Version " + _applicationDataModel.getProgramVersion() + " - " + _applicationDataModel.getCopyrightValue());
         _programVersionLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         _logger.debug("Every program version label properties have been initialized");

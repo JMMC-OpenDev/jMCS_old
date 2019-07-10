@@ -197,19 +197,19 @@ public final class CommandLineUtils {
                     if (arg != null) {
                         _logger.info("Set logger level to '{}'.", arg);
 
-                        final ch.qos.logback.classic.Logger jmmcLogger = LoggingService.getJmmcLogger();
+                        final Logger jmmcLogger = LoggingService.getJmmcLogger();
                         if (arg.equals("0")) {
-                            jmmcLogger.setLevel(Level.OFF);
+                            LoggingService.setLoggerLevel(jmmcLogger, Level.OFF);
                         } else if (arg.equals("1")) {
-                            jmmcLogger.setLevel(Level.ERROR);
+                            LoggingService.setLoggerLevel(jmmcLogger, Level.ERROR);
                         } else if (arg.equals("2")) {
-                            jmmcLogger.setLevel(Level.WARN);
+                            LoggingService.setLoggerLevel(jmmcLogger, Level.WARN);
                         } else if (arg.equals("3")) {
-                            jmmcLogger.setLevel(Level.INFO);
+                            LoggingService.setLoggerLevel(jmmcLogger, Level.INFO);
                         } else if (arg.equals("4")) {
-                            jmmcLogger.setLevel(Level.DEBUG);
+                            LoggingService.setLoggerLevel(jmmcLogger, Level.DEBUG);
                         } else if (arg.equals("5")) {
-                            jmmcLogger.setLevel(Level.ALL);
+                            LoggingService.setLoggerLevel(jmmcLogger, Level.ALL);
                         } else {
                             showArgumentsHelp(customArguments);
                         }

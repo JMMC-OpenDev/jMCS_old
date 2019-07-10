@@ -337,8 +337,8 @@ public final class ParallelJobExecutor {
 
         final int len = jobs.length;
 
-        if (isLogDebug) {
-            _logger.debug("starting {} jobs ...", len, new Throwable());
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("starting {} jobs ...", len, new Throwable());
         }
 
         final Future<?>[] futures = new Future<?>[len];
@@ -378,8 +378,8 @@ public final class ParallelJobExecutor {
 
         final int len = jobs.length;
 
-        if (isLogDebug) {
-            _logger.debug("starting {} jobs ...", len, new Throwable());
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("starting {} jobs ...", len, new Throwable());
         }
 
         final Future<?>[] futures = new Future<?>[len];
@@ -424,8 +424,8 @@ public final class ParallelJobExecutor {
 
         final int len = futures.length;
 
-        if (isLogDebug) {
-            _logger.debug("join {} jobs ...", len, new Throwable());
+        if (_logger.isTraceEnabled()) {
+            _logger.trace("join {} jobs ...", len, new Throwable());
         }
 
         final List<Object> results = new ArrayList<Object>(len);

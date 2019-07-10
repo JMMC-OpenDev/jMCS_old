@@ -50,6 +50,8 @@ public final class RingBuffer {
     private static final Logger _logger = LoggerFactory.getLogger(RingBuffer.class.getName());
     /** default line size */
     public static final int DEFAULT_LINE_SIZE = 100;
+    /** default file buffer size */
+    public static final int DEFAULT_FILE_BUFFER_SIZE = 512;
     // Members
     /** maximum of lines */
     private final int _maxCount;
@@ -93,7 +95,7 @@ public final class RingBuffer {
         _lineBuffer = new StringBuilder(DEFAULT_LINE_SIZE);
 
         if (!StringUtils.isEmpty(_writeLogFile)) {
-            _fw = FileUtils.openFile(_writeLogFile);
+            _fw = FileUtils.openFile(_writeLogFile, DEFAULT_FILE_BUFFER_SIZE);
         }
     }
 

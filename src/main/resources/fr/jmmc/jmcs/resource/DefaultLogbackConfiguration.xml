@@ -30,7 +30,7 @@
 -->
 
 <!-- Debug controls the Logback configuration logs -->
-<configuration debug="false" scan="false" scanPeriod="30 seconds" > 
+<configuration debug="false" scan="false" scanPeriod="30 seconds" >
 
     <!-- Reset java.util.logging configuration -->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
@@ -58,7 +58,7 @@
         </encoder>
     </appender>
 
-<!--    
+<!--
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
       <file>${user.home}/.fr.jmmc.apps.log</file>
       <append>true</append>
@@ -66,10 +66,10 @@
             <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{60} - %msg%n</pattern>
         </encoder>
     </appender>
--->  
-      
+-->
+
     <!-- Loggers -->
-  
+
     <!-- JMMC -->
     <logger name="fr.jmmc" level="INFO"/>
 
@@ -77,19 +77,19 @@
     <logger name="fr.jmmc.jmcs.status" level="INFO" additivity="true">
         <appender-ref ref="STATUSLOG" />
     </logger>
-    
+
     <!-- Include application specific configuration -->
     <include resource="LogbackConfiguration.xml"/>
 
     <!-- JSamp -->
     <logger name="org.astrogrid.samp" level="WARN"/>
     <logger name="org.astrogrid.samp.client" level="WARN"/>
-  
+
     <!-- Apache HTTP client -->
     <logger name="org.apache.commons.httpclient" level="INFO"/>
     <logger name="org.apache.commons.httpclient.MultiThreadedHttpConnectionManager" level="INFO"/>
     <logger name="httpclient" level="INFO"/>
-    
+
     <!-- JIDE -->
     <logger name="com.jidesoft" level="INFO"/>
 
@@ -102,10 +102,10 @@
     <!-- JAXB -->
     <logger name="javax.xml" level="INFO"/>
     <logger name="com.sun.xml" level="INFO"/>
-  
+
     <!-- Network -->
     <logger name="sun.net.www" level="INFO"/>
-  
+
     <!-- Disable Logback -->
     <logger name="ch.qos.logback" level="INFO"/>
 
@@ -114,9 +114,9 @@
     <root level="INFO">
         <appender-ref ref="APPLOG" />
         <appender-ref ref="STDOUT" />
-<!--        
+<!--
         <appender-ref ref="FILE" />
--->        
+-->
     </root>
-  
+
 </configuration>

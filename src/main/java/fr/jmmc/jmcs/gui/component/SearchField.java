@@ -163,20 +163,20 @@ public class SearchField extends JTextField {
             // note: possible conflict with FindPopup
             putClientProperty("JTextField.Search.FindAction",
                     new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            _logger.debug("FindAction Mac OS X called.");
-                            postActionEvent();
-                        }
-                    });
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    _logger.debug("FindAction Mac OS X called.");
+                    postActionEvent();
+                }
+            });
             putClientProperty("JTextField.Search.CancelAction",
                     new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            _logger.debug("CancelAction Mac OS X called.");
-                            handleCancelEdit();
-                        }
-                    });
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    _logger.debug("CancelAction Mac OS X called.");
+                    handleCancelEdit();
+                }
+            });
             if (_optionsPopupMenu != null) {
                 putClientProperty("JTextField.Search.FindPopup", _optionsPopupMenu);
             }
@@ -317,7 +317,7 @@ public class SearchField extends JTextField {
      * @param txt the new text to be set
      */
     @Override
-    public void setText(final String txt) {
+    public final void setText(final String txt) {
         super.setText(txt);
 
         if (!_placeholderText.equals(txt)) {
@@ -383,7 +383,7 @@ public class SearchField extends JTextField {
     /**
      * @return custom newLine replacement character
      */
-    public char getNewLineReplacement() {
+    public final char getNewLineReplacement() {
         final CustomPlainDocument doc = getCustomPlainDocument();
         return (doc != null) ? doc.getNewLineReplacement() : NEWLINE_DEFAULT_REPLACEMENT_CHAR;
     }
@@ -391,7 +391,7 @@ public class SearchField extends JTextField {
     /**
      * @param newLineReplacement custom newLine replacement character
      */
-    public void setNewLineReplacement(final char newLineReplacement) {
+    public final void setNewLineReplacement(final char newLineReplacement) {
         final CustomPlainDocument doc = getCustomPlainDocument();
         if (doc != null) {
             doc.setNewLineReplacement(newLineReplacement);

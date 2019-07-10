@@ -31,13 +31,16 @@ import fr.jmmc.jmcs.App;
 import fr.jmmc.jmcs.Bootstrapper;
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.gui.util.SwingUtils;
+import fr.jmmc.jmcs.gui.util.WindowUtils;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import org.slf4j.Logger;
@@ -419,6 +422,43 @@ public final class MessagePane {
         }
 
         return receivedValue;
+    }
+
+    /**
+     * Show a new JDialog with the given form
+     * @param title dialog's title
+     * @param panel form to display
+     * @return true if the user clicks OK
+     */
+    public static boolean showDialogPanel(final String title, final JPanel panel) {
+        boolean result = false;
+        JDialog dialog = null;
+        try {
+            // initialise the dialog:
+            final JOptionPane pane = new JOptionPane(panel, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null);
+            dialog = pane.createDialog(getApplicationFrame(), title);
+
+            // Size the dialog.
+            WindowUtils.setClosingKeyboardShortcuts(dialog);
+            dialog.pack();
+
+            // Center it :
+            dialog.setLocationRelativeTo(dialog.getOwner());
+
+            // Show it and waits until dialog is not visible or disposed:
+            dialog.setVisible(true);
+
+            // get editor result :
+            final Object value = pane.getValue();
+            result = (value instanceof Integer) ? (((Integer) value).intValue() == JOptionPane.OK_OPTION) : false;
+
+        } finally {
+            if (dialog != null) {
+                _logger.debug("dispose dialog ...");
+                dialog.dispose();
+            }
+        }
+        return result;
     }
 
     /**

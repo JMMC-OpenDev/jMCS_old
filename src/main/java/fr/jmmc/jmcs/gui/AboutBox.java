@@ -29,16 +29,30 @@ package fr.jmmc.jmcs.gui;
 
 import fr.jmmc.jmcs.data.app.ApplicationDescription;
 import fr.jmmc.jmcs.data.app.model.Package;
+import fr.jmmc.jmcs.gui.util.SwingUtils;
 import fr.jmmc.jmcs.gui.util.WindowUtils;
 import fr.jmmc.jmcs.service.BrowserLauncher;
 import fr.jmmc.jmcs.util.ImageUtils;
 import fr.jmmc.jmcs.util.StringUtils;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.List;
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import org.slf4j.Logger;
@@ -66,8 +80,10 @@ public class AboutBox extends JDialog implements HyperlinkListener {
     private static final long serialVersionUID = 1L;
     /** Model of the about box */
     private ApplicationDescription _applicationDataModel = null;
-    /** Logo label */
-    private JLabel _logoLabel = new JLabel();
+    /** Company Logo label */
+    private JLabel _companyLogoLabel = new JLabel();
+    /** Application Logo label */
+    private JLabel _applicationLogoLabel = new JLabel();
     /** Copyright label */
     private JLabel _copyrightLabel = new JLabel();
     /** Container of the text area */
@@ -208,19 +224,21 @@ public class AboutBox extends JDialog implements HyperlinkListener {
         final String logoURL = _applicationDataModel.getCompanyLogoResourcePath();
         if (logoURL != null) {
             // Get and scale image
-            ImageIcon logo = ImageUtils.loadResourceIcon(logoURL);
-            logo = ImageUtils.getScaledImageIcon(logo, 81, 300);
-            _logoLabel.setIcon(logo);
-            _logoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+            final ImageIcon companyLogo = ImageUtils.getScaledImageIcon(
+                    ImageUtils.loadResourceIcon(logoURL),
+                    100, 400
+            );
+            _companyLogoLabel.setIcon(companyLogo);
+            _companyLogoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
 
             // Center label content
-            _logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            _logoLabel.setOpaque(false);
+            _companyLogoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            _companyLogoLabel.setOpaque(false);
 
             _logger.debug("All the logo label properties have been initialized");
 
             // Launch the default browser with the given link
-            _logoLabel.addMouseListener(new MouseAdapter() {
+            _companyLogoLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent evt) {
                     String mainWebPageURL = _applicationDataModel.getMainWebPageURL();
@@ -233,10 +251,10 @@ public class AboutBox extends JDialog implements HyperlinkListener {
             _logger.debug("Mouse click event placed on logo label");
 
             // Show hand cursor when mouse is moving on logo
-            _logoLabel.addMouseMotionListener(new MouseMotionAdapter() {
+            _companyLogoLabel.addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
                 public void mouseMoved(MouseEvent evt) {
-                    _logoLabel.setCursor(Cursor.getPredefinedCursor(
+                    _companyLogoLabel.setCursor(Cursor.getPredefinedCursor(
                             Cursor.HAND_CURSOR));
                 }
             });
@@ -244,6 +262,17 @@ public class AboutBox extends JDialog implements HyperlinkListener {
             _logger.debug("Mouse move event placed on logo label");
         } else {
             _logger.warn("No company logo found");
+        }
+
+        final String applicationLogoResourcePath = _applicationDataModel.getApplicationLogoResourcePath();
+        if (applicationLogoResourcePath != null) {
+            final ImageIcon applicationLogo = ImageUtils.getScaledImageIcon(
+                    ImageUtils.loadResourceIcon(applicationLogoResourcePath),
+                    400, 400
+            );
+            _applicationLogoLabel.setVerticalAlignment(SwingConstants.TOP);
+            _applicationLogoLabel.setIcon(applicationLogo);
+            _applicationLogoLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         }
     }
 
@@ -264,7 +293,7 @@ public class AboutBox extends JDialog implements HyperlinkListener {
         _descriptionEditorPane.addHyperlinkListener(this);
 
         // The textarea should have the same width than the logo
-        final Dimension textareaDimension = new Dimension(300, 170);
+        final Dimension textareaDimension = new Dimension(400, 200);
         _descriptionEditorPane.setPreferredSize(textareaDimension);
         _logger.debug("All the textarea properties have been initialized");
 
@@ -362,7 +391,7 @@ public class AboutBox extends JDialog implements HyperlinkListener {
 
         _programNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
         _programNameLabel.setText(name);
-        _programNameLabel.setFont(new Font("Dialog", 1, 23));
+        _programNameLabel.setFont(new Font(Font.DIALOG, Font.BOLD, SwingUtils.adjustUISize(23)));
 
         _logger.debug("All the program info label properties have been initialized");
     }
@@ -480,7 +509,11 @@ public class AboutBox extends JDialog implements HyperlinkListener {
 
         // Window layout
         final Container contentPane = getContentPane();
-        contentPane.add(_logoLabel, BorderLayout.PAGE_START);
+        contentPane.add(_companyLogoLabel, BorderLayout.PAGE_START);
+
+        if (_applicationLogoLabel.getIcon() != null) {
+            contentPane.add(_applicationLogoLabel, BorderLayout.LINE_START);
+        }
         contentPane.add(_descriptionSplit, BorderLayout.CENTER);
         contentPane.add(_copyrightLabel, BorderLayout.PAGE_END);
         pack();

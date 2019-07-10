@@ -28,6 +28,7 @@
 package fr.jmmc.jmcs.util.concurrent;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadFactory;
@@ -119,6 +120,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor {
                 task.get();
             } catch (InterruptedException ie) {
                 _logger.debug("{}.afterExecute : runnable: {}", _name, ie);
+            } catch (CancellationException ce) {
+                _logger.debug("{}.afterExecute : runnable: {}", _name, ce);
             } catch (ExecutionException ee) {
                 th = ee.getCause();
             }

@@ -142,6 +142,17 @@ public final class TaskSwingWorkerExecutor {
     }
 
     /**
+     * Cancel any busy worker related to the given task and its child tasks 
+     * NOTE : No synchronization HERE as it must be called from Swing EDT
+     *
+     * @param task task to find the current worker
+     * @return true if one task was canceled
+     */
+    public static boolean cancelTaskAndRelated(final Task task) {
+        return getInstance().cancelRelatedTasks(task);
+    }
+
+    /**
      * Return true if there is at least one worker running
      *
      * @return true if there is at least one worker running
@@ -221,21 +232,26 @@ public final class TaskSwingWorkerExecutor {
     }
 
     /**
-     * Cancel any busy worker related to the given task and its child tasks NOTE
-     * : No synchronization HERE as it must be called from Swing EDT
+     * Cancel any busy worker related to the given task and its child tasks 
+     * NOTE: No synchronization HERE as it must be called from Swing EDT
      *
      * @param task to use
+     * @return true if one task was canceled
      */
-    private void cancelRelatedTasks(final Task task) {
+    private boolean cancelRelatedTasks(final Task task) {
         if (DEBUG_FLAG) {
             _logger.info("cancel related tasks for = {}", task);
         }
+        boolean cancelled = false;
+        
         // cancel first any busy worker related to any child task :
         for (Task child : task.getChildTasks()) {
-            cancel(child);
+            cancelled |= cancel(child);
         }
         // cancel any busy worker related to the given task :
-        cancel(task);
+        cancelled |= cancel(task);
+        
+        return cancelled;
     }
 
     /**
@@ -452,7 +468,7 @@ public final class TaskSwingWorkerExecutor {
             final StringBuilder name = new StringBuilder("SwingWorker-pool-");
             name.append(threadNumber.getAndIncrement());
 
-            final Thread thread = new Thread(r, name.toString());
+            final Thread thread = new InterruptableThread(r, name.toString());
             if (thread.isDaemon()) {
                 thread.setDaemon(false);
             }

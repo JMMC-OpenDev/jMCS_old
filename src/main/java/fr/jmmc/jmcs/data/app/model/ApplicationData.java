@@ -55,6 +55,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="text" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="jnlp" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="sampdescription" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="logo_resource" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="authors" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *         &lt;element name="distribution" type="{}Distribution" minOccurs="0"/&gt;
  *         &lt;element name="dependences" type="{}Dependences" minOccurs="0"/&gt;
@@ -82,6 +83,7 @@ import javax.xml.bind.annotation.XmlType;
     "text",
     "jnlp",
     "sampdescription",
+    "logoResource",
     "authors",
     "distribution",
     "dependences",
@@ -101,6 +103,8 @@ public class ApplicationData {
     protected String text;
     protected String jnlp;
     protected String sampdescription;
+    @XmlElement(name = "logo_resource")
+    protected String logoResource;
     protected String authors;
     protected Distribution distribution;
     protected Dependences dependences;
@@ -285,6 +289,34 @@ public class ApplicationData {
 
     public boolean isSetSampdescription() {
         return (this.sampdescription!= null);
+    }
+
+    /**
+     * Gets the value of the logoResource property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getLogoResource() {
+        return logoResource;
+    }
+
+    /**
+     * Sets the value of the logoResource property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setLogoResource(String value) {
+        this.logoResource = value;
+    }
+
+    public boolean isSetLogoResource() {
+        return (this.logoResource!= null);
     }
 
     /**

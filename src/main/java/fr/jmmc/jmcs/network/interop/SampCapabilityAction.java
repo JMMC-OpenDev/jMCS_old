@@ -62,6 +62,8 @@ public abstract class SampCapabilityAction extends RegisteredAction {
     public final static boolean BROADCAST_ENABLED = false;
     /** Label for broadcast to all */
     private final static String BROADCAST_MENU_LABEL = "All Applications";
+    /** Flag to enable/disable broadcast action */
+    public final static boolean SHOW_CLIENT_ID = "true".equalsIgnoreCase(System.getProperty("SampCapabilityAction.showClientId", "true"));
     // Members
     /** SAMP capability to send */
     private final SampCapability _capability;
@@ -205,7 +207,11 @@ public abstract class SampCapabilityAction extends RegisteredAction {
             final String clientId = client.getId();
 
             final JMenuItem individualMenuItem = new JMenuItem(this);
-            individualMenuItem.setText(clientName + " [" + clientId + ']');
+            if (SHOW_CLIENT_ID) {
+                individualMenuItem.setText(clientName + " [" + clientId + ']');
+            } else {
+                individualMenuItem.setText(clientName);
+            }
             individualMenuItem.setActionCommand(clientId);
 
             menu.add(individualMenuItem);
