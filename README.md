@@ -1,3 +1,10 @@
+# Deprecated project
+
+**kept for history, issues & previous releases...**
+
+> Please use https://github.com/JMMC-OpenDev/jmcs 
+
+
 jMCS
 ====
 
