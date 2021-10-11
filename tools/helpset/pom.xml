@@ -71,7 +71,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.2</version>
+            <version>1.2.0</version>
         </dependency>
 
         <!-- mvn install:install-file -Dfile=lib/jhelpdev.jar -DgroupId=net.sourceforge.jhelpdev -DartifactId=jhelpdev -Dversion=0.63 -Dpackaging=jar -->
